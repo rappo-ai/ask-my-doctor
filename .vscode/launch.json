@@ -1,0 +1,83 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "docker attach rasa run",
+      "type": "python",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 5678
+      },
+      "justMyCode": false,
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder:rasa}",
+          "remoteRoot": "/opt/venv/lib/python3.8/site-packages/rasa"
+        }
+      ]
+    },
+    {
+      "name": "docker attach rasa run actions",
+      "type": "python",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 5679
+      },
+      "justMyCode": false,
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder:rasa}",
+          "remoteRoot": "/opt/venv/lib/python3.8/site-packages/rasa"
+        }
+      ]
+    },
+    {
+      "name": "rasa train",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/dataset",
+      "python": "${workspaceFolder:rasa}/../.venv/bin/python",
+      "program": "${workspaceFolder:rasa}/../.venv/bin/rasa",
+      "args": [
+        "train",
+        "-vv"
+      ],
+      "console": "integratedTerminal",
+      "justMyCode": false,
+    },
+    {
+      "name": "rasa run",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/dataset",
+      "python": "${workspaceFolder:rasa}/../.venv/bin/python",
+      "program": "${workspaceFolder:rasa}/../.venv/bin/rasa",
+      "args": [
+        "run",
+        "-vv"
+      ],
+      "console": "integratedTerminal",
+      "justMyCode": false,
+    },
+    {
+      "name": "rasa run actions",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/dataset",
+      "python": "${workspaceFolder:rasa}/../.venv/bin/python",
+      "program": "${workspaceFolder:rasa}/../.venv/bin/rasa",
+      "args": [
+        "run",
+        "actions",
+        "-vv"
+      ],
+      "console": "integratedTerminal",
+      "justMyCode": false,
+    }
+  ]
+}

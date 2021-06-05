@@ -1,0 +1,10 @@
+version: "2.0"
+
+nlu:
+
+- intent: help
+  metadata:
+    keyword_intent: true
+    match_condition: "start"
+  examples: |
+    - /help

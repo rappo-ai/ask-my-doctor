@@ -1,0 +1,32 @@
+version: "3.9"
+services:
+  rasa:
+    image: rappoai/rasa:telegram
+    volumes:
+      - ./dataset:/app
+    entrypoint: ""
+    command: |
+      bash -c "
+      until [ $$(curl -s -o /dev/null -w "%{http_code}" http://ngrok:4040/api/tunnels) == 200 ]
+      do
+        echo \"Waiting for ngrok to start ...\"
+        sleep 1s
+      done
+      until [ $$(curl --silent --show-error http://ngrok:4040/api/tunnels | sed -nE 's/.*public_url\":\"https:..([^\"]*).*/\1/p') ]
+      do
+        echo \"Waiting for ngrok tunnel to be created ...\"
+        sleep 1s
+      done
+      echo \"telegram:
+        access_token: \\\"${TELEGRAM_BOT_TOKEN}\\\"
+        verify: \\\"${TELEGRAM_BOT_USERNAME}\\\"
+        webhook_url: \\\"https://$$(curl --silent --show-error http://ngrok:4040/api/tunnels | sed -nE 's/.*public_url\":\"https:..([^\"]*).*/\1/p')/webhooks/telegram/webhook\\\"
+      \" > /app/credentials.yml
+      rasa train -vv > /app/train_logs.txt
+      rasa run actions -vv > /app/run_actions_logs.txt & rasa run -vv --log-file /app/run_logs.txt
+      "
+    depends_on:
+      - ngrok
+  ngrok:
+    image: wernight/ngrok
+    command: ngrok http rasa:5005

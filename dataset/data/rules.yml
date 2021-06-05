@@ -1,0 +1,14 @@
+version: "2.0"
+
+rules:
+
+- rule: Command /help
+  steps:
+  - intent: help
+  - action: utter_help
+
+- rule: NLU Fallback
+  steps:
+  - intent: nlu_fallback
+  - action: action_echo
+  

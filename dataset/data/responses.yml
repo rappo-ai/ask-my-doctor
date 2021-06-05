@@ -1,0 +1,16 @@
+version: "2.0"
+
+responses:
+  utter_help:
+  - custom:
+      text: |
+        *Hello from Rappo*
+
+        - /help - show this help message
+
+        *Notes*
+        This is a sample bot. Send any text message to the bot, and the bot will echo it back as a reply
+
+        Created by @rappoai - follow us for more useful Telegram bots.
+      parse_mode: "Markdown"
+      disable_web_page_preview: true
