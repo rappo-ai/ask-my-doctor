@@ -35,9 +35,9 @@ It is recommended to have Python 3.8.5 installed on your system for creating the
     cd rasa
     git checkout telegram
     ```
-    Make sure you sync rasa repository as a sibling folder to mockabot-rasa repository.
+    Make sure you sync rasa repository as a sibling folder to ask-my-doctor repository.
 
-1.  #### Create a virtual env and activate it
+1.  #### Create a virtual env and activate it (inside rasa folder)
     ```bash
     /path/to/python3.8.5 -m venv ./.venv
     source .venv/bin/activate
@@ -45,7 +45,6 @@ It is recommended to have Python 3.8.5 installed on your system for creating the
 
 1.  #### Build and install Rasa
     ```bash
-    cd rasa
     make install
     ```
 
