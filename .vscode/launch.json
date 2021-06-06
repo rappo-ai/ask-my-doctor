@@ -15,7 +15,7 @@
       "justMyCode": false,
       "pathMappings": [
         {
-          "localRoot": "${workspaceFolder:rasa}",
+          "localRoot": "${workspaceFolder:rasa}/rasa",
           "remoteRoot": "/opt/venv/lib/python3.8/site-packages/rasa"
         }
       ]
@@ -31,8 +31,8 @@
       "justMyCode": false,
       "pathMappings": [
         {
-          "localRoot": "${workspaceFolder:rasa}",
-          "remoteRoot": "/opt/venv/lib/python3.8/site-packages/rasa"
+          "localRoot": "${workspaceFolder}/dataset",
+          "remoteRoot": "/app"
         }
       ]
     },
