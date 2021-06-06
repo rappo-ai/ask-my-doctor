@@ -22,7 +22,7 @@ docker-compose up
 
 You will need VS Code with Python extension installed. (https://code.visualstudio.com/download)
 
-It is recommended to have Python 3.8.5 installed on your system for creating the venv as the Rasa docker image currently uses Python 3.8.5 and you may get strange debugging errors when  debuggers will
+It is recommended to have Python 3.8.5 installed on your system for creating the venv as the Rasa docker image currently uses Python 3.8.5 and you may get strange debugging errors with a different version of Python.
 
 1.  #### Install poetry (Python dependency management tool, installed globally)
     ```bash
