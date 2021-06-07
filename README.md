@@ -34,5 +34,6 @@ You will need VS Code with Remote - Containers extension installed. (https://cod
 
 1.  #### Launch Rasa actions server
     In VSCode 'Run and Debug' tab, select 'rasa run actions' and click Start Debugging.
+
     Note:
     - To debug action code, just set a breakpoint in the corresponding action file inside "dataset/actions".
