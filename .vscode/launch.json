@@ -17,6 +17,12 @@
         "--log-file",
         "/app/server_logs.txt"
       ],
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}/.venv",
+          "remoteRoot": "/opt/venv"
+        }
+      ],
       "console": "integratedTerminal",
       "justMyCode": false,
     },
