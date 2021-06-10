@@ -21,7 +21,11 @@
         {
           "localRoot": "${workspaceFolder}/.venv",
           "remoteRoot": "/opt/venv"
-        }
+        },
+        {
+          "localRoot": "${workspaceFolder}/dataset",
+          "remoteRoot": "/app"
+        },
       ],
       "console": "integratedTerminal",
       "justMyCode": false,
@@ -39,6 +43,10 @@
         "-vv"
       ],
       "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}/.venv",
+          "remoteRoot": "/opt/venv"
+        },
         {
           "localRoot": "${workspaceFolder}/dataset",
           "remoteRoot": "/app"
