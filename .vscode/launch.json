@@ -40,7 +40,8 @@
       "args": [
         "run",
         "actions",
-        "-vv"
+        "-vv",
+        "--auto-reload",
       ],
       "pathMappings": [
         {

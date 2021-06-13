@@ -1,11 +1,58 @@
 version: "2.0"
 
-intents:
-  - help
-
 actions:
-  - action_echo
+- action_session_start
+
+- action_create_order
+- action_payment_success
+- action_payment_failure
+- action_create_patient
+- action_create_appointment
+
+forms:
+  new_appointment_request_form:
+    required_slots:
+      new_appointment_request__speciality:
+        - type: from_text
+      new_appointment_request__doctor:
+        - type: from_text
+      new_appointment_request__date:
+        - type: from_text
+      new_appointment_request__time:
+        - type: from_text
+  new_patient_form:
+    required_slots:
+      new_patient__name:
+        - type: from_text
+      new_patient__dob:
+        - type: from_text
+      new_patient__phone_number:
+        - type: from_text
 
 session_config:
   session_expiration_time: 60
   carry_over_slots_to_new_session: true
+
+slots:
+  chat_type:
+    type: categorical
+    values:
+    - private
+    - group
+    - channel
+  first_name:
+    type: text
+  new_appointment_request__speciality:
+    type: text
+  new_appointment_request__doctor:
+    type: text
+  new_appointment_request__date:
+    type: text
+  new_appointment_request__time:
+    type: text
+  new_patient__name:
+    type: text
+  new_patient__dob:
+    type: text
+  new_patient__phone_number:
+    type: text
