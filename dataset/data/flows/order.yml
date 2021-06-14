@@ -1,0 +1,34 @@
+version: "2.0"
+
+actions:
+- action_create_order
+- action_payment_success
+- action_payment_failure
+
+intents:
+- EXTERNAL_create_order
+- EXTERNAL_payment_success
+- EXTERNAL_payment_failure
+
+rules:
+- rule: Create order
+  condition:
+  - slot_was_set:
+    - chat_type: private
+  steps:
+  - intent: EXTERNAL_create_order
+  - action: action_create_order
+- rule: Payment success
+  condition:
+  - slot_was_set:
+    - chat_type: private
+  steps:
+  - intent: EXTERNAL_payment_success
+  - action: action_payment_success
+- rule: Payment failure
+  condition:
+  - slot_was_set:
+    - chat_type: private
+  steps:
+  - intent: EXTERNAL_payment_failure
+  - action: action_payment_failure

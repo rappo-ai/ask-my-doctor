@@ -8,26 +8,47 @@ actions:
 - action_payment_failure
 - action_create_patient
 - action_create_appointment
+- action_new_doctor_signup
 
 forms:
   new_appointment_request_form:
     required_slots:
       new_appointment_request__speciality:
-        - type: from_text
+      - type: from_text
       new_appointment_request__doctor:
-        - type: from_text
+      - type: from_text
       new_appointment_request__date:
-        - type: from_text
+      - type: from_text
       new_appointment_request__time:
-        - type: from_text
+      - type: from_text
   new_patient_form:
     required_slots:
       new_patient__name:
-        - type: from_text
-      new_patient__dob:
-        - type: from_text
+      - type: from_text
+      new_patient__age:
+      - type: from_text
       new_patient__phone_number:
-        - type: from_text
+      - type: from_text
+  new_doctor_signup_form:
+    required_slots:
+      new_doctor_signup__name:
+      - type: from_text
+      new_doctor_signup__number:
+      - type: from_text
+      new_doctor_signup__google_id:
+      - type: from_text
+      new_doctor_signup__speciality:
+      - type: from_text
+      new_doctor_signup__availability:
+      - type: from_text
+      new_doctor_signup__consultation_fee:
+      - type: from_text
+      new_doctor_signup__bank_account_number:
+      - type: from_text
+      new_doctor_signup__bank_account_name:
+      - type: from_text
+      new_doctor_signup__bank_account_ifsc:
+      - type: from_text
 
 session_config:
   session_expiration_time: 60
@@ -52,7 +73,25 @@ slots:
     type: text
   new_patient__name:
     type: text
-  new_patient__dob:
+  new_patient__age:
     type: text
   new_patient__phone_number:
+    type: text
+  new_doctor_signup__name:
+    type: text
+  new_doctor_signup__number:
+    type: text
+  new_doctor_signup__google_id:
+    type: text
+  new_doctor_signup__speciality:
+    type: text
+  new_doctor_signup__availability:
+    type: text
+  new_doctor_signup__consultation_fee:
+    type: text
+  new_doctor_signup__bank_account_number:
+    type: text
+  new_doctor_signup__bank_account_name:
+    type: text
+  new_doctor_signup__bank_account_ifsc:
     type: text

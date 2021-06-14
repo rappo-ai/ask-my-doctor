@@ -8,7 +8,7 @@ forms:
     required_slots:
       new_patient__name:
         - type: from_text
-      new_patient__dob:
+      new_patient__age:
         - type: from_text
       new_patient__phone_number:
         - type: from_text
@@ -21,8 +21,8 @@ responses:
   - text: We need to collect a few details of the patient.
   utter_ask_new_patient__name:
   - text: Please enter the patient's name.
-  utter_ask_new_patient__dob:
-  - text: Please enter the patient's date of birth.
+  utter_ask_new_patient__age:
+  - text: Please enter the patient's age.
   utter_ask_new_patient__phone_number:
   - text: Please enter the patient's phone number.
 

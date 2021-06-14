@@ -1,0 +1,9 @@
+version: "2.0"
+
+nlu:
+- intent: EXTERNAL_new_doctor_signup
+  metadata:
+    keyword_intent: true
+    match_condition: "exact"
+  examples: |
+    - /signup

@@ -2,6 +2,7 @@ version: "2.0"
 
 intents:
 - start
+- menu
 
 nlu:
 - intent: start
@@ -10,28 +11,10 @@ nlu:
     match_condition: "exact"
   examples: |
     - /start
-- intent: EXTERNAL_new_appointment_request
-  metadata:
-    keyword_intent: true
-    match_condition: "exact"
-  examples: |
-    - Book Appointment
-- intent: EXTERNAL_contact_support
-  metadata:
-    keyword_intent: true
-    match_condition: "exact"
-  examples: |
-    - Contact Support
 
 responses:
   utter_greet:
   - text: Hi {first_name}! I am here to assist you in connecting with doctors and scheduling appointments with them.
-  utter_main_menu:
-  - text: What would you like to do?
-    buttons:
-    - title: Book Appointment
-    - title: Contact Support
-    button_type: reply
 
 rules:
 - rule: Command /start
@@ -42,3 +25,11 @@ rules:
   - intent: start
   - action: utter_greet
   - action: utter_main_menu
+- rule: NLU Fallback
+  condition:
+  - slot_was_set:
+    - chat_type: private
+  steps:
+  - intent: nlu_fallback
+  - action: utter_main_menu
+

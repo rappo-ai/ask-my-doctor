@@ -1,0 +1,89 @@
+version: "2.0"
+
+actions:
+- action_new_doctor_signup
+
+forms:
+  new_doctor_signup_form:
+    required_slots:
+      new_doctor_signup__name:
+      - type: from_text
+      new_doctor_signup__number:
+      - type: from_text
+      new_doctor_signup__google_id:
+      - type: from_text
+      new_doctor_signup__speciality:
+      - type: from_text
+      new_doctor_signup__availability:
+      - type: from_text
+      new_doctor_signup__consultation_fee:
+      - type: from_text
+      new_doctor_signup__bank_account_number:
+      - type: from_text
+      new_doctor_signup__bank_account_name:
+      - type: from_text
+      new_doctor_signup__bank_account_ifsc:
+      - type: from_text
+
+intents:
+- EXTERNAL_new_doctor_signup
+
+responses:
+  utter_new_doctor_signup_start:
+  - text: >
+      Thank you for your interst in signing up. We need a few details from you
+      before we proceed.
+  utter_ask_new_doctor_signup__name:
+  - text: "What is your full name?"
+  utter_ask_new_doctor_signup__number:
+  - text: "What is your phone number?"
+  utter_ask_new_doctor_signup__google_id:
+  - text: "Please connect your Google ID for us to be able to schedule meetings on your behalf."
+    buttons:
+    - title: Connect Google ID
+    button_type: reply
+  utter_ask_new_doctor_signup__speciality:
+  - text: "What is your speciality?"
+    buttons:
+    - title: General Surgeon
+    - title: Paediatrician
+    - title: Gynaecologist
+    - title: Psychiatrist
+    - title: Dermatologist
+    button_type: reply
+  utter_ask_new_doctor_signup__availability:
+  - text: "What is your availability?"
+    buttons:
+    - title: Weekends
+    - title: Weekdays
+    button_type: reply
+  utter_ask_new_doctor_signup__consultation_fee:
+  - text: "What is your consultation fee? Please note we charge a 20% commission on the consultation fee."
+  utter_ask_new_doctor_signup__bank_account_number:
+  - text: "What is your bank account number?"
+  utter_ask_new_doctor_signup__bank_account_name:
+  - text: "What is your full name as in your bank account?"
+  utter_ask_new_doctor_signup__bank_account_ifsc:
+  - text: "What is your bank account IFSC code?"
+
+rules:
+- rule: Start new doctor signup form
+  condition:
+  - slot_was_set:
+    - chat_type: private
+  steps:
+  - intent: EXTERNAL_new_doctor_signup
+  - action: utter_new_doctor_signup_start
+  - action: new_doctor_signup_form
+  - active_loop: new_doctor_signup_form
+- rule: End new doctor signup form
+  condition:
+  - active_loop: new_doctor_signup_form
+  - slot_was_set:
+    - chat_type: private
+  steps:
+  - action: new_doctor_signup_form
+  - active_loop: null
+  - slot_was_set:
+    - requested_slot: null
+  - action: action_new_doctor_signup

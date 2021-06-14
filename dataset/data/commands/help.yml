@@ -22,6 +22,8 @@ responses:
         - Email us at support@askmydoctor.com
         - Call us at 9876543210 (Mon-Fri 9 AM-6PM)
 
+        Click /menu to view the main menu.
+
 rules:
 - rule: Command /help
   condition:
