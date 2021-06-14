@@ -1,0 +1,35 @@
+version: "2.0"
+
+intents:
+- start
+- menu
+
+nlu:
+- intent: start
+  metadata:
+    keyword_intent: true
+    match_condition: "exact"
+  examples: |
+    - /start
+
+responses:
+  utter_greet:
+  - text: Hi {first_name}! I am here to assist you in connecting with doctors and scheduling appointments with them.
+
+rules:
+- rule: Command /start
+  condition:
+  - slot_was_set:
+    - chat_type: private
+  steps:
+  - intent: start
+  - action: utter_greet
+  - action: utter_main_menu
+- rule: NLU Fallback
+  condition:
+  - slot_was_set:
+    - chat_type: private
+  steps:
+  - intent: nlu_fallback
+  - action: utter_main_menu
+

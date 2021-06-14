@@ -5,61 +5,27 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "docker attach rasa run",
-      "type": "python",
-      "request": "attach",
-      "connect": {
-        "host": "localhost",
-        "port": 5678
-      },
-      "justMyCode": false,
-      "pathMappings": [
-        {
-          "localRoot": "${workspaceFolder:rasa}/rasa",
-          "remoteRoot": "/opt/venv/lib/python3.8/site-packages/rasa"
-        }
-      ]
-    },
-    {
-      "name": "docker attach rasa run actions",
-      "type": "python",
-      "request": "attach",
-      "connect": {
-        "host": "localhost",
-        "port": 5679
-      },
-      "justMyCode": false,
-      "pathMappings": [
-        {
-          "localRoot": "${workspaceFolder}/dataset",
-          "remoteRoot": "/app"
-        }
-      ]
-    },
-    {
-      "name": "rasa train",
-      "type": "python",
-      "request": "launch",
-      "cwd": "${workspaceFolder}/dataset",
-      "python": "${workspaceFolder:rasa}/../.venv/bin/python",
-      "program": "${workspaceFolder:rasa}/../.venv/bin/rasa",
-      "args": [
-        "train",
-        "-vv"
-      ],
-      "console": "integratedTerminal",
-      "justMyCode": false,
-    },
-    {
       "name": "rasa run",
       "type": "python",
       "request": "launch",
-      "cwd": "${workspaceFolder}/dataset",
-      "python": "${workspaceFolder:rasa}/../.venv/bin/python",
-      "program": "${workspaceFolder:rasa}/../.venv/bin/rasa",
+      "cwd": "/app",
+      "python": "/opt/venv/bin/python",
+      "program": "/workspace/.devcontainer/scripts/launch-rasa-server.py",
       "args": [
         "run",
-        "-vv"
+        "-vv",
+        "--log-file",
+        "/app/server_logs.txt"
+      ],
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}/.venv",
+          "remoteRoot": "/opt/venv"
+        },
+        {
+          "localRoot": "${workspaceFolder}/dataset",
+          "remoteRoot": "/app"
+        },
       ],
       "console": "integratedTerminal",
       "justMyCode": false,
@@ -68,13 +34,24 @@
       "name": "rasa run actions",
       "type": "python",
       "request": "launch",
-      "cwd": "${workspaceFolder}/dataset",
-      "python": "${workspaceFolder:rasa}/../.venv/bin/python",
-      "program": "${workspaceFolder:rasa}/../.venv/bin/rasa",
+      "cwd": "/app",
+      "python": "/opt/venv/bin/python",
+      "program": "/opt/venv/bin/rasa",
       "args": [
         "run",
         "actions",
-        "-vv"
+        "-vv",
+        "--auto-reload",
+      ],
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}/.venv",
+          "remoteRoot": "/opt/venv"
+        },
+        {
+          "localRoot": "${workspaceFolder}/dataset",
+          "remoteRoot": "/app"
+        }
       ],
       "console": "integratedTerminal",
       "justMyCode": false,

@@ -1,0 +1,41 @@
+version: "2.0"
+
+intents:
+- help
+- EXTERNAL_contact_support
+
+nlu:
+- intent: help
+  metadata:
+    keyword_intent: true
+    match_condition: "exact"
+  examples: |
+    - /help
+
+responses:
+  utter_help:
+  - custom:
+      text: |
+        You can reach out to us for help in any of the following ways:
+        
+        - Message us @askmydoctorsupport
+        - Email us at support@askmydoctor.com
+        - Call us at 9876543210 (Mon-Fri 9 AM-6PM)
+
+        Click /menu to view the main menu.
+
+rules:
+- rule: Command /help
+  condition:
+  - slot_was_set:
+    - chat_type: private
+  steps:
+  - intent: help
+  - action: utter_help
+- rule: Contact support
+  condition:
+  - slot_was_set:
+    - chat_type: private
+  steps:
+  - intent: EXTERNAL_contact_support
+  - action: utter_help

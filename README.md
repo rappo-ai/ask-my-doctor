@@ -20,45 +20,20 @@ docker-compose up
 
 ### Launch and Attach (supports debugging)
 
-You will need VS Code with Python extension installed. (https://code.visualstudio.com/download)
+You will need VS Code with Remote - Containers extension installed. (https://code.visualstudio.com/download)
 
-It is recommended to have Python 3.8.5 installed on your system for creating the venv as the Rasa docker image currently uses Python 3.8.5 and you may get strange debugging errors with a different version of Python.
+1.  #### Launch this repo as a Remote - Container in VS Code
+    In VSCode open this repo and execute command 'Remote-Containers: Rebuild and Reopen in Container' through the Command Palette. VS Code may also recognize the devcontainer folder and prompt you to open it as a container. Either way works.
 
-1.  #### Install poetry (Python dependency management tool, installed globally)
-    ```bash
-    curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
-    ```
+1.  #### Launch Rasa core/nlu server
+    In VSCode 'Run and Debug' tab, select 'rasa run' and click Start Debugging.
 
-1.  #### Sync Rasa source code and switch to Telegram branch
-    ```bash
-    git clone https://github.com/rappo-ai/rasa.git
-    cd rasa
-    git checkout telegram
-    ```
-    Make sure you sync rasa repository as a sibling folder to ask-my-doctor repository.
+    Note:
+    - The actions server does not launch automatically with the core/nlu server. You need to manually start the action server as well. Your bot will still work but actions will not execute.
+    - To debug incoming messages from Telegram to Rasa, you can set a breakpoint in ".venv/lib/python*/site-packages/rasa/core/channels/telegram.py" under the server route "/webhook".
 
-1.  #### Create a virtual env and activate it (inside rasa folder)
-    ```bash
-    /path/to/python3.8.5 -m venv ./.venv
-    source .venv/bin/activate
-    ```
+1.  #### Launch Rasa actions server
+    In VSCode 'Run and Debug' tab, select 'rasa run actions' and click Start Debugging.
 
-1.  #### Build and install Rasa
-    ```bash
-    make install
-    ```
-
-1.  #### Build and run the debug Docker image
-    ```bash
-    cd ask-my-doctor
-    docker-compose -f docker-compose.debug.yml up --build
-    ```
-
-1.  #### Open the VS Code workspace
-    In VSCode, File -> Open Workspace -> /path/to/ask-my-doctor/ask-my-doctor.code-workspace
-
-1.  #### Attach to Rasa SDK server (actions server)
-    In VSCode 'Run and Debug' tab, select 'docker attach rasa run actions' and click Start Debugging.
-
-1.  #### Attach to Rasa open-source server (core/nlu server)
-    In VSCode 'Run and Debug' tab, select 'docker attach rasa run' and click Start Debugging.
+    Note:
+    - To debug action code, just set a breakpoint in the corresponding action file inside "dataset/actions".

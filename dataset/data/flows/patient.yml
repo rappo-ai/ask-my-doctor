@@ -1,0 +1,49 @@
+version: "2.0"
+
+actions:
+- action_create_patient
+
+forms:
+  new_patient_form:
+    required_slots:
+      new_patient__name:
+        - type: from_text
+      new_patient__age:
+        - type: from_text
+      new_patient__phone_number:
+        - type: from_text
+
+intents:
+- EXTERNAL_new_patient
+
+responses:
+  utter_new_patient_start:
+  - text: We need to collect a few details of the patient.
+  utter_ask_new_patient__name:
+  - text: Please enter the patient's name.
+  utter_ask_new_patient__age:
+  - text: Please enter the patient's age.
+  utter_ask_new_patient__phone_number:
+  - text: Please enter the patient's phone number.
+
+rules:
+- rule: Start new patient form
+  condition:
+  - slot_was_set:
+    - chat_type: private
+  steps:
+  - intent: EXTERNAL_new_patient
+  - action: utter_new_patient_start
+  - action: new_patient_form
+  - active_loop: new_patient_form
+- rule: End new patient form
+  condition:
+  - active_loop: new_patient_form
+  - slot_was_set:
+    - chat_type: private
+  steps:
+  - action: new_patient_form
+  - active_loop: null
+  - slot_was_set:
+    - requested_slot: null
+  - action: action_create_patient

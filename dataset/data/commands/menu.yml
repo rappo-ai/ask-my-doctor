@@ -1,0 +1,43 @@
+version: "2.0"
+
+intents:
+- menu
+
+nlu:
+- intent: menu
+  metadata:
+    keyword_intent: true
+    match_condition: "exact"
+  examples: |
+    - /menu
+- intent: EXTERNAL_new_appointment_request
+  metadata:
+    keyword_intent: true
+    match_condition: "exact"
+  examples: |
+    - Book Appointment
+- intent: EXTERNAL_contact_support
+  metadata:
+    keyword_intent: true
+    match_condition: "exact"
+  examples: |
+    - Contact Support
+
+responses:
+  utter_main_menu:
+  - text: |
+      If you are a doctor, please click /signup to sign up on our platform.
+      What would you like to do?
+    buttons:
+    - title: Book Appointment
+    - title: Contact Support
+    button_type: reply
+
+rules:
+- rule: Command /menu
+  condition:
+  - slot_was_set:
+    - chat_type: private
+  steps:
+  - intent: menu
+  - action: utter_main_menu

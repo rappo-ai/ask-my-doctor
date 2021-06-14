@@ -1,0 +1,75 @@
+version: "2.0"
+
+actions:
+- action_create_appointment
+
+forms:
+  new_appointment_request_form:
+    required_slots:
+      new_appointment_request__speciality:
+        - type: from_text
+      new_appointment_request__doctor:
+        - type: from_text
+      new_appointment_request__date:
+        - type: from_text
+      new_appointment_request__time:
+        - type: from_text
+
+intents:
+- EXTERNAL_new_appointment_request
+
+responses:
+  utter_new_appointment_request_start:
+  - text: New appointment request ...
+  utter_ask_new_appointment_request__speciality:
+  - text: "Please select the speciality you are looking for:"
+    buttons:
+    - title: General Surgeon
+    - title: Paediatrician
+    - title: Gynaecologist
+    - title: Psychiatrist
+    - title: Dermatologist
+    button_type: reply
+  utter_ask_new_appointment_request__doctor:
+  - text: "Please choose a doctor:"
+    buttons:
+    - title: Dr. Murali
+    - title: Dr. Lata
+    - title: Dr. Shafi
+    button_type: reply
+  utter_ask_new_appointment_request__date:
+  - text: "Please pick a date:"
+    buttons:
+    - title: Thursday, 1st July 2021
+    - title: Friday, 2nd July 2021
+    - title: Saturday, 3rd July 2021
+    button_type: reply
+  utter_ask_new_appointment_request__time:
+  - text: "Please pick a time slot:"
+    buttons:
+    - title: "5:00 PM"
+    - title: "6:30 PM"
+    - title: "7:00 PM"
+    button_type: reply
+
+rules:
+- rule: Start new appointment request form
+  condition:
+  - slot_was_set:
+    - chat_type: private
+  steps:
+  - intent: EXTERNAL_new_appointment_request
+  - action: utter_new_appointment_request_start
+  - action: new_appointment_request_form
+  - active_loop: new_appointment_request_form
+- rule: End new appointment request form
+  condition:
+  - active_loop: new_appointment_request_form
+  - slot_was_set:
+    - chat_type: private
+  steps:
+  - action: new_appointment_request_form
+  - active_loop: null
+  - slot_was_set:
+    - requested_slot: null
+  - action: action_create_appointment
