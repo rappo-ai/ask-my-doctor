@@ -14,15 +14,15 @@ Copy .env.template to .env and set the Telegram bot token and Telegram bot usern
 docker-compose up
 ```
 
-### Launch with debugging (Local)
+## Launch with debugging (Local)
 
 Install VS Code with Remote-Containers extension. (https://code.visualstudio.com/download)
 
-#### OSX devcontainer setup
+### OSX devcontainer setup
 - Install Docker Desktop (see instructions on https://www.docker.com/)
 - Clone this repository and open it with VS Code. Launch as devcontainer when prompted.
 
-#### Windows devcontainer setup
+### Windows devcontainer setup
 - Install WSL 2 (Windows Subsystem for Linux) first along with a Linux distribution (such as Ubuntu 20.04) (https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 - Install Docker Desktop and configure it to use WSL (see instructions on https://www.docker.com/)
 - Set your git email, password, credentials, etc. in the WSL Linux OS so that devcontainer can pick these credentials up later. (https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
@@ -30,7 +30,7 @@ Install VS Code with Remote-Containers extension. (https://code.visualstudio.com
 - Change the usergroup of all source code files to 'root' to grant the Docker container user the appropriate permissions (you do not need to set file permissions to 770, so just use the chgrp command from this link https://rasa.com/docs/rasa-x/installation-and-setup/install/docker-compose/#permissions-on-mounted-directories)
 - Open repository inside WSL Linux with VS Code. Launch as devcontainer when prompted. (see https://docs.docker.com/docker-for-windows/wsl/#develop-with-docker-and-wsl-2)
 
-#### Linux devcontainer setup
+### Linux devcontainer setup
 - Install Docker Desktop (see instructions on https://www.docker.com/)
 - Clone this repository.
 - Change the usergroup of all source code files to 'root' to grant the Docker container user the appropriate permissions (you do not need to set file permissions to 770, so just use the chgrp command from this link https://rasa.com/docs/rasa-x/installation-and-setup/install/docker-compose/#permissions-on-mounted-directories)
