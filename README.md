@@ -18,10 +18,6 @@ docker-compose up
 
 Install VS Code with Remote-Containers extension. (https://code.visualstudio.com/download)
 
-### OSX devcontainer setup
-- Install Docker Desktop (see instructions on https://www.docker.com/)
-- Clone this repository and open it with VS Code. Launch as devcontainer when prompted.
-
 ### Windows devcontainer setup
 - Install WSL 2 (Windows Subsystem for Linux) first along with a Linux distribution (such as Ubuntu 20.04) (https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 - Install Docker Desktop and configure it to use WSL (see instructions on https://www.docker.com/)
@@ -29,6 +25,10 @@ Install VS Code with Remote-Containers extension. (https://code.visualstudio.com
 - Clone this repository inside WSL Linux filesystem for performance reasons with Docker (see https://docs.docker.com/docker-for-windows/wsl/#develop-with-docker-and-wsl-2)
 - Change the usergroup of all source code files to 'root' to grant the Docker container user the appropriate permissions (you do not need to set file permissions to 770, so just use the chgrp command from this link https://rasa.com/docs/rasa-x/installation-and-setup/install/docker-compose/#permissions-on-mounted-directories)
 - Open repository inside WSL Linux with VS Code. Launch as devcontainer when prompted. (see https://docs.docker.com/docker-for-windows/wsl/#develop-with-docker-and-wsl-2)
+
+### OSX devcontainer setup
+- Install Docker Desktop (see instructions on https://www.docker.com/)
+- Clone this repository and open it with VS Code. Launch as devcontainer when prompted.
 
 ### Linux devcontainer setup
 - Install Docker Desktop (see instructions on https://www.docker.com/)
