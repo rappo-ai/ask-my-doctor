@@ -36,15 +36,15 @@ Install VS Code with Remote-Containers extension. (https://code.visualstudio.com
 - Change the usergroup of all source code files to 'root' to grant the Docker container user the appropriate permissions (you do not need to set file permissions to 770, so just use the chgrp command from this link https://rasa.com/docs/rasa-x/installation-and-setup/install/docker-compose/#permissions-on-mounted-directories)
 - Open repository with VS Code. Launch as devcontainer when prompted.
 
-1.  #### Launch Rasa server
-    In VSCode 'Run and Debug' tab, select 'rasa run' and click Start Debugging.
+### Launch Rasa server
+In VSCode 'Run and Debug' tab, select 'rasa run' and click Start Debugging.
 
-    Note:
-    - The actions server does not launch automatically with the rasa server. You need to manually start the action server as well. Your bot will still work but actions will not execute.
-    - To debug incoming messages from Telegram to Rasa, you can set a breakpoint in ".venv/lib/python*/site-packages/rasa/core/channels/telegram.py" under the server route "/webhook".
+Note:
+- The actions server does not launch automatically with the rasa server. You need to manually start the action server as well. Your bot will still work but actions will not execute.
+- To debug incoming messages from Telegram to Rasa, you can set a breakpoint in ".venv/lib/python*/site-packages/rasa/core/channels/telegram.py" under the server route "/webhook".
 
-1.  #### Launch Rasa actions server
-    In VSCode 'Run and Debug' tab, select 'rasa run actions' and click Start Debugging.
+### Launch Rasa actions server
+In VSCode 'Run and Debug' tab, select 'rasa run actions' and click Start Debugging.
 
-    Note:
-    - To debug action code, just set a breakpoint in the corresponding action file inside "dataset/actions".
+Note:
+- To debug action code, just set a breakpoint in the corresponding action file inside "dataset/actions".
