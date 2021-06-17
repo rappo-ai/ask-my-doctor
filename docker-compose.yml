@@ -30,3 +30,13 @@ services:
   ngrok:
     image: wernight/ngrok
     command: ngrok http rasa:5005
+  mongo:
+    image: mongo
+    volumes:
+      - mongodb:/data/db
+  mongo-express:
+    image: mongo-express
+    ports:
+      - 8081:8081
+volumes:
+  mongodb:
