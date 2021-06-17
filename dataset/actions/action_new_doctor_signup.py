@@ -19,7 +19,7 @@ class ActionNewDoctorSignup(Action):
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
       
-        text = f"We have received your details and will review it and get back to you shortly.\n\n" +\
+        text = f"Thank you for your interest in Ask My Doctor. We have received your details and will review it and get back to you within 48 hours.\n\n" +\
             f"Name: {tracker.get_slot('new_doctor_signup__name')}\n" + \
             f"Phone Number: {tracker.get_slot('new_doctor_signup__number')}\n" + \
             f"Speciality: {tracker.get_slot('new_doctor_signup__speciality')}\n" + \
