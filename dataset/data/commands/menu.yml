@@ -26,7 +26,6 @@ nlu:
 responses:
   utter_main_menu:
   - text: |
-      If you are a doctor, please click /signup to sign up on our platform.
       What would you like to do?
     buttons:
     - title: Book Appointment
