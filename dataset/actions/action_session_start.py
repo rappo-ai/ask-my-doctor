@@ -5,6 +5,7 @@ from rasa_sdk.events import SlotSet, SessionStarted, ActionExecuted, EventType
 from actions.utils.json import get_json_key
 from actions.utils.telegram import get_chat_type, get_first_name
 
+
 class ActionSessionStart(Action):
     def name(self) -> Text:
         return "action_session_start"
@@ -39,7 +40,7 @@ class ActionSessionStart(Action):
         return slots
 
     async def run(
-      self, dispatcher, tracker: Tracker, domain: Dict[Text, Any]
+        self, dispatcher, tracker: Tracker, domain: Dict[Text, Any]
     ) -> List[Dict[Text, Any]]:
 
         # the session should begin with a `session_started` event
