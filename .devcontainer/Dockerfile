@@ -9,6 +9,7 @@ RUN apt-get update && \
     ssh \
     git \
     nodejs && \
-    pip install debugpy -t /tmp
+    . /opt/venv/bin/activate && \
+    pip install black
 
 USER 1001
