@@ -24,6 +24,8 @@
 		"terminal.integrated.shell.linux": "/bin/bash",
 		"python.pythonPath": "/opt/venv/bin/python",
 		"python.languageServer": "Pylance",
+		"python.formatting.provider": "black",
+		"editor.formatOnSave": true,
 		"git.enabled": true,
 		"git.path": "/usr/bin/git",
 	},
