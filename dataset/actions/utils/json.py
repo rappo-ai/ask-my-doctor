@@ -1,4 +1,4 @@
-def get_json_key(dict, key, default = None):
+def get_json_key(dict, key, default=None):
     try:
         key_split = key.split(".", 1)
         key_split_len = len(key_split)

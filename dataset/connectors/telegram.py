@@ -37,7 +37,9 @@ class TelegramOutput(TeleBot, OutputChannel):
         self, recipient_id: Text, text: Text, **kwargs: Any
     ) -> None:
         for message_part in text.strip().split("\n\n"):
-            self.send_message(recipient_id, message_part, reply_markup=ReplyKeyboardRemove())
+            self.send_message(
+                recipient_id, message_part, reply_markup=ReplyKeyboardRemove()
+            )
 
     async def send_image_url(
         self, recipient_id: Text, image: Text, **kwargs: Any
@@ -136,8 +138,13 @@ class TelegramOutput(TeleBot, OutputChannel):
         for params in send_functions.keys():
             if all(json_message.get(p) is not None for p in params):
                 args = [json_message.pop(p) for p in params]
-                if send_functions[params] not in ["send_media_group", "send_game", "send_chat_action", "send_invoice"]:
-                   json_message["reply_markup"] = ReplyKeyboardRemove()
+                if send_functions[params] not in [
+                    "send_media_group",
+                    "send_game",
+                    "send_chat_action",
+                    "send_invoice",
+                ]:
+                    json_message["reply_markup"] = ReplyKeyboardRemove()
                 api_call = getattr(self, send_functions[params])
                 api_call(recipient_id, *args, **json_message)
 
@@ -158,7 +165,8 @@ class TelegramInput(InputChannel):
             credentials.get("access_token"),
             credentials.get("verify"),
             credentials.get("webhook_url"),
-            credentials.get("drop_pending_updates", 'true').lower() in ['true', '1', 't'],
+            credentials.get("drop_pending_updates", "true").lower()
+            in ["true", "1", "t"],
         )
 
     def __init__(
@@ -267,7 +275,7 @@ class TelegramInput(InputChannel):
                                 sender_id,
                                 input_channel=self.name(),
                                 metadata=metadata,
-                                disable_nlu_bypass=True
+                                disable_nlu_bypass=True,
                             )
                         )
                 except Exception as e:
@@ -284,7 +292,9 @@ class TelegramInput(InputChannel):
     def get_output_channel(self) -> TelegramOutput:
         """Loads the telegram channel."""
         channel = TelegramOutput(self.access_token)
-        channel.set_webhook(url=self.webhook_url, drop_pending_updates=self.drop_pending_updates)
+        channel.set_webhook(
+            url=self.webhook_url, drop_pending_updates=self.drop_pending_updates
+        )
 
         return channel
 
