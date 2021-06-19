@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   rasa:
-    image: rappoai/rasa:telegram
+    image: rappoai/rasa:telegram-2f575bf
     volumes:
       - ./dataset:/app
     entrypoint: ""
