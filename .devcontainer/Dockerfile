@@ -1,4 +1,4 @@
-FROM rappoai/rasa:telegram
+FROM rappoai/rasa:telegram-2f575bf
 
 USER root
 
