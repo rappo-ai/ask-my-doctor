@@ -4,7 +4,7 @@ from actions.helpers.reply_button_action import ReplyButtonAction
 from actions.utils.common import get_upcoming_appointment_dates
 
 
-class ActionAskAppointmentSpeciality(ReplyButtonAction):
+class ActionAskAppointmentDate(ReplyButtonAction):
     def name(self) -> Text:
         return "action_ask_appointment__date"
 

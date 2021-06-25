@@ -1,3 +1,5 @@
+from copy import deepcopy
+import logging
 from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
@@ -5,12 +7,15 @@ from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.common import (
     create_meeting_link,
+    get_admin_group_id,
     get_appointment_details,
     print_appointment_details,
     print_patient_details,
     print_payment_details,
     set_payment_details,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ActionPaymentCallback(Action):
@@ -54,6 +59,13 @@ class ActionPaymentCallback(Action):
 
             json_message = {"text": text}
             dispatcher.utter_message(json_message=json_message)
+
+            if get_admin_group_id():
+                admin_json_message = deepcopy(json_message)
+                admin_json_message["chat_id"] = get_admin_group_id()
+                dispatcher.utter_message(json_message=admin_json_message)
+            else:
+                logger.warn("Admin group id not set. Use /admin or /groupid.")
         else:
             json_message = {"text": "Payment error"}
             dispatcher.utter_message(json_message=json_message)

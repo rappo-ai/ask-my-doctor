@@ -1,21 +1,11 @@
 from typing import Text
 
-from actions.utils.db import (
-    get_doctors as get_doctors_from_db,
-    get_specialities as get_specialities_from_db,
-)
 
 _appointment_details = {}
 _patient_details = {}
 _payment_details = {}
-
-
-def get_specialities():
-    return get_specialities_from_db()
-
-
-def get_doctors():
-    return get_doctors_from_db()
+_doctor_signup_data = {}
+_admin_details = {}
 
 
 def get_upcoming_appointment_dates():
@@ -95,6 +85,41 @@ def print_payment_details():
     )
 
 
+def set_doctor_signup_data(
+    name,
+    phone_number,
+    speciality,
+    availability,
+    consultation_fee,
+    bank_account_number,
+    bank_account_name,
+    bank_account_ifsc,
+):
+    _doctor_signup_data["name"] = name
+    _doctor_signup_data["phone_number"] = phone_number
+    _doctor_signup_data["speciality"] = speciality
+    _doctor_signup_data["availability"] = availability
+    _doctor_signup_data["consultation_fee"] = consultation_fee
+    _doctor_signup_data["bank_account_number"] = bank_account_number
+    _doctor_signup_data["bank_account_name"] = bank_account_name
+    _doctor_signup_data["bank_account_ifsc"] = bank_account_ifsc
+    return _doctor_signup_data
+
+
+def print_doctor_signup_data():
+    return (
+        f"Name: {_doctor_signup_data.get('name')}\n"
+        + f"Phone Number: {_doctor_signup_data.get('phone_number')}\n"
+        + f"Speciality: {_doctor_signup_data.get('speciality')}\n"
+        + f"Availability: {_doctor_signup_data.get('availability')}\n"
+        + f"Consultation Fee: {_doctor_signup_data.get('consultation_fee')}\n\n"
+        + f"Bank Details\n\n"
+        + f"Account number: {_doctor_signup_data.get('bank_account_number')}\n"
+        + f"Account name: {_doctor_signup_data.get('bank_account_name')}\n"
+        + f"Account IFSC: {_doctor_signup_data.get('bank_account_ifsc')}\n"
+    )
+
+
 def create_order():
     # tbdnikhil
     return {"id": 1, "amount": 300, "payment_link": "https://rzp.io/i/4E2QCoUO"}
@@ -103,3 +128,20 @@ def create_order():
 def create_meeting_link():
     # tbdemily
     return "https://meet.google.com/vix-uaxv-hcx"
+
+
+def get_commission_rate():
+    return 20
+
+
+def set_admin_group_id(group_id):
+    _admin_details["group_id"] = group_id
+
+
+def get_admin_group_id():
+    return _admin_details.get("group_id")
+
+
+def get_google_auth_url():
+    # tbdemily
+    return "https://accounts.google.com/o/oauth2/v2/auth"

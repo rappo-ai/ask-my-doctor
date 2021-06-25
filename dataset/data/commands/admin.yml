@@ -1,0 +1,44 @@
+version: "2.0"
+
+actions:
+  - action_set_admin_group_id
+
+intents:
+  - admin
+
+nlu:
+  - intent: admin
+    metadata:
+      keyword_intent: true
+      match_condition: "exact"
+    examples: |
+      - /admin
+  - intent: groupid
+    metadata:
+      keyword_intent: true
+      match_condition: "start"
+    examples: |
+      - /groupid
+
+responses:
+  utter_admin_menu_options:
+    - text: |
+        /groupid - change the admin group id
+
+rules:
+  - rule: show admin menu options
+    condition:
+      - slot_was_set:
+          - chat_type: private
+          - is_admin: true
+    steps:
+      - intent: admin
+      - action: utter_admin_menu_options
+  - rule: set admin group id
+    condition:
+      - slot_was_set:
+          - chat_type: private
+          - is_admin: true
+    steps:
+      - intent: groupid
+      - action: action_set_admin_group_id
