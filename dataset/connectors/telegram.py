@@ -34,17 +34,23 @@ class TelegramOutput(TeleBot, OutputChannel):
         super().__init__(access_token)
 
     async def send_text_message(
-        self, recipient_id: Text, text: Text, **kwargs: Any
+        self,
+        recipient_id: Text,
+        text: Text,
+        reply_markup=ReplyKeyboardRemove(),
+        **kwargs: Any,
     ) -> None:
         for message_part in text.strip().split("\n\n"):
-            self.send_message(
-                recipient_id, message_part, reply_markup=ReplyKeyboardRemove()
-            )
+            self.send_message(recipient_id, message_part, reply_markup=reply_markup)
 
     async def send_image_url(
-        self, recipient_id: Text, image: Text, **kwargs: Any
+        self,
+        recipient_id: Text,
+        image: Text,
+        reply_markup=ReplyKeyboardRemove(),
+        **kwargs: Any,
     ) -> None:
-        self.send_photo(recipient_id, image, reply_markup=ReplyKeyboardRemove())
+        self.send_photo(recipient_id, image, reply_markup=reply_markup)
 
     async def send_text_with_buttons(
         self,
@@ -107,6 +113,18 @@ class TelegramOutput(TeleBot, OutputChannel):
         json_message = deepcopy(json_message)
 
         recipient_id = json_message.pop("chat_id", recipient_id)
+        reply_markup_json: Dict = json_message.pop("reply_markup", None)
+        reply_markup = ReplyKeyboardRemove()
+        if reply_markup_json:
+            reply_markup = ReplyKeyboardMarkup(
+                resize_keyboard=reply_markup_json.get("resize_keyboard", False),
+                one_time_keyboard=reply_markup_json.get("one_time_keyboard", True),
+            )
+            [
+                reply_markup.add(KeyboardButton(col))
+                for row in reply_markup_json.get("keyboard", [])
+                for col in row
+            ]
 
         send_functions = {
             ("text",): "send_message",
@@ -144,7 +162,7 @@ class TelegramOutput(TeleBot, OutputChannel):
                     "send_chat_action",
                     "send_invoice",
                 ]:
-                    json_message["reply_markup"] = ReplyKeyboardRemove()
+                    json_message["reply_markup"] = reply_markup
                 api_call = getattr(self, send_functions[params])
                 api_call(recipient_id, *args, **json_message)
 

@@ -1,49 +1,80 @@
 version: "2.0"
 
 actions:
-  - action_create_patient
+  - action_set_patient
+  - action_confirm_patient
+  - action_on_patient_set
+  - action_reset_patient_form
 
 forms:
-  new_patient_form:
+  patient_form:
     required_slots:
-      new_patient__name:
+      patient__name:
         - type: from_text
-      new_patient__age:
+      patient__age:
         - type: from_text
-      new_patient__phone_number:
+      patient__phone_number:
+        - type: from_text
+      patient__email:
         - type: from_text
 
 intents:
-  - EXTERNAL_new_patient
+  - EXTERNAL_confirm_patient
+  - EXTERNAL_update_patient
 
 responses:
-  utter_new_patient_start:
-    - text: We need to collect a few details of the patient.
-  utter_ask_new_patient__name:
+  utter_update_patient_start:
+    - text: We need a few details of the patient to proceed.
+  utter_ask_patient__name:
     - text: Please enter the patient's name.
-  utter_ask_new_patient__age:
+  utter_ask_patient__age:
     - text: Please enter the patient's age.
-  utter_ask_new_patient__phone_number:
+  utter_ask_patient__phone_number:
     - text: Please enter the patient's phone number.
+  utter_ask_patient__email:
+    - text: Please enter the patient's email id.
 
 rules:
-  - rule: Start new patient form
+  - rule: Confirm existing patient details / affirm
     condition:
       - slot_was_set:
           - chat_type: private
     steps:
-      - intent: EXTERNAL_new_patient
-      - action: utter_new_patient_start
-      - action: new_patient_form
-      - active_loop: new_patient_form
+      - intent: EXTERNAL_confirm_patient
+      - action: action_confirm_patient
+      - intent: affirm
+      - action: action_on_patient_set
+  - rule: Confirm existing patient details / deny
+    condition:
+      - slot_was_set:
+          - chat_type: private
+    steps:
+      - intent: EXTERNAL_confirm_patient
+      - action: action_confirm_patient
+      - intent: deny
+      - action: action_reset_patient_form
+      - action: utter_update_patient_start
+      - action: patient_form
+      - active_loop: patient_form
+  - rule: Create new patient form
+    condition:
+      - slot_was_set:
+          - chat_type: private
+    steps:
+      - intent: EXTERNAL_update_patient
+      - action: action_reset_patient_form
+      - action: utter_update_patient_start
+      - action: patient_form
+      - active_loop: patient_form
   - rule: End new patient form
     condition:
-      - active_loop: new_patient_form
+      - active_loop: patient_form
       - slot_was_set:
           - chat_type: private
     steps:
-      - action: new_patient_form
+      - action: patient_form
       - active_loop: null
       - slot_was_set:
           - requested_slot: null
-      - action: action_create_patient
+      - action: action_set_patient
+      - action: action_on_patient_set

@@ -1,0 +1,54 @@
+version: "2.0"
+
+actions:
+  - action_set_appointment
+  - action_on_appointment_set
+  - action_ask_appointment__speciality
+  - action_ask_appointment__doctor
+  - action_ask_appointment__date
+  - action_ask_appointment__time
+  - action_reset_appointment_form
+  - validate_appointment_form
+
+forms:
+  appointment_form:
+    required_slots:
+      appointment__speciality:
+        - type: from_text
+      appointment__doctor:
+        - type: from_text
+      appointment__date:
+        - type: from_text
+      appointment__time:
+        - type: from_text
+
+intents:
+  - EXTERNAL_create_appointment
+
+responses:
+  utter_appointment_start:
+    - text: NEW APPOINTMENT REQUEST
+
+rules:
+  - rule: Start new appointment request form
+    condition:
+      - slot_was_set:
+          - chat_type: private
+    steps:
+      - intent: EXTERNAL_create_appointment
+      - action: action_reset_appointment_form
+      - action: utter_appointment_start
+      - action: appointment_form
+      - active_loop: appointment_form
+  - rule: End new appointment request form
+    condition:
+      - active_loop: appointment_form
+      - slot_was_set:
+          - chat_type: private
+    steps:
+      - action: appointment_form
+      - active_loop: null
+      - slot_was_set:
+          - requested_slot: null
+      - action: action_set_appointment
+      - action: action_on_appointment_set

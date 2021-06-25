@@ -8,14 +8,12 @@
 from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
-from rasa_sdk.events import ActionExecuted, UserUttered
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.bl import   get_specialities
 
-class ActionAskNewAppointmentRequestSpeciality(Action):
+class ReplyButtonAction(Action):
     def name(self) -> Text:
-        return "action_ask_new_appointment_request__speciality"
+        return "reply_button_action"
 
     def run(
         self,
@@ -24,10 +22,7 @@ class ActionAskNewAppointmentRequestSpeciality(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
-        text = f"Please select the speciality you are looking for:"
-        specialities = get_specialities()
-        reply_markup = 
-        json_message = {"text": text}
+        json_message = {"text": self.text, "reply_markup": self.reply_markup}
         dispatcher.utter_message(json_message=json_message)
 
         return []

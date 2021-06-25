@@ -1,34 +1,38 @@
 version: "2.0"
 
 actions:
+  - action_confirm_order_details
   - action_create_order
-  - action_payment_success
-  - action_payment_failure
+  - action_change_order
+  - action_payment_callback
 
 intents:
-  - EXTERNAL_create_order
-  - EXTERNAL_payment_success
-  - EXTERNAL_payment_failure
+  - EXTERNAL_confirm_order_details
+  - EXTERNAL_payment_callback
 
 rules:
-  - rule: Create order
+  - rule: Confirm order details / affirm
     condition:
       - slot_was_set:
           - chat_type: private
     steps:
-      - intent: EXTERNAL_create_order
+      - intent: EXTERNAL_confirm_order_details
+      - action: action_confirm_order_details
+      - intent: affirm
       - action: action_create_order
-  - rule: Payment success
+  - rule: Confirm order details / deny
     condition:
       - slot_was_set:
           - chat_type: private
     steps:
-      - intent: EXTERNAL_payment_success
-      - action: action_payment_success
-  - rule: Payment failure
+      - intent: EXTERNAL_confirm_order_details
+      - action: action_confirm_order_details
+      - intent: deny
+      - action: action_change_order
+  - rule: Payment callback
     condition:
       - slot_was_set:
           - chat_type: private
     steps:
-      - intent: EXTERNAL_payment_failure
-      - action: action_payment_failure
+      - intent: EXTERNAL_payment_callback
+      - action: action_payment_callback

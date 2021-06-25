@@ -1,7 +1,7 @@
 version: "2.0"
 
 nlu:
-  - intent: EXTERNAL_payment_success
+  - intent: EXTERNAL_payment_callback
     metadata:
       keyword_intent: true
       match_condition: "exact"

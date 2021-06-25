@@ -12,3 +12,4 @@ pipeline:
 # https://rasa.com/docs/rasa/core/policies/
 policies:
   - name: RulePolicy
+    restrict_rules: false

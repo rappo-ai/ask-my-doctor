@@ -10,7 +10,7 @@ nlu:
       match_condition: "exact"
     examples: |
       - /menu
-  - intent: EXTERNAL_new_appointment_request
+  - intent: EXTERNAL_create_appointment
     metadata:
       keyword_intent: true
       match_condition: "exact"
