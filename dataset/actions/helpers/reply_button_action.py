@@ -8,13 +8,12 @@
 from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
-from rasa_sdk.events import ActionExecuted, UserUttered
 from rasa_sdk.executor import CollectingDispatcher
 
 
-class ActionCreateAppointment(Action):
+class ReplyButtonAction(Action):
     def name(self) -> Text:
-        return "action_create_appointment"
+        return "reply_button_action"
 
     def run(
         self,
@@ -23,11 +22,7 @@ class ActionCreateAppointment(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
-        return [
-            ActionExecuted("action_listen"),
-            UserUttered(
-                text="/EXTERNAL_new_patient",
-                parse_data={"intent": {"name": "EXTERNAL_new_patient"}},
-                input_channel="telegram",
-            ),
-        ]
+        json_message = {"text": self.text, "reply_markup": self.reply_markup}
+        dispatcher.utter_message(json_message=json_message)
+
+        return []
