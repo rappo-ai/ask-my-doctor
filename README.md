@@ -41,7 +41,7 @@ In VSCode 'Run and Debug' tab, select 'rasa run' and click Start Debugging.
 
 Note:
 - The actions server does not launch automatically with the rasa server. You need to manually start the action server as well. Your bot will still work but actions will not execute.
-- To debug incoming messages from Telegram to Rasa, you can set a breakpoint in ".venv/lib/python*/site-packages/rasa/core/channels/telegram.py" under the server route "/webhook".
+- To debug incoming messages from Telegram to Rasa, you can set a breakpoint in "dataset/connectors/telegram.py" under the server route "/webhook".
 
 ### Launch Rasa actions server
 In VSCode 'Run and Debug' tab, select 'rasa run actions' and click Start Debugging.
