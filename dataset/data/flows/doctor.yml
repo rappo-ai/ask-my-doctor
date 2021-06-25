@@ -1,8 +1,12 @@
 version: "2.0"
 
 actions:
+  - action_confirm_doctor_signup
   - action_doctor_signup
   - action_reset_doctor_signup_form
+  - action_ask_doctor_signup__speciality
+  - action_ask_doctor_signup__availability
+  - action_ask_doctor_signup__consultation_fee
 
 forms:
   doctor_signup_form:
@@ -10,8 +14,6 @@ forms:
       doctor_signup__name:
         - type: from_text
       doctor_signup__number:
-        - type: from_text
-      doctor_signup__google_id:
         - type: from_text
       doctor_signup__speciality:
         - type: from_text
@@ -35,35 +37,13 @@ responses:
         Thank you for your interst in signing up. We need a few details from you
         before we proceed.
   utter_ask_doctor_signup__name:
-    - text: "What is your full name?"
+    - text: "What is your name as mentioned in your doctor's id? Please include the title Dr."
   utter_ask_doctor_signup__number:
     - text: "What is your phone number?"
-  utter_ask_doctor_signup__google_id:
-    - text: "Please connect your Google ID for us to be able to schedule meetings on your behalf."
-      buttons:
-        - title: Connect Google ID
-      button_type: reply
-  utter_ask_doctor_signup__speciality:
-    - text: "What is your speciality?"
-      buttons:
-        - title: General Surgeon
-        - title: Paediatrician
-        - title: Gynaecologist
-        - title: Psychiatrist
-        - title: Dermatologist
-      button_type: reply
-  utter_ask_doctor_signup__availability:
-    - text: "What is your availability?"
-      buttons:
-        - title: Weekends
-        - title: Weekdays
-      button_type: reply
-  utter_ask_doctor_signup__consultation_fee:
-    - text: "What is your consultation fee? Please note we charge a 20% commission on the consultation fee."
   utter_ask_doctor_signup__bank_account_number:
     - text: "What is your bank account number?"
   utter_ask_doctor_signup__bank_account_name:
-    - text: "What is your full name as in your bank account?"
+    - text: "What is your full name as linked to your bank account?"
   utter_ask_doctor_signup__bank_account_ifsc:
     - text: "What is your bank account IFSC code?"
 
@@ -88,4 +68,11 @@ rules:
       - active_loop: null
       - slot_was_set:
           - requested_slot: null
+      - action: action_confirm_doctor_signup
+  - rule: Doctor signup Google auth
+    condition:
+      - slot_was_set:
+          - chat_type: private
+    steps:
+      - intent: EXTERNAL_doctor_signup_google_authenticated
       - action: action_doctor_signup

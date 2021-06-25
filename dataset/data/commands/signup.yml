@@ -7,3 +7,9 @@ nlu:
       match_condition: "exact"
     examples: |
       - /signup
+  - intent: EXTERNAL_doctor_signup_google_authenticated
+    metadata:
+      keyword_intent: true
+      match_condition: "exact"
+    examples: |
+      - /google

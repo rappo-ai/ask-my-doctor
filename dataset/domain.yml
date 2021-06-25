@@ -22,8 +22,14 @@ actions:
   - action_reset_appointment_form
   - validate_appointment_form
 
+  - action_confirm_doctor_signup
   - action_doctor_signup
   - action_reset_doctor_signup_form
+  - action_ask_doctor_signup__speciality
+  - action_ask_doctor_signup__availability
+  - action_ask_doctor_signup__consultation_fee
+
+  - action_set_admin_group_id
 
 forms:
   appointment_form:
@@ -52,8 +58,6 @@ forms:
         - type: from_text
       doctor_signup__number:
         - type: from_text
-      doctor_signup__google_id:
-        - type: from_text
       doctor_signup__speciality:
         - type: from_text
       doctor_signup__availability:
@@ -80,6 +84,8 @@ slots:
       - channel
   first_name:
     type: text
+  is_admin:
+    type: bool
   appointment__speciality:
     type: text
   appointment__doctor:
@@ -99,8 +105,6 @@ slots:
   doctor_signup__name:
     type: text
   doctor_signup__number:
-    type: text
-  doctor_signup__google_id:
     type: text
   doctor_signup__speciality:
     type: text

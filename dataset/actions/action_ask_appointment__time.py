@@ -4,7 +4,7 @@ from actions.helpers.reply_button_action import ReplyButtonAction
 from actions.utils.common import get_appointment_time_slots
 
 
-class ActionAskAppointmentSpeciality(ReplyButtonAction):
+class ActionAskAppointmentTime(ReplyButtonAction):
     def name(self) -> Text:
         return "action_ask_appointment__time"
 
