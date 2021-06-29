@@ -3,7 +3,7 @@ from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.common import set_patient_details
+from actions.utils.patient import add_patient, get_patient_for_user_id, update_patient
 
 
 class ActionSetPatient(Action):
@@ -17,9 +17,15 @@ class ActionSetPatient(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
-        name = tracker.get_slot("patient__name")
-        age = tracker.get_slot("patient__age")
-        phone = tracker.get_slot("patient__phone_number")
-        email = tracker.get_slot("patient__email")
-        set_patient_details(name=name, age=age, phone=phone, email=email)
+        user_id = tracker.sender_id
+        patient = get_patient_for_user_id(user_id) or {}
+        patient["name"] = tracker.get_slot("patient__name")
+        patient["age"] = tracker.get_slot("patient__age")
+        patient["phone"] = tracker.get_slot("patient__phone_number")
+        patient["email"] = tracker.get_slot("patient__email")
+        patient["user_id"] = user_id
+        if patient.get("_id"):
+            update_patient(patient)
+        else:
+            add_patient(patient)
         return []

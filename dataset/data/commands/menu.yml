@@ -10,12 +10,12 @@ nlu:
       match_condition: "exact"
     examples: |
       - /menu
-  - intent: EXTERNAL_create_appointment
+  - intent: EXTERNAL_create_search
     metadata:
       keyword_intent: true
       match_condition: "exact"
     examples: |
-      - Book Appointment
+      - Browse Doctors
   - intent: EXTERNAL_contact_support
     metadata:
       keyword_intent: true
@@ -28,7 +28,7 @@ responses:
     - text: |
         What would you like to do?
       buttons:
-        - title: Book Appointment
+        - title: Browse Doctors
         - title: Contact Support
       button_type: reply
 

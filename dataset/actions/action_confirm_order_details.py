@@ -3,10 +3,8 @@ from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.common import (
-    print_appointment_details,
-    print_patient_details,
-)
+from actions.utils.cart import get_cart, print_cart
+from actions.utils.patient import get_patient_for_user_id, print_patient
 
 
 class ActionConfirmOrderDetails(Action):
@@ -20,12 +18,15 @@ class ActionConfirmOrderDetails(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
+        user_id = tracker.sender_id
+        cart = get_cart(user_id)
+        patient = get_patient_for_user_id(user_id)
         text = (
             f"You have requested for an appointment with the following details:\n\n"
-            + print_appointment_details()
+            + print_cart(cart)
             + "\n"
-            + f"Patient details\n\n"
-            + print_patient_details()
+            + f"Patient Details\n\n"
+            + print_patient(patient)
             + "\n\n"
             + f"Is this correct?"
         )

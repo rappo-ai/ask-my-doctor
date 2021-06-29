@@ -1,16 +1,24 @@
 from copy import deepcopy
+from datetime import datetime, timedelta
 import logging
 from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.common import (
-    create_meeting_link,
-    get_admin_group_id,
-    print_appointment_details,
-    print_patient_details,
-    print_payment_details,
+from actions.utils.admin import get_admin_group_id, get_meeting_duration_in_minutes
+from actions.utils.cart import print_cart
+from actions.utils.doctor import get_doctor
+from actions.utils.json import get_json_key
+from actions.utils.meet import create_meeting
+from actions.utils.order import (
+    get_order,
+    update_order,
+)
+from actions.utils.patient import print_patient
+from actions.utils.payment_status import (
+    get_order_id_for_payment_status,
+    print_payment_status,
 )
 
 logger = logging.getLogger(__name__)
@@ -28,36 +36,58 @@ class ActionPaymentCallback(Action):
     ) -> List[Dict[Text, Any]]:
 
         metadata = tracker.latest_message.get("metadata", {})
-        payment_info: Dict = metadata.get(
-            "payment_info",
+        payment_status: Dict = metadata.get(
+            "payment_status",
             {
                 "status": "complete",
                 "amount": 300,
                 "transaction_id": "1234567890",
                 "date": "July 1st, 2021 5:15 PM IST",
                 "mode": "Credit Card",
+                "order_id": 1,
             },
         )
-        if payment_info.get("status") == "complete":
-            order_id = get_order_id_for_payment(payment_info)
-            meeting_link: Text = create_meeting_link()
-            update_order(order_id, meeting_link=meeting_link, payment_info=payment_info)
+
+        order_id = get_order_id_for_payment_status(payment_status)
+        update_order(order_id, payment_status=payment_status)
+
+        if payment_status.get("status") == "complete":
+            order = get_order(order_id)
+            cart = order["cart"]
+            patient = get_json_key(order, "metadata.patient", {})
+            cart_item = next(iter(cart["items"] or []), {})
+            doctor = get_doctor(cart_item["doctor_id"])
+            doctor_chat_id = doctor.get("user_id")
+
+            credentials = doctor.get("credentials")
+            guest_emails = [patient.get("email")]
+            start_date = datetime.fromisoformat(cart_item["appointment_datetime"])
+            end_date = start_date + timedelta(minutes=get_meeting_duration_in_minutes())
+            meeting: Dict = create_meeting(
+                credentials=credentials,
+                guest_emails=guest_emails,
+                start_date=start_date,
+                end_date=end_date,
+            )
+
+            update_order(order_id, meeting=meeting)
+
             text = (
                 f"Booking Confirmation\n"
                 + "\n"
                 + "Appoinment Details\n"
                 + "\n"
-                + print_appointment_details(order_id)
+                + print_cart(cart)
                 + "\n"
                 + f"Patient details\n"
                 + "\n"
-                + print_patient_details(order_id)
+                + print_patient(patient)
                 + "\n"
                 + f"Payment Details\n"
                 + "\n"
-                + print_payment_details(order_id)
+                + print_payment_status(payment_status)
                 + "\n"
-                + f"Your appointment has been scheduled. Please join this meeting link at the date and time of the appointment:\n{meeting_link}\n\nIf you need any help with this booking, please click /help."
+                + f"Your appointment has been scheduled. Please join this meeting link at the date and time of the appointment:\n{meeting.get('link')}\n\nIf you need any help with this booking, please click /help."
             )
 
             json_message = {"text": text}
@@ -69,6 +99,13 @@ class ActionPaymentCallback(Action):
                 dispatcher.utter_message(json_message=admin_json_message)
             else:
                 logger.warn("Admin group id not set. Use /admin or /groupid.")
+
+            if doctor_chat_id:
+                doctor_json_message = deepcopy(json_message)
+                doctor_json_message["chat_id"] = doctor_chat_id
+                dispatcher.utter_message(json_message=doctor_json_message)
+            else:
+                logger.warn("Doctor chat id not set.")
         else:
             json_message = {"text": "Payment error"}
             dispatcher.utter_message(json_message=json_message)

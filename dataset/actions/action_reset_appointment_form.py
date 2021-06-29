@@ -16,9 +16,12 @@ class ActionResetAppointmentForm(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
+        entities = tracker.latest_message.get("entities", {})
+        doctor_id = next(
+            iter([e.get("value") for e in entities if e.get("entity") == "doctor_id"])
+        )
         return [
-            SlotSet("appointment__speciality", None),
-            SlotSet("appointment__doctor", None),
+            SlotSet("appointment__doctor_id", doctor_id),
             SlotSet("appointment__date", None),
             SlotSet("appointment__time", None),
         ]

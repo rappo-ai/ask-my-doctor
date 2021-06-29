@@ -4,7 +4,7 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.events import ActionExecuted, UserUttered
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.common import get_patient_details
+from actions.utils.patient import get_patient_for_user_id, print_patient
 
 
 class ActionConfirmPatient(Action):
@@ -20,14 +20,13 @@ class ActionConfirmPatient(Action):
 
         events: List[Dict[Text, Any]] = []
 
-        patient_details: Dict = get_patient_details()
-        if patient_details:
+        user_id = tracker.sender_id
+        patient: Dict = get_patient_for_user_id(user_id)
+        if patient:
             text = (
                 f"Patient Details\n\n"
-                + f"Name: {patient_details.get('name', '')}\n"
-                + f"Age: {patient_details.get('age', '')}\n"
-                + f"Phone: {patient_details.get('phone', '')}\n"
-                + f"Email: {patient_details.get('email', '')}\n\n"
+                + print_patient(patient)
+                + "\n"
                 + f"Is this correct?"
             )
             reply_markup = {

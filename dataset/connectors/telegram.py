@@ -116,15 +116,26 @@ class TelegramOutput(TeleBot, OutputChannel):
         reply_markup_json: Dict = json_message.pop("reply_markup", None)
         reply_markup = ReplyKeyboardRemove()
         if reply_markup_json:
-            reply_markup = ReplyKeyboardMarkup(
-                resize_keyboard=reply_markup_json.get("resize_keyboard", False),
-                one_time_keyboard=reply_markup_json.get("one_time_keyboard", True),
-            )
-            [
-                reply_markup.add(KeyboardButton(col))
-                for row in reply_markup_json.get("keyboard", [])
-                for col in row
-            ]
+            keyboard_type = reply_markup_json.get("type", "reply")
+            if keyboard_type == "reply":
+                reply_markup = ReplyKeyboardMarkup(
+                    resize_keyboard=reply_markup_json.get("resize_keyboard", False),
+                    one_time_keyboard=reply_markup_json.get("one_time_keyboard", True),
+                )
+                [
+                    reply_markup.add(KeyboardButton(col))
+                    for row in reply_markup_json.get("keyboard", [])
+                    for col in row
+                ]
+            elif keyboard_type == "inline":
+                reply_markup = InlineKeyboardMarkup()
+                [
+                    reply_markup.add(
+                        InlineKeyboardButton(col["title"], callback_data=col["payload"])
+                    )
+                    for row in reply_markup_json.get("keyboard", [])
+                    for col in row
+                ]
 
         send_functions = {
             ("text",): "send_message",
@@ -240,7 +251,7 @@ class TelegramInput(InputChannel):
         @telegram_webhook.route("/webhook", methods=["GET", "POST"])
         async def message(request: Request) -> Any:
             if request.method == "POST":
-
+                disable_nlu_bypass = True
                 request_dict = request.json
                 update = Update.de_json(request_dict)
                 if not out_channel.get_me().username == self.verify:
@@ -250,6 +261,7 @@ class TelegramInput(InputChannel):
                 if self._is_button(update):
                     msg = update.callback_query.message
                     text = update.callback_query.data
+                    disable_nlu_bypass = False
                 elif self._is_edited_message(update):
                     msg = update.edited_message
                     text = update.edited_message.text
@@ -293,14 +305,12 @@ class TelegramInput(InputChannel):
                                 sender_id,
                                 input_channel=self.name(),
                                 metadata=metadata,
-                                disable_nlu_bypass=True,
+                                disable_nlu_bypass=disable_nlu_bypass,
                             )
                         )
                 except Exception as e:
                     logger.error(f"Exception when trying to handle message.{e}")
                     logger.debug(e, exc_info=True)
-                    if self.debug_mode:
-                        raise
                     pass
 
                 return response.text("success")

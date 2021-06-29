@@ -1,3 +1,4 @@
+from pymongo.database import Database
 from typing import Optional, Text
 
 
@@ -16,7 +17,6 @@ class MongoDataStore:
         password: Optional[Text] = None,
         auth_source: Optional[Text] = "admin",
     ) -> None:
-        from pymongo.database import Database
         from pymongo import MongoClient
 
         self.client = MongoClient(
@@ -27,3 +27,10 @@ class MongoDataStore:
         )
 
         self.db = Database(self.client, db)
+
+
+_db_store = MongoDataStore()
+
+
+def db() -> Database:
+    return _db_store.db
