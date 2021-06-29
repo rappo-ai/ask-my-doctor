@@ -1,6 +1,7 @@
 from copy import deepcopy
 from typing import Dict, Text
 
+from actions.utils.admin import get_advance_appointment_days
 from actions.utils.date import format_time_slots_for_date, get_upcoming_availability
 
 doctors = [
@@ -108,7 +109,7 @@ def get_upcoming_appointment_dates(doctor_id):
     doctor_time_slots = get_doctor_time_slots(doctor_id)
     if len(doctor_time_slots) != 7:
         doctor_time_slots = ["" for i in range(7)]
-    return get_upcoming_availability(doctor_time_slots, 7)
+    return get_upcoming_availability(doctor_time_slots, get_advance_appointment_days())
 
 
 def print_doctor_signup_form(doctor: Dict):
