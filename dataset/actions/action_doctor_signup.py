@@ -12,6 +12,7 @@ from actions.utils.doctor import (
     update_doctor,
     print_doctor_signup_form,
 )
+from actions.utils.sheets import update_doctor_in_spreadsheet
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +46,8 @@ class ActionNewDoctorSignup(Action):
             doctor["onboarding_status"] = "signup"
             doctor["credentials"] = credentials
             update_doctor(doctor)
+
+            update_doctor_in_spreadsheet(doctor)
 
             text = (
                 f"Thank you for your interest in Ask My Doctor. We have received your details and will review it and get back to you within 48 hours.\n"
