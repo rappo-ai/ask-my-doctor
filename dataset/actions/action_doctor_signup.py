@@ -27,11 +27,18 @@ class ActionNewDoctorSignup(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
-        metadata = tracker.latest_message.get("metadata", {})
-
-        # tbdemily - get credentials & doctor_id from the incoming webhook
-        credentials = metadata.get("credentials", {})
-        user_id = metadata.get("user_id", tracker.sender_id)
+        entities = tracker.latest_message.get("entities", [])
+        # #tbdemily - add webhook to trigger intent /EXTERNAL_doctor_signup_google_authenticated
+        # with "credentials" entity in dataset/connectors/telegram.py; The syntax will be
+        # /EXTERNAL_doctor_signup_google_authenticated{"credentials": "value"}; Not sure if value
+        # can be a JSON object, can convert JSON to string if not supported
+        credentials = next(
+            iter(
+                [e.get("value") for e in entities if e.get("entity") == "credentials"]
+            ),
+            {},
+        )
+        user_id = tracker.sender_id
 
         doctor = get_doctor_for_user_id(user_id)
         if doctor:
