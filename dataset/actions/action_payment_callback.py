@@ -35,9 +35,19 @@ class ActionPaymentCallback(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
-        metadata = tracker.latest_message.get("metadata", {})
-        payment_status: Dict = metadata.get(
-            "payment_status",
+        entities = tracker.latest_message.get("entities", [])
+        # #tbdnikhil - set the payment status object in webhook as an entity for intent EXTERNAL_payment_callback.
+        # You can trigger this intent with entity from webhook using /EXTERNAL_payment_callback{"payment_status": "<PAYMENT_STATUS_DATA>"}
+        # Not sure if you can send JSON directly as the value of "payment_status"; if JSON doesn't work you can
+        # send a serialized JSON string and deserialize it here.
+        payment_status: Dict = next(
+            iter(
+                [
+                    e.get("value")
+                    for e in entities
+                    if e.get("entity") == "payment_status"
+                ]
+            ),
             {
                 "status": "complete",
                 "amount": 300,

@@ -37,6 +37,8 @@ class ActionCreateOrder(Action):
 
         patient: Dict = get_patient_for_user_id(user_id)
 
+        # #tbdnikhil - create Razorpay payment link, add / remove fields as needed; set the callback_url to
+        # your webhook added in dataset/connectors/telegram.py. Can use get_host_url utility to get the host url.
         payment_link: Dict = create_payment_link(
             cart_amount,
             patient["name"],

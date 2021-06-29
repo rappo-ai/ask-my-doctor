@@ -32,7 +32,7 @@ class ActionNewDoctorSignup(Action):
         # with "credentials" entity in dataset/connectors/telegram.py; The syntax will be
         # /EXTERNAL_doctor_signup_google_authenticated{"credentials": "value"}; Not sure if value
         # can be a JSON object, can convert JSON to string if not supported
-        credentials = next(
+        credentials: Dict = next(
             iter(
                 [e.get("value") for e in entities if e.get("entity") == "credentials"]
             ),
