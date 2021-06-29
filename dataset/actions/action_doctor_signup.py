@@ -6,7 +6,7 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 
-from actions.utils.admin import get_admin_group_id
+from actions.utils.admin_config import get_admin_group_id
 from actions.utils.doctor import (
     get_doctor_for_user_id,
     update_doctor,

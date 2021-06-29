@@ -6,7 +6,10 @@ from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.admin import get_admin_group_id, get_meeting_duration_in_minutes
+from actions.utils.admin_config import (
+    get_admin_group_id,
+    get_meeting_duration_in_minutes,
+)
 from actions.utils.cart import print_cart
 from actions.utils.doctor import get_doctor
 from actions.utils.json import get_json_key

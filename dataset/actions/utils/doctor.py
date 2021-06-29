@@ -1,7 +1,7 @@
 from copy import deepcopy
 from typing import Dict, Text
 
-from actions.utils.admin import get_advance_appointment_days
+from actions.utils.admin_config import get_advance_appointment_days
 from actions.utils.date import format_time_slots_for_date, get_upcoming_availability
 
 doctors = [
