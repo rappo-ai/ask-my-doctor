@@ -1,22 +1,16 @@
 version: "2.0"
 
 actions:
-  - action_set_appointment
-  - action_on_appointment_set
-  - action_ask_appointment__speciality
-  - action_ask_appointment__doctor
   - action_ask_appointment__date
   - action_ask_appointment__time
+  - action_on_appointment_set
+  - action_set_appointment
   - action_reset_appointment_form
   - validate_appointment_form
 
 forms:
   appointment_form:
     required_slots:
-      appointment__speciality:
-        - type: from_text
-      appointment__doctor:
-        - type: from_text
       appointment__date:
         - type: from_text
       appointment__time:
@@ -52,3 +46,11 @@ rules:
           - requested_slot: null
       - action: action_set_appointment
       - action: action_on_appointment_set
+
+slots:
+  appointment__date:
+    type: text
+  appointment__doctor_id:
+    type: text
+  appointment__time:
+    type: text

@@ -1,9 +1,9 @@
 version: "2.0"
 
 actions:
+  - action_change_order
   - action_confirm_order_details
   - action_create_order
-  - action_change_order
   - action_payment_callback
 
 intents:

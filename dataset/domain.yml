@@ -3,41 +3,43 @@ version: "2.0"
 actions:
   - action_session_start
 
-  - action_confirm_order_details
-  - action_create_order
-  - action_change_order
-  - action_payment_callback
-
-  - action_set_patient
-  - action_confirm_patient
-  - action_on_patient_set
-  - action_reset_patient_form
+  - action_ask_search__speciality
+  - action_on_search_set
+  - action_reset_search_form
+  - validate_search_form
 
   - action_set_appointment
   - action_on_appointment_set
-  - action_ask_appointment__speciality
-  - action_ask_appointment__doctor
   - action_ask_appointment__date
   - action_ask_appointment__time
   - action_reset_appointment_form
   - validate_appointment_form
 
+  - action_confirm_patient
+  - action_on_patient_set
+  - action_reset_patient_form
+  - action_set_patient
+
+  - action_change_order
+  - action_create_order
+  - action_confirm_order_details
+  - action_payment_callback
+
+  - action_ask_doctor_signup__consultation_fee
+  - action_ask_doctor_signup__speciality
   - action_confirm_doctor_signup
   - action_doctor_signup
   - action_reset_doctor_signup_form
-  - action_ask_doctor_signup__speciality
-  - action_ask_doctor_signup__availability
-  - action_ask_doctor_signup__consultation_fee
 
   - action_set_admin_group_id
 
 forms:
+  search_form:
+    required_slots:
+      search__speciality:
+        - type: from_text
   appointment_form:
     required_slots:
-      appointment__speciality:
-        - type: from_text
-      appointment__doctor:
-        - type: from_text
       appointment__date:
         - type: from_text
       appointment__time:
@@ -59,6 +61,8 @@ forms:
       doctor_signup__number:
         - type: from_text
       doctor_signup__speciality:
+        - type: from_text
+      doctor_signup__description:
         - type: from_text
       doctor_signup__availability:
         - type: from_text
@@ -86,11 +90,11 @@ slots:
     type: text
   is_admin:
     type: bool
-  appointment__speciality:
-    type: text
-  appointment__doctor:
+  search__speciality:
     type: text
   appointment__date:
+    type: text
+  appointment__doctor_id:
     type: text
   appointment__time:
     type: text
@@ -102,19 +106,21 @@ slots:
     type: text
   patient__email:
     type: text
-  doctor_signup__name:
-    type: text
-  doctor_signup__number:
-    type: text
-  doctor_signup__speciality:
-    type: text
   doctor_signup__availability:
-    type: text
-  doctor_signup__consultation_fee:
     type: text
   doctor_signup__bank_account_number:
     type: text
   doctor_signup__bank_account_name:
     type: text
   doctor_signup__bank_account_ifsc:
+    type: text
+  doctor_signup__consultation_fee:
+    type: text
+  doctor_signup__description:
+    type: text
+  doctor_signup__name:
+    type: text
+  doctor_signup__number:
+    type: text
+  doctor_signup__speciality:
     type: text
