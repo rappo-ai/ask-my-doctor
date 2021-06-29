@@ -16,7 +16,7 @@ class ActionResetAppointmentForm(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
-        entities = tracker.latest_message.get("entities", {})
+        entities = tracker.latest_message.get("entities", [])
         doctor_id = next(
             iter([e.get("value") for e in entities if e.get("entity") == "doctor_id"])
         )

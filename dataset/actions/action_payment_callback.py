@@ -6,13 +6,17 @@ from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.admin import get_admin_group_id, get_meeting_duration_in_minutes
+from actions.utils.admin_config import (
+    get_admin_group_id,
+    get_meeting_duration_in_minutes,
+)
 from actions.utils.cart import print_cart
 from actions.utils.doctor import get_doctor
 from actions.utils.json import get_json_key
 from actions.utils.meet import create_meeting
 from actions.utils.order import (
     get_order,
+    get_order_for_user_id,
     update_order,
 )
 from actions.utils.patient import print_patient
@@ -35,9 +39,19 @@ class ActionPaymentCallback(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
-        metadata = tracker.latest_message.get("metadata", {})
-        payment_status: Dict = metadata.get(
-            "payment_status",
+        entities = tracker.latest_message.get("entities", [])
+        # #tbdnikhil - set the payment status object in webhook as an entity for intent EXTERNAL_payment_callback.
+        # You can trigger this intent with entity from webhook using /EXTERNAL_payment_callback{"payment_status": "<PAYMENT_STATUS_DATA>"}
+        # Not sure if you can send JSON directly as the value of "payment_status"; if JSON doesn't work you can
+        # send a serialized JSON string and deserialize it here.
+        payment_status: Dict = next(
+            iter(
+                [
+                    e.get("value")
+                    for e in entities
+                    if e.get("entity") == "payment_status"
+                ]
+            ),
             {
                 "status": "complete",
                 "amount": 300,
@@ -52,7 +66,7 @@ class ActionPaymentCallback(Action):
         update_order(order_id, payment_status=payment_status)
 
         if payment_status.get("status") == "complete":
-            order = get_order(order_id)
+            order = get_order(order_id) or get_order_for_user_id(tracker.sender_id)
             cart = order["cart"]
             patient = get_json_key(order, "metadata.patient", {})
             cart_item = next(iter(cart["items"] or []), {})
@@ -74,6 +88,8 @@ class ActionPaymentCallback(Action):
 
             text = (
                 f"Booking Confirmation\n"
+                + "\n"
+                + f"Order #{order_id}\n"
                 + "\n"
                 + "Appoinment Details\n"
                 + "\n"

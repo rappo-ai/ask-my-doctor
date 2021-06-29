@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
@@ -33,10 +34,13 @@ class ActionCreateOrder(Action):
         doctor: Dict = get_doctor(doctor_id)
         payment_description = f"Consultation fee for {doctor.get('name', '')}"
 
-        order_id: Dict = create_order(user_id, cart)
+        order_id: Text = create_order(user_id, cart)
 
         patient: Dict = get_patient_for_user_id(user_id)
+        patient.pop("_id", None)
 
+        # #tbdnikhil - create Razorpay payment link, add / remove fields as needed; set the callback_url to
+        # your webhook added in dataset/connectors/telegram.py. Can use get_host_url utility to get the host url.
         payment_link: Dict = create_payment_link(
             cart_amount,
             patient["name"],
