@@ -24,6 +24,7 @@ from actions.utils.payment_status import (
     get_order_id_for_payment_status,
     print_payment_status,
 )
+from actions.utils.sheets import update_order_in_spreadsheet
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +67,12 @@ class ActionPaymentCallback(Action):
         update_order(order_id, payment_status=payment_status)
 
         if payment_status.get("status") == "complete":
-            order = get_order(order_id) or get_order_for_user_id(tracker.sender_id)
+            order = get_order(order_id)
+            if not order:
+                # #tbdnikhil - remove this block once payment_status callback is implemented
+                order = get_order_for_user_id(tracker.sender_id)
+                order_id = order.get("_id")
+
             cart = order["cart"]
             patient = get_json_key(order, "metadata.patient", {})
             cart_item = next(iter(cart["items"] or []), {})
@@ -85,6 +91,8 @@ class ActionPaymentCallback(Action):
             )
 
             update_order(order_id, meeting=meeting)
+
+            update_order_in_spreadsheet(get_order(order_id))
 
             text = (
                 f"Booking Confirmation\n"

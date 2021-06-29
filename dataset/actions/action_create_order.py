@@ -8,10 +8,12 @@ from actions.utils.cart import get_cart, get_cart_total, print_cart
 from actions.utils.doctor import get_doctor
 from actions.utils.order import (
     create_order,
+    get_order,
     update_order,
 )
 from actions.utils.payment_link import create_payment_link
 from actions.utils.patient import get_patient_for_user_id, print_patient
+from actions.utils.sheets import update_order_in_spreadsheet
 
 
 class ActionCreateOrder(Action):
@@ -53,6 +55,7 @@ class ActionCreateOrder(Action):
         order_metadata = {"patient": patient}
 
         update_order(order_id, payment_link=payment_link, metadata=order_metadata)
+        update_order_in_spreadsheet(get_order(order_id))
 
         text = (
             f"Order #{order_id}\n"

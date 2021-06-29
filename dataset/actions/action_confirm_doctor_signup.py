@@ -10,6 +10,7 @@ from actions.utils.doctor import (
     update_doctor,
 )
 from actions.utils.meet import get_google_auth_url
+from actions.utils.sheets import update_doctor_in_spreadsheet
 
 
 class ActionConfirmDoctorSignup(Action):
@@ -47,6 +48,7 @@ class ActionConfirmDoctorSignup(Action):
             update_doctor(doctor)
         else:
             add_doctor(doctor)
+        update_doctor_in_spreadsheet(doctor)
         text = (
             f"Doctor Signup Details\n"
             + f"\n"
