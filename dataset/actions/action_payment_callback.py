@@ -16,6 +16,7 @@ from actions.utils.json import get_json_key
 from actions.utils.meet import create_meeting
 from actions.utils.order import (
     get_order,
+    get_order_for_user_id,
     update_order,
 )
 from actions.utils.patient import print_patient
@@ -65,7 +66,7 @@ class ActionPaymentCallback(Action):
         update_order(order_id, payment_status=payment_status)
 
         if payment_status.get("status") == "complete":
-            order = get_order(order_id)
+            order = get_order(order_id) or get_order_for_user_id(tracker.sender_id)
             cart = order["cart"]
             patient = get_json_key(order, "metadata.patient", {})
             cart_item = next(iter(cart["items"] or []), {})
@@ -87,6 +88,8 @@ class ActionPaymentCallback(Action):
 
             text = (
                 f"Booking Confirmation\n"
+                + "\n"
+                + f"Order #{order_id}\n"
                 + "\n"
                 + "Appoinment Details\n"
                 + "\n"

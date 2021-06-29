@@ -11,8 +11,8 @@ class MongoDataStore:
 
     def __init__(
         self,
-        host: Optional[Text] = "mongodb://localhost:27017",
-        db: Optional[Text] = "rasa",
+        host: Optional[Text] = "mongodb://mongo:27017",
+        db: Optional[Text] = "rappo",
         username: Optional[Text] = None,
         password: Optional[Text] = None,
         auth_source: Optional[Text] = "admin",
@@ -31,6 +31,9 @@ class MongoDataStore:
 
 _db_store = MongoDataStore()
 
+db = _db_store.db
 
-def db() -> Database:
-    return _db_store.db
+
+def reset_actions_db():
+    for c in db.list_collection_names():
+        db.drop_collection(c)

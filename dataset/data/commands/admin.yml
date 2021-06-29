@@ -1,6 +1,7 @@
 version: "2.0"
 
 actions:
+  - action_reset_db
   - action_set_admin_group_id
 
 intents:
@@ -19,6 +20,12 @@ nlu:
       match_condition: "start"
     examples: |
       - /groupid
+  - intent: resetdb
+    metadata:
+      keyword_intent: true
+      match_condition: "exact"
+    examples: |
+      - /resetdb
 
 responses:
   utter_admin_menu_options:
@@ -42,3 +49,11 @@ rules:
     steps:
       - intent: groupid
       - action: action_set_admin_group_id
+  - rule: reset db
+    condition:
+      - slot_was_set:
+          - chat_type: private
+          - is_admin: true
+    steps:
+      - intent: resetdb
+      - action: action_reset_db

@@ -2,33 +2,26 @@ from datetime import datetime
 from functools import reduce
 from typing import Any, Dict, List, Text
 
+from actions.db.store import db
 from actions.utils.date import DATE_FORMAT, TIME_FORMAT
 from actions.utils.doctor import get_doctor
 
-cart: Dict = {}
-
 
 def add_cart(user_id, items: List) -> int:
-    user_cart = cart[user_id] = {}
-    user_cart["items"] = items
-    return len(cart)
-
-
-def add_to_cart(user_id, items: List):
-    user_cart: Dict = cart.get(user_id)
-    user_cart_items: List = user_cart["items"]
-    user_cart_items.extend(items)
-    return len(user_cart_items)
+    return db.cart.insert_one(
+        {
+            "user_id": user_id,
+            "items": items,
+        },
+    ).inserted_id
 
 
 def clear_cart(user_id):
-    user_cart: Dict = cart.get(user_id)
-    user_cart_items: List = user_cart["items"]
-    user_cart_items.clear()
+    db.cart.update_one({"user_id": user_id}, {"$set": {"items": []}})
 
 
 def get_cart(user_id) -> Dict[Text, Any]:
-    return cart.get(user_id)
+    return db.cart.find_one({"user_id": user_id})
 
 
 def get_cart_total(user_cart):
@@ -58,6 +51,4 @@ def print_cart(cart: Dict):
 
 
 def update_cart(user_id, items: List) -> int:
-    user_cart: Dict = cart.get(user_id)
-    user_cart["items"] = items
-    return len(user_cart["items"])
+    db.cart.update_one({"user_id": user_id}, {"$set": {"items": items}})
