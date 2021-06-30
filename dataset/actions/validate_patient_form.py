@@ -58,7 +58,10 @@ class ValidatePatientForm(FormValidationAction):
         domain: DomainDict,
     ) -> Dict[Text, Any]:
         email = str(slot_value).strip()
-        if re.search(r"^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$", email):
+        if re.search(
+            r"^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$",
+            email,
+        ):
             return {"patient__email": email}
         else:
             return {"patient__email": None}
