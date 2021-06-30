@@ -259,6 +259,7 @@ class TelegramInput(InputChannel):
                     return response.text("failed")
 
                 if self._is_button(update):
+                    out_channel.answer_callback_query(update.callback_query.id)
                     msg = update.callback_query.message
                     text = update.callback_query.data
                     disable_nlu_bypass = False
