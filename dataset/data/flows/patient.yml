@@ -5,6 +5,7 @@ actions:
   - action_on_patient_set
   - action_reset_patient_form
   - action_set_patient
+  - validate_patient_form
 
 forms:
   patient_form:

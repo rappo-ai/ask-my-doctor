@@ -17,7 +17,7 @@ class ActionAskDoctorSignupSpeciality(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
-        text = f"Please select your speciality (or enter a new one):"
+        text = f"Please select your speciality:"
         reply_markup = {
             "keyboard": [[s] for s in get_specialities()],
         }

@@ -19,6 +19,7 @@ actions:
   - action_on_patient_set
   - action_reset_patient_form
   - action_set_patient
+  - validate_patient_form
 
   - action_change_order
   - action_create_order
@@ -30,6 +31,7 @@ actions:
   - action_confirm_doctor_signup
   - action_doctor_signup
   - action_reset_doctor_signup_form
+  - validate_doctor_signup_form
 
   - action_reset_db
   - action_set_admin_group_id
