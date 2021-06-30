@@ -114,7 +114,7 @@ class ActionPaymentCallback(Action):
                 + f"Your appointment has been scheduled. Please join this meeting link at the date and time of the appointment:\n{meeting.get('link')}\n\nIf you need any help with this booking, please click /help."
             )
 
-            json_message = {"text": text}
+            json_message = {"text": text, "disable_web_page_preview": True}
             dispatcher.utter_message(json_message=json_message)
 
             if get_admin_group_id():
