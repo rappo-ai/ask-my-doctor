@@ -22,6 +22,11 @@ class ValidatePatientForm(FormValidationAction):
         if re.search(r"^[a-zA-Z.' ]+$", patient_name):
             return {"patient__name": patient_name}
         else:
+            dispatcher.utter_custom_json(
+                json_message={
+                    "text": "Name cannot contain special characters other than apostrophe or period."
+                }
+            )
             return {"patient__name": None}
 
     def validate_patient__age(
@@ -35,6 +40,9 @@ class ValidatePatientForm(FormValidationAction):
         if re.search(r"^1[0-1][0-9]$|^[1-9][0-9]$|^[0-9]$", age):
             return {"patient__age": age}
         else:
+            dispatcher.utter_custom_json(
+                json_message={"text": "Age must be a number between 0 and 120."}
+            )
             return {"patient__age": None}
 
     def validate_patient__phone_number(
@@ -48,6 +56,9 @@ class ValidatePatientForm(FormValidationAction):
         if re.search(r"^[1-9]\d{9}$", phone_number):
             return {"patient__phone_number": phone_number}
         else:
+            dispatcher.utter_custom_json(
+                json_message={"text": "Phone number must be a 10-digit mobile number."}
+            )
             return {"patient__phone_number": None}
 
     def validate_patient__email(
@@ -64,4 +75,7 @@ class ValidatePatientForm(FormValidationAction):
         ):
             return {"patient__email": email}
         else:
+            dispatcher.utter_custom_json(
+                json_message={"text": "This email id is not a valid format."}
+            )
             return {"patient__email": None}
