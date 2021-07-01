@@ -25,4 +25,4 @@ def print_patient(patient: Dict):
 
 
 def update_patient(patient: Dict):
-    db.patient.update_one({"_id": patient.get("id")}, {"$set": patient})
+    db.patient.update_one({"_id": patient.get("_id")}, {"$set": patient})

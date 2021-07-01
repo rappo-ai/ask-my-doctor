@@ -22,4 +22,5 @@ class ValidateSearchForm(FormValidationAction):
         if slot_value in get_specialities():
             return {"search__speciality": slot_value}
         else:
+            dispatcher.utter_custom_json(json_message={"text": "Invalid input."})
             return {"search__speciality": None}
