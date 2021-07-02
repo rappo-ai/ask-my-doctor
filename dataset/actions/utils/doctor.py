@@ -16,7 +16,7 @@ def lazy_init():
                     "speciality": "General Surgeon",
                     "fee": 600,
                     "description": "Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum",
-                    "photo": "https://storage.googleapis.com/ask-my-doctor-public/doctor_default_profile.jpg",
+                    "photo": "https://storage.googleapis.com/ask-my-doctor-public/stethoscope.png",
                     "time_slots": {
                         "mon": [{"start": "17:00", "end": "19:00"}],
                         "tue": [{"start": "17:00", "end": "19:00"}],
@@ -37,7 +37,7 @@ def lazy_init():
                     "speciality": "Paediatrician",
                     "fee": 400,
                     "description": "Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum",
-                    "photo": "https://storage.googleapis.com/ask-my-doctor-public/doctor_default_profile.jpg",
+                    "photo": "https://storage.googleapis.com/ask-my-doctor-public/stethoscope.png",
                     "time_slots": {
                         "mon": [],
                         "tue": [],
@@ -58,7 +58,7 @@ def lazy_init():
                     "speciality": "Gynaecologist",
                     "fee": 700,
                     "description": "Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum",
-                    "photo": "https://storage.googleapis.com/ask-my-doctor-public/doctor_default_profile.jpg",
+                    "photo": "https://storage.googleapis.com/ask-my-doctor-public/stethoscope.png",
                     "time_slots": {
                         "mon": [{"start": "17:00", "end": "19:00"}],
                         "tue": [],
