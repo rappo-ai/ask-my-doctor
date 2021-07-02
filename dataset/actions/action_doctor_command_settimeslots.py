@@ -58,7 +58,7 @@ class ActionDoctorCommandSetTimeSlots(Action):
                 usage = "/settimeslots <DOCTOR ID> <TIME SLOTS>"
             dispatcher.utter_message(
                 json_message={
-                    "text": f'The command format is incorrect. Usage:\n\n{usage}\n\nTime slots must be in the format "Mon, 09:00-13:00". You can specify multiple slots by separating them with a comma, and multiple days by separating them with a semicolon. For example "Mon, 10:00-12:00, 14:00-17:00; Tue, 10:00-12:00, 14:00-17:00".'
+                    "text": f'The command format is incorrect. Usage:\n\n{usage}\n\nTime slots must be in the format "Mon, 09:00-13:00". The minutes must be either 00, 15, 30 or 45. You can specify multiple slots by separating them with a comma, and multiple days by separating them with a semicolon. For example "Mon, 10:00-12:00, 14:00-17:00; Tue, 10:00-12:00, 14:00-17:00".'
                 }
             )
 

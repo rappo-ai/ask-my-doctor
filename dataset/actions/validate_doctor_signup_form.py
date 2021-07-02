@@ -118,7 +118,7 @@ class ValidateDoctorSignupForm(FormValidationAction):
         else:
             dispatcher.utter_message(
                 json_message={
-                    "text": 'Time slots must be in the format "Mon, 09:00-13:00". You can specify multiple slots by separating them with a comma, and multiple days by separating them with a semicolon. For example "Mon, 10:00-12:00, 14:00-17:00; Tue, 10:00-12:00, 14:00-17:00".'
+                    "text": 'Time slots must be in the format "Mon, 09:00-13:00". The minutes must be either 00, 15, 30 or 45. You can specify multiple slots by separating them with a comma, and multiple days by separating them with a semicolon. For example "Mon, 10:00-12:00, 14:00-17:00; Tue, 10:00-12:00, 14:00-17:00".'
                 }
             )
             return {"doctor_signup__time_slots": None}
