@@ -30,9 +30,10 @@ class ActionConfirmDoctorSignup(Action):
         doctor["onboarding_status"] = "form"
         doctor["name"] = tracker.get_slot("doctor_signup__name")
         doctor["phone_number"] = tracker.get_slot("doctor_signup__number")
+        doctor["photo"] = tracker.get_slot("doctor_signup__photo")
         doctor["speciality"] = tracker.get_slot("doctor_signup__speciality")
         doctor["description"] = tracker.get_slot("doctor_signup__description")
-        doctor["availability"] = tracker.get_slot("doctor_signup__availability")
+        doctor["time_slots"] = tracker.get_slot("doctor_signup__time_slots")
         doctor["fee"] = int(tracker.get_slot("doctor_signup__consultation_fee"))
         doctor["bank_account_number"] = tracker.get_slot(
             "doctor_signup__bank_account_number"
@@ -49,7 +50,7 @@ class ActionConfirmDoctorSignup(Action):
         else:
             add_doctor(doctor)
         update_doctor_in_spreadsheet(doctor)
-        text = (
+        caption = (
             f"Doctor Signup Details\n"
             + f"\n"
             + print_doctor_signup_form(doctor)
@@ -58,6 +59,6 @@ class ActionConfirmDoctorSignup(Action):
             + f"\n"
             + "Please click /signup to make any changes to your details."
         )
-        json_message = {"text": text}
+        json_message = {"photo": doctor.get("photo"), "caption": caption}
         dispatcher.utter_message(json_message=json_message)
         return []

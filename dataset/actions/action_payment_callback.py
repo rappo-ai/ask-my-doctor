@@ -59,20 +59,19 @@ class ActionPaymentCallback(Action):
                 "transaction_id": "1234567890",
                 "date": "July 1st, 2021 5:15 PM IST",
                 "mode": "Credit Card",
-                "order_id": 1,
+                "order_id": "000000000000000000000000",
             },
         )
 
         order_id = get_order_id_for_payment_status(payment_status)
+        order = get_order(order_id)
+        if not order:
+            # #tbdnikhil - remove this block once payment_status callback is implemented
+            order = get_order_for_user_id(tracker.sender_id)
+            order_id = order.get("_id")
         update_order(order_id, payment_status=payment_status)
 
         if payment_status.get("status") == "complete":
-            order = get_order(order_id)
-            if not order:
-                # #tbdnikhil - remove this block once payment_status callback is implemented
-                order = get_order_for_user_id(tracker.sender_id)
-                order_id = order.get("_id")
-
             cart = order["cart"]
             patient = get_json_key(order, "metadata.patient", {})
             cart_item = next(iter(cart["items"] or []), {})

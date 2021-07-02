@@ -6,9 +6,9 @@ from rasa_sdk.executor import CollectingDispatcher
 from actions.db.store import reset_actions_db
 
 
-class ActionResetDB(Action):
+class ActionAdminCommandResetDB(Action):
     def name(self) -> Text:
-        return "action_reset_db"
+        return "action_admin_command_resetdb"
 
     def run(
         self,

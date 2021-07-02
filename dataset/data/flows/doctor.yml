@@ -16,11 +16,13 @@ forms:
         - type: from_text
       doctor_signup__number:
         - type: from_text
+      doctor_signup__photo:
+        - type: from_text
       doctor_signup__speciality:
         - type: from_text
       doctor_signup__description:
         - type: from_text
-      doctor_signup__availability:
+      doctor_signup__time_slots:
         - type: from_text
       doctor_signup__consultation_fee:
         - type: from_text
@@ -39,20 +41,22 @@ responses:
     - text: >
         Thank you for your interest in signing up. We need a few details from you
         before we proceed.
-  utter_ask_doctor_signup__availability:
-    - text: "What is your availability to take appointments on Ask My Doctor? Please mention the days of the week and the time slots you are available."
-  utter_ask_doctor_signup__description:
-    - text: "Please share a brief description of yourself (not more than 200 words)."
-  utter_ask_doctor_signup__name:
-    - text: "What is your name as mentioned in your doctor's id? Please include the title Dr."
-  utter_ask_doctor_signup__number:
-    - text: "What is your phone number?"
+  utter_ask_doctor_signup__bank_account_ifsc:
+    - text: "What is your bank account IFSC code?"
   utter_ask_doctor_signup__bank_account_number:
     - text: "What is your bank account number?"
   utter_ask_doctor_signup__bank_account_name:
     - text: "What is your full name as linked to your bank account?"
-  utter_ask_doctor_signup__bank_account_ifsc:
-    - text: "What is your bank account IFSC code?"
+  utter_ask_doctor_signup__description:
+    - text: "Please share a brief description of yourself (not more than 200 words)."
+  utter_ask_doctor_signup__name:
+    - text: "What is your name as mentioned in your doctor's id?"
+  utter_ask_doctor_signup__number:
+    - text: "What is your phone number?"
+  utter_ask_doctor_signup__photo:
+    - text: "Please send a photo to use as your profile picture."
+  utter_ask_doctor_signup__time_slots:
+    - text: 'What is your availability to take appointments on Ask My Doctor? For example "Mon, 10:00-13:00, 15:00-18:00; Tue, 11:00-17:00".'
 
 rules:
   - rule: Start new doctor signup form
@@ -85,8 +89,6 @@ rules:
       - action: action_doctor_signup
 
 slots:
-  doctor_signup__availability:
-    type: text
   doctor_signup__bank_account_number:
     type: text
   doctor_signup__bank_account_name:
@@ -101,5 +103,9 @@ slots:
     type: text
   doctor_signup__number:
     type: text
+  doctor_signup__photo:
+    type: text
   doctor_signup__speciality:
+    type: text
+  doctor_signup__time_slots:
     type: text

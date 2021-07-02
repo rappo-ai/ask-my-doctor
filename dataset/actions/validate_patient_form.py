@@ -6,6 +6,13 @@ from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.forms import FormValidationAction
 from rasa_sdk.types import DomainDict
 
+from actions.utils.validate import (
+    validate_age,
+    validate_email,
+    validate_name,
+    validate_phone_number,
+)
+
 
 class ValidatePatientForm(FormValidationAction):
     def name(self) -> Text:
@@ -18,11 +25,11 @@ class ValidatePatientForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        patient_name = str(slot_value).strip()
-        if re.search(r"^[a-zA-Z.' ]+$", patient_name):
+        patient_name = validate_name(slot_value)
+        if patient_name:
             return {"patient__name": patient_name}
         else:
-            dispatcher.utter_custom_json(
+            dispatcher.utter_message(
                 json_message={
                     "text": "Name cannot contain special characters other than apostrophe or period."
                 }
@@ -36,11 +43,11 @@ class ValidatePatientForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        age = str(slot_value).strip()
-        if re.search(r"^1[0-1][0-9]$|^[1-9][0-9]$|^[0-9]$", age):
+        age = validate_age(slot_value)
+        if age:
             return {"patient__age": age}
         else:
-            dispatcher.utter_custom_json(
+            dispatcher.utter_message(
                 json_message={"text": "Age must be a number between 0 and 120."}
             )
             return {"patient__age": None}
@@ -52,11 +59,11 @@ class ValidatePatientForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        phone_number = str(slot_value).strip()
-        if re.search(r"^[1-9]\d{9}$", phone_number):
+        phone_number = validate_phone_number(slot_value)
+        if phone_number:
             return {"patient__phone_number": phone_number}
         else:
-            dispatcher.utter_custom_json(
+            dispatcher.utter_message(
                 json_message={"text": "Phone number must be a 10-digit mobile number."}
             )
             return {"patient__phone_number": None}
@@ -68,14 +75,11 @@ class ValidatePatientForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        email = str(slot_value).strip()
-        if re.search(
-            r"^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$",
-            email,
-        ):
+        email = validate_email(slot_value)
+        if email:
             return {"patient__email": email}
         else:
-            dispatcher.utter_custom_json(
+            dispatcher.utter_message(
                 json_message={"text": "This email id is not a valid format."}
             )
             return {"patient__email": None}

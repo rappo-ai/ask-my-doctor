@@ -18,7 +18,7 @@ class ActionResetAppointmentForm(Action):
 
         entities = tracker.latest_message.get("entities", [])
         doctor_id = next(
-            iter([e.get("value") for e in entities if e.get("entity") == "doctor_id"])
+            iter([e.get("value") for e in entities if e.get("entity") == "d_id"])
         )
         return [
             SlotSet("appointment__doctor_id", doctor_id),

@@ -33,8 +33,22 @@ actions:
   - action_reset_doctor_signup_form
   - validate_doctor_signup_form
 
-  - action_reset_db
-  - action_set_admin_group_id
+  - action_admin_command_addspeciality
+  - action_admin_command_approve
+  - action_admin_command_deletespeciality
+  - action_admin_command_groupid
+  - action_admin_command_reject
+  - action_admin_command_resetdb
+
+  - action_doctor_command_activate
+  - action_doctor_command_deactivate
+  - action_doctor_command_setdescription
+  - action_doctor_command_setfee
+  - action_doctor_command_setname
+  - action_doctor_command_setphonenumber
+  - action_doctor_command_setphoto
+  - action_doctor_command_setspeciality
+  - action_doctor_command_settimeslots
 
 forms:
   search_form:
@@ -63,11 +77,13 @@ forms:
         - type: from_text
       doctor_signup__number:
         - type: from_text
+      doctor_signup__photo:
+        - type: from_text
       doctor_signup__speciality:
         - type: from_text
       doctor_signup__description:
         - type: from_text
-      doctor_signup__availability:
+      doctor_signup__time_slots:
         - type: from_text
       doctor_signup__consultation_fee:
         - type: from_text
@@ -109,8 +125,6 @@ slots:
     type: text
   patient__email:
     type: text
-  doctor_signup__availability:
-    type: text
   doctor_signup__bank_account_number:
     type: text
   doctor_signup__bank_account_name:
@@ -125,5 +139,9 @@ slots:
     type: text
   doctor_signup__number:
     type: text
+  doctor_signup__photo:
+    type: text
   doctor_signup__speciality:
+    type: text
+  doctor_signup__time_slots:
     type: text

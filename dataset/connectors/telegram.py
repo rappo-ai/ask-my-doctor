@@ -1,3 +1,4 @@
+import json
 import logging
 from copy import deepcopy
 from sanic import Blueprint, response
@@ -213,12 +214,16 @@ class TelegramInput(InputChannel):
         self.debug_mode = debug_mode
 
     @staticmethod
-    def _is_location(message: Message) -> bool:
-        return message and (message.location is not None)
+    def _is_text_message(message: Message) -> bool:
+        return message and (message.text is not None)
 
     @staticmethod
-    def _is_user_message(message: Message) -> bool:
-        return message and (message.text is not None)
+    def _is_photo_message(message: Message) -> bool:
+        return message and (message.photo is not None)
+
+    @staticmethod
+    def _is_location_message(message: Message) -> bool:
+        return message and (message.location is not None)
 
     @staticmethod
     def _is_edited_message(message: Update) -> bool:
@@ -264,13 +269,17 @@ class TelegramInput(InputChannel):
                     text = update.callback_query.data
                     disable_nlu_bypass = False
                 elif self._is_edited_message(update):
-                    msg = update.edited_message
-                    text = update.edited_message.text
+                    # skip edited messages for now
+                    # msg = update.edited_message
+                    # text = update.edited_message.text
+                    return response.text("success")
                 else:
                     msg = update.message
-                    if self._is_user_message(msg):
+                    if self._is_text_message(msg):
                         text = msg.text.replace("/bot", "")
-                    elif self._is_location(msg):
+                    elif self._is_photo_message(msg):
+                        text = json.dumps(request_dict)
+                    elif self._is_location_message(msg):
                         text = '{{"lng":{0}, "lat":{1}}}'.format(
                             msg.location.longitude, msg.location.latitude
                         )
