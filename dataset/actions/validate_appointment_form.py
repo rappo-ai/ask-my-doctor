@@ -27,7 +27,7 @@ class ValidateAppointmentForm(FormValidationAction):
         if slot_value in upcoming_dates:
             return {"appointment__date": slot_value}
         else:
-            dispatcher.utter_custom_json(json_message={"text": "Invalid input."})
+            dispatcher.utter_message(json_message={"text": "Invalid input."})
             return {"appointment__date": None}
 
     def validate_appointment__time(
@@ -43,5 +43,5 @@ class ValidateAppointmentForm(FormValidationAction):
         if slot_value in availaible_time_slots:
             return {"appointment__time": slot_value}
         else:
-            dispatcher.utter_custom_json(json_message={"text": "Invalid input."})
+            dispatcher.utter_message(json_message={"text": "Invalid input."})
             return {"appointment__time": None}

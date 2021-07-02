@@ -1,3 +1,4 @@
+from bson.objectid import ObjectId
 from typing import Dict, Text
 
 from actions.db.store import db
@@ -8,7 +9,7 @@ def add_patient(patient: Dict):
 
 
 def get_patient(id: Text):
-    return db.patient.find_one({"_id": id})
+    return db.patient.find_one({"_id": ObjectId(id)})
 
 
 def get_patient_for_user_id(user_id):

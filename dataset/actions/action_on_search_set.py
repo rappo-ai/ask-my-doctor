@@ -27,15 +27,19 @@ class ActionOnSearchSet(Action):
                     [
                         {
                             "title": "Book",
-                            "payload": f"/EXTERNAL_create_appointment{{\"doctor_id\":{d['_id']}}}",
+                            "payload": f"/EXTERNAL_create_appointment{{\"d_id\":\"{str(d['_id'])}\"}}",
                         }
                     ]
                 ],
                 "type": "inline",
             }
-            text = print_doctor_summary(d)
+            caption = print_doctor_summary(d)
 
-            json_message = {"text": text, "reply_markup": reply_markup}
+            json_message = {
+                "photo": d["photo"],
+                "caption": caption,
+                "reply_markup": reply_markup,
+            }
             dispatcher.utter_message(json_message=json_message)
 
         return []

@@ -6,7 +6,17 @@ from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.forms import FormValidationAction
 from rasa_sdk.types import DomainDict
 
-from actions.utils.admin_config import get_specialities
+from actions.utils.validate import (
+    validate_bank_account_ifsc,
+    validate_bank_account_number,
+    validate_consulation_fee,
+    validate_description,
+    validate_name,
+    validate_phone_number,
+    validate_photo,
+    validate_speciality,
+    validate_time_slots,
+)
 
 
 class ValidateDoctorSignupForm(FormValidationAction):
@@ -20,11 +30,11 @@ class ValidateDoctorSignupForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        doctor_name = str(slot_value).strip()
-        if re.search(r"^[a-zA-Z.' ]+$", doctor_name):
+        doctor_name = validate_name(slot_value)
+        if doctor_name:
             return {"doctor_signup__name": doctor_name}
         else:
-            dispatcher.utter_custom_json(
+            dispatcher.utter_message(
                 json_message={
                     "text": "Name cannot contain special characters other than apostrophe or period."
                 }
@@ -38,14 +48,30 @@ class ValidateDoctorSignupForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        phone_number = str(slot_value).strip()
-        if re.search(r"^[1-9]\d{9}$", phone_number):
+        phone_number = validate_phone_number(slot_value)
+        if phone_number:
             return {"doctor_signup__number": phone_number}
         else:
-            dispatcher.utter_custom_json(
+            dispatcher.utter_message(
                 json_message={"text": "Phone number must be a 10-digit mobile number."}
             )
             return {"doctor_signup__number": None}
+
+    def validate_doctor_signup__photo(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        photo = validate_photo(slot_value)
+        if photo:
+            return {"doctor_signup__photo": photo}
+        else:
+            dispatcher.utter_message(
+                json_message={"text": "The message received is not a photo."}
+            )
+            return {"doctor_signup__photo": None}
 
     def validate_doctor_signup__speciality(
         self,
@@ -54,10 +80,11 @@ class ValidateDoctorSignupForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        if slot_value in get_specialities():
-            return {"doctor_signup__speciality": slot_value}
+        speciality = validate_speciality(slot_value)
+        if speciality:
+            return {"doctor_signup__speciality": speciality}
         else:
-            dispatcher.utter_custom_json(json_message={"text": "Invalid input."})
+            dispatcher.utter_message(json_message={"text": "Invalid input."})
             return {"doctor_signup__speciality": None}
 
     def validate_doctor_signup__description(
@@ -67,24 +94,34 @@ class ValidateDoctorSignupForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        if len(slot_value) <= 200:
-            return {"doctor_signup__description": slot_value}
+        description = validate_description(slot_value)
+        if description:
+            return {"doctor_signup__description": description}
         else:
-            dispatcher.utter_custom_json(
+            dispatcher.utter_message(
                 json_message={
                     "text": "Description cannot be more than 200 characters long."
                 }
             )
             return {"doctor_signup__description": None}
 
-    def validate_doctor_signup__availability(
+    def validate_doctor_signup__time_slots(
         self,
         slot_value: Any,
         dispatcher: CollectingDispatcher,
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        return {"doctor_signup__availability": slot_value}
+        time_slots = validate_time_slots(slot_value)
+        if time_slots:
+            return {"doctor_signup__time_slots": time_slots}
+        else:
+            dispatcher.utter_message(
+                json_message={
+                    "text": 'Time slots must be in the format "Mon, 09:00-13:00". You can specify multiple slots by separating them with a comma, and multiple days by separating them with a semicolon. For example "Mon, 10:00-12:00, 14:00-17:00; Tue, 10:00-12:00, 14:00-17:00".'
+                }
+            )
+            return {"doctor_signup__time_slots": None}
 
     def validate_doctor_signup__consultation_fee(
         self,
@@ -93,11 +130,11 @@ class ValidateDoctorSignupForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        fee = str(slot_value).strip()
-        if re.search(r"^[1-9][0-9]*50$|^[1-9][0-9]*00$", fee):
+        fee = validate_consulation_fee(slot_value)
+        if fee:
             return {"doctor_signup__consultation_fee": fee}
         else:
-            dispatcher.utter_custom_json(
+            dispatcher.utter_message(
                 json_message={
                     "text": "Consultation fee must be a number in multiples of 50. The minimum fee is 100. The amount is automatically converted to Rupees, so no need to add the Rupee prefix / suffix."
                 }
@@ -111,11 +148,11 @@ class ValidateDoctorSignupForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        account_number = str(slot_value).strip()
-        if re.search(r"^\d{9,18}$", account_number):
-            return {"doctor_signup__bank_account_number": account_number}
+        bank_account_number = validate_bank_account_number(slot_value)
+        if bank_account_number:
+            return {"doctor_signup__bank_account_number": bank_account_number}
         else:
-            dispatcher.utter_custom_json(
+            dispatcher.utter_message(
                 json_message={
                     "text": "Bank account number must be between 9-18 digits."
                 }
@@ -129,11 +166,11 @@ class ValidateDoctorSignupForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        account_name = str(slot_value).strip()
-        if re.search(r"^[a-zA-Z.' ]+$", account_name):
+        account_name = validate_name(slot_value)
+        if account_name:
             return {"doctor_signup__bank_account_name": account_name}
         else:
-            dispatcher.utter_custom_json(
+            dispatcher.utter_message(
                 json_message={
                     "text": "Name cannot contain special characters other than apostrophe or period."
                 }
@@ -147,11 +184,11 @@ class ValidateDoctorSignupForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        ifsc_code = str(slot_value).strip()
-        if re.search(r"^[A-Za-z]{4}[a-zA-Z0-9]{7}$", ifsc_code):
+        ifsc_code = validate_bank_account_ifsc(slot_value)
+        if ifsc_code:
             return {"doctor_signup__bank_account_ifsc": ifsc_code}
         else:
-            dispatcher.utter_custom_json(
+            dispatcher.utter_message(
                 json_message={
                     "text": "Bank account IFSC code must be exactly 11 alpha-numeric characters, and the first four cannot be digits."
                 }

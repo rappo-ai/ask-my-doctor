@@ -1,3 +1,4 @@
+from bson.objectid import ObjectId
 from typing import Dict, Optional, Text
 
 from actions.db.store import db
@@ -8,14 +9,15 @@ def create_order(user_id: Text, cart: Dict):
 
 
 def get_order(id):
-    return db.order.find_one({"_id": id})
+    return db.order.find_one({"_id": ObjectId(id)})
+
 
 def get_order_for_user_id(user_id):
     return db.order.find_one({"user_id": user_id})
 
 
 def update_order(
-    id: Text,
+    id,
     cart: Optional[Dict] = None,
     payment_link: Optional[Dict] = None,
     payment_status: Optional[Dict] = None,
@@ -39,4 +41,4 @@ def update_order(
     if metadata:
         order["metadata"] = metadata
 
-    db.order.update_one({"_id": id}, {"$set": order})
+    db.order.update_one({"_id": ObjectId(id)}, {"$set": order})

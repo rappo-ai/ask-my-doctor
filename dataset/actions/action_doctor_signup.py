@@ -49,13 +49,13 @@ class ActionNewDoctorSignup(Action):
 
             update_doctor_in_spreadsheet(doctor)
 
-            text = (
+            caption = (
                 f"Thank you for your interest in Ask My Doctor. We have received your details and will review it and get back to you within 48 hours.\n"
                 + "\n"
                 + print_doctor_signup_form(doctor)
             )
 
-            json_message = {"text": text}
+            json_message = {"photo": doctor.get("photo"), "caption": caption}
             dispatcher.utter_message(json_message=json_message)
 
             if get_admin_group_id():

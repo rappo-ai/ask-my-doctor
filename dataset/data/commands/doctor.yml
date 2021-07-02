@@ -1,0 +1,144 @@
+version: "2.0"
+
+actions:
+  - action_doctor_command_activate
+  - action_doctor_command_deactivate
+  - action_doctor_command_setdescription
+  - action_doctor_command_setfee
+  - action_doctor_command_setname
+  - action_doctor_command_setphonenumber
+  - action_doctor_command_setphoto
+  - action_doctor_command_setspeciality
+  - action_doctor_command_settimeslots
+
+intents:
+  - activate
+  - deactivate
+  - setfee
+  - setname
+  - setdescription
+  - setphonenumber
+  - setphoto
+  - setspeciality
+  - settimeslots
+
+nlu:
+  - intent: activate
+    metadata:
+      keyword_intent: true
+      match_condition: "start"
+    examples: |
+      - /activate
+  - intent: deactivate
+    metadata:
+      keyword_intent: true
+      match_condition: "start"
+    examples: |
+      - /deactivate
+  - intent: setname
+    metadata:
+      keyword_intent: true
+      match_condition: "start"
+    examples: |
+      - /setname
+  - intent: setphoto
+    metadata:
+      keyword_intent: true
+      match_condition: "start"
+    examples: |
+      - /setphoto
+  - intent: setphonenumber
+    metadata:
+      keyword_intent: true
+      match_condition: "start"
+    examples: |
+      - /setphonenumber
+  - intent: setspeciality
+    metadata:
+      keyword_intent: true
+      match_condition: "start"
+    examples: |
+      - /setspeciality
+  - intent: setdescription
+    metadata:
+      keyword_intent: true
+      match_condition: "start"
+    examples: |
+      - /setdescription
+  - intent: settimeslots
+    metadata:
+      keyword_intent: true
+      match_condition: "start"
+    examples: |
+      - /settimeslots
+  - intent: setfee
+    metadata:
+      keyword_intent: true
+      match_condition: "start"
+    examples: |
+      - /setfee
+
+rules:
+  - rule: activate doctor listing
+    condition:
+      - slot_was_set:
+          - is_admin: true
+    steps:
+      - intent: activate
+      - action: action_doctor_command_activate
+  - rule: deactivate doctor listing
+    condition:
+      - slot_was_set:
+          - is_admin: true
+    steps:
+      - intent: deactivate
+      - action: action_doctor_command_deactivate
+  - rule: update doctor description
+    condition:
+      - slot_was_set:
+          - is_admin: true
+    steps:
+      - intent: setdescription
+      - action: action_doctor_command_setdescription
+  - rule: update doctor fee
+    condition:
+      - slot_was_set:
+          - is_admin: true
+    steps:
+      - intent: setfee
+      - action: action_doctor_command_setfee
+  - rule: update doctor name
+    condition:
+      - slot_was_set:
+          - is_admin: true
+    steps:
+      - intent: setname
+      - action: action_doctor_command_setname
+  - rule: update doctor phone number
+    condition:
+      - slot_was_set:
+          - is_admin: true
+    steps:
+      - intent: setphonenumber
+      - action: action_doctor_command_setphonenumber
+  - rule: update doctor photo
+    condition:
+      - slot_was_set:
+          - is_admin: true
+    steps:
+      - intent: setphoto
+      - action: action_doctor_command_setphoto
+  - rule: update doctor speciality
+    condition:
+      - slot_was_set:
+          - is_admin: true
+    steps:
+      - intent: setspeciality
+      - action: action_doctor_command_setspeciality
+  - rule: update doctor time slots
+    condition:
+      - slot_was_set:
+          - is_admin: true
+    steps:
+      - intent: settimeslots
+      - action: action_doctor_command_settimeslots
