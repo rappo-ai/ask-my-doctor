@@ -1,9 +1,13 @@
 version: "3.9"
+
 services:
   rasa:
-    image: rappoai/rasa:telegram
-    depends_on:
-      - ngrok
-  ngrok:
-    image: wernight/ngrok
-    command: ngrok http rasa:5005
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: |
+      bash -c "
+      rasa run actions -vv > /app/run_actions_logs.txt & /workspace/.devcontainer/scripts/launch-rasa-server.py
+      "
+    volumes:
+      - .:/workspace:cached
