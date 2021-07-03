@@ -9,9 +9,9 @@ Copy .env.template to .env and set the Telegram bot token and Telegram bot usern
 
 ## Launch without debugging (Production)
 
-### Linux OS
+### Docker Compose with Linux engine
 ```bash
-docker-compose up
+docker-compose -f docker-compose.base.yml -f docker-compose.yml up --build -d
 ```
 
 ## Launch with debugging (Local)
