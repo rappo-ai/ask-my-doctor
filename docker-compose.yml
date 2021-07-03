@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     command: |
       bash -c "
-      rasa run actions -vv > /app/run_actions_logs.txt & /workspace/.devcontainer/scripts/launch-rasa-server.py
+      rasa run actions -vv > /app/run_actions_logs.txt & python /workspace/.devcontainer/scripts/launch-rasa-server.py run -vv --log-file /app/server_logs.txt
       "
     volumes:
       - .:/workspace:cached
