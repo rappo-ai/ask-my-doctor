@@ -1,0 +1,13 @@
+{
+    "web": {
+        "client_id": "881461713261-dhrt5ug8hf8tr2uiqsiihnj24492flt6.apps.googleusercontent.com",
+        "project_id": "spread-313410",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_secret": "fQ28EXqDQHeV0k0UFJr-N8xu",
+        "redirect_uris": [
+            "http://localhost/"
+        ]
+    }
+}

@@ -10,6 +10,7 @@ RUN apt-get update && \
     git \
     nodejs && \
     . /opt/venv/bin/activate && \
-    pip install black
+    pip install black && \
+    pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib
 
 USER 1001
