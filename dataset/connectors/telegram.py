@@ -163,6 +163,7 @@ class TelegramOutput(TeleBot, OutputChannel):
                 "currency",
                 "prices",
             ): "send_invoice",
+            ("from_chat_id", "message_id"): "copy_message",
         }
 
         for params in send_functions.keys():
