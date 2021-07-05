@@ -25,8 +25,6 @@ forms:
         - type: from_text
       doctor_signup__description:
         - type: from_text
-      doctor_signup__time_slots:
-        - type: from_text
       doctor_signup__consultation_fee:
         - type: from_text
       doctor_signup__bank_account_number:
@@ -62,8 +60,6 @@ responses:
     - text: "What is your phone number?"
   utter_ask_doctor_signup__photo:
     - text: "Please send a photo to use as your profile picture."
-  utter_ask_doctor_signup__time_slots:
-    - text: 'What is your availability to take appointments on Ask My Doctor? For example "Mon, 10:00-13:00, 15:00-18:00; Tue, 11:00-17:00".'
 
 rules:
   - rule: Start new doctor signup form
@@ -137,6 +133,4 @@ slots:
   doctor_signup__photo:
     type: text
   doctor_signup__speciality:
-    type: text
-  doctor_signup__time_slots:
     type: text

@@ -26,7 +26,7 @@ class ActionDoctorCommandActivate(Action):
             regex = r"^(/\w+)(\s+#(\w+))$"
         matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
         if matches:
-            doctor = {}
+            doctor: Dict = {}
             doctor_id = ""
             if is_admin:
                 doctor_id = matches.group(3)
@@ -45,6 +45,20 @@ class ActionDoctorCommandActivate(Action):
                     json_message={
                         "chat_id": doctor["user_id"],
                         "text": f"Your listing cannot be activated as you are yet to connect a Google ID to schedule meetings. Please use /setgoogleid.",
+                    }
+                )
+                return
+            if all(value == [] for value in doctor.get("time_slots", {}).values()):
+                dispatcher.utter_message(
+                    json_message={
+                        "chat_id": get_admin_group_id(),
+                        "text": f"{doctor['name']} with ID #{doctor_id} cannot be activated, missing time slots. Use \"/settimeslots #{doctor_id} <TIME_SLOTS>\".",
+                    }
+                )
+                dispatcher.utter_message(
+                    json_message={
+                        "chat_id": doctor["user_id"],
+                        "text": f'Your listing cannot be activated as you haven\'t added your time slots. Please use "/settimeslots <TIME_SLOTS>".',
                     }
                 )
                 return

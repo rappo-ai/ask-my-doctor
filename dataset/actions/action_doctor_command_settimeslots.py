@@ -27,9 +27,9 @@ class ActionDoctorCommandSetTimeSlots(Action):
         if is_admin:
             regex = r"^(/\w+)(\s+#(\w+))(.+)$"
         matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
-        time_slots = matches and validate_time_slots(matches.group(4))
-        if matches and time_slots:
-            doctor = {}
+        new_time_slots = matches and validate_time_slots(matches.group(4))
+        if matches and new_time_slots:
+            doctor: Dict = {}
             doctor_id = ""
             if is_admin:
                 doctor_id = matches.group(3)
@@ -37,6 +37,8 @@ class ActionDoctorCommandSetTimeSlots(Action):
             else:
                 doctor = get_doctor_for_user_id(tracker.sender_id)
                 doctor_id = str(doctor["_id"])
+            time_slots = doctor.get("time_slots", {})
+            time_slots.update(new_time_slots)
             doctor["time_slots"] = time_slots
             update_doctor(doctor)
             time_slots_str = print_time_slots(time_slots)

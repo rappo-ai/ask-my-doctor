@@ -103,22 +103,12 @@ def validate_speciality(speciality: Text):
 def validate_time_slots(time_slots_str: Text):
     test_str = time_slots_str and time_slots_str.strip()
     if test_str:
-        time_slots = {
-            "mon": [],
-            "tue": [],
-            "wed": [],
-            "thu": [],
-            "fri": [],
-            "sat": [],
-            "sun": [],
-        }
+        time_slots = {}
         lines = test_str.split(";")
         if not len(lines):
             return None
         for l in lines:
             slots = l.split(",")
-            if not len(slots):
-                return None
             weekday = str(slots[0]).strip().lower()
             if not weekday in WEEK_DAYS_SHORT:
                 return None
