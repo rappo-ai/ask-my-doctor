@@ -34,6 +34,20 @@ class ActionDoctorCommandActivate(Action):
             else:
                 doctor = get_doctor_for_user_id(tracker.sender_id)
                 doctor_id = str(doctor["_id"])
+            if not doctor.get("credentials"):
+                dispatcher.utter_message(
+                    json_message={
+                        "chat_id": get_admin_group_id(),
+                        "text": f"{doctor['name']} with ID #{doctor_id} cannot be activated, missing Google auth. Doctor needs to use /setgoogleid.",
+                    }
+                )
+                dispatcher.utter_message(
+                    json_message={
+                        "chat_id": doctor["user_id"],
+                        "text": f"Your listing cannot be activated as you are yet to connect a Google ID to schedule meetings. Please use /setgoogleid.",
+                    }
+                )
+                return
             doctor["listing_status"] = "active"
             update_doctor(doctor)
             dispatcher.utter_message(

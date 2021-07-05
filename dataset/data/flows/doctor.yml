@@ -4,7 +4,7 @@ actions:
   - action_ask_doctor_signup__description
   - action_ask_doctor_signup__consultation_fee
   - action_ask_doctor_signup__speciality
-  - action_confirm_doctor_signup
+  - action_doctor_setgoogleauth
   - action_doctor_signup
   - action_reset_doctor_signup_form
   - validate_doctor_signup_form
@@ -79,14 +79,14 @@ rules:
       - active_loop: null
       - slot_was_set:
           - requested_slot: null
-      - action: action_confirm_doctor_signup
+      - action: action_doctor_signup
   - rule: Doctor signup Google auth
     condition:
       - slot_was_set:
           - chat_type: private
     steps:
-      - intent: EXTERNAL_doctor_signup_google_authenticated
-      - action: action_doctor_signup
+      - intent: EXTERNAL_on_google_auth
+      - action: action_doctor_setgoogleauth
 
 slots:
   doctor_signup__bank_account_number:

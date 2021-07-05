@@ -28,7 +28,7 @@ actions:
 
   - action_ask_doctor_signup__consultation_fee
   - action_ask_doctor_signup__speciality
-  - action_confirm_doctor_signup
+  - action_doctor_setgoogleauth
   - action_doctor_signup
   - action_reset_doctor_signup_form
   - validate_doctor_signup_form
@@ -44,6 +44,7 @@ actions:
   - action_doctor_command_deactivate
   - action_doctor_command_setdescription
   - action_doctor_command_setfee
+  - action_doctor_command_setgoogleid
   - action_doctor_command_setname
   - action_doctor_command_setphonenumber
   - action_doctor_command_setphoto
