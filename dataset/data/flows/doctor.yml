@@ -4,10 +4,13 @@ actions:
   - action_ask_doctor_signup__description
   - action_ask_doctor_signup__consultation_fee
   - action_ask_doctor_signup__speciality
-  - action_confirm_doctor_signup
+  - action_doctor_setgoogleauth
+  - action_doctor_send_message
   - action_doctor_signup
+  - action_reset_doctor_send_message_form
   - action_reset_doctor_signup_form
   - validate_doctor_signup_form
+  - validate_doctor_send_message_form
 
 forms:
   doctor_signup_form:
@@ -32,11 +35,15 @@ forms:
         - type: from_text
       doctor_signup__bank_account_ifsc:
         - type: from_text
+  doctor_send_message_form:
 
 intents:
+  - EXT_doctor_send_message
   - EXTERNAL_doctor_signup
 
 responses:
+  utter_ask_doctor_send_message__message_id:
+    - text: Please enter the message you want to send to the patient.
   utter_doctor_signup_start:
     - text: >
         Thank you for your interest in signing up. We need a few details from you
@@ -79,16 +86,40 @@ rules:
       - active_loop: null
       - slot_was_set:
           - requested_slot: null
-      - action: action_confirm_doctor_signup
+      - action: action_doctor_signup
   - rule: Doctor signup Google auth
     condition:
       - slot_was_set:
           - chat_type: private
     steps:
-      - intent: EXTERNAL_doctor_signup_google_authenticated
-      - action: action_doctor_signup
+      - intent: EXTERNAL_on_google_auth
+      - action: action_doctor_setgoogleauth
+  - rule: Activate doctor_send_message_form
+    condition:
+      - slot_was_set:
+          - chat_type: private
+    steps:
+      - intent: EXT_doctor_send_message
+      - action: action_reset_doctor_send_message_form
+      - action: doctor_send_message_form
+      - active_loop: doctor_send_message_form
+  - rule: Deactivate doctor_send_message_form
+    condition:
+      - active_loop: doctor_send_message_form
+      - slot_was_set:
+          - chat_type: private
+    steps:
+      - action: doctor_send_message_form
+      - active_loop: null
+      - slot_was_set:
+          - requested_slot: null
+      - action: action_doctor_send_message
 
 slots:
+  doctor_send_message__message_id:
+    type: text
+  doctor_send_message__order_id:
+    type: text
   doctor_signup__bank_account_number:
     type: text
   doctor_signup__bank_account_name:

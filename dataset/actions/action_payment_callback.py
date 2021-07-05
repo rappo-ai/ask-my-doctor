@@ -12,6 +12,7 @@ from actions.utils.admin_config import (
 )
 from actions.utils.cart import print_cart
 from actions.utils.doctor import get_doctor
+from actions.utils.entity import get_entity
 from actions.utils.json import get_json_key
 from actions.utils.meet import create_meeting
 from actions.utils.order import (
@@ -45,14 +46,9 @@ class ActionPaymentCallback(Action):
         # You can trigger this intent with entity from webhook using /EXTERNAL_payment_callback{"payment_status": "<PAYMENT_STATUS_DATA>"}
         # Not sure if you can send JSON directly as the value of "payment_status"; if JSON doesn't work you can
         # send a serialized JSON string and deserialize it here.
-        payment_status: Dict = next(
-            iter(
-                [
-                    e.get("value")
-                    for e in entities
-                    if e.get("entity") == "payment_status"
-                ]
-            ),
+        payment_status: Dict = get_entity(
+            entities,
+            "payment_status",
             {
                 "status": "complete",
                 "amount": 300,
@@ -64,7 +60,7 @@ class ActionPaymentCallback(Action):
         )
 
         order_id = get_order_id_for_payment_status(payment_status)
-        order = get_order(order_id)
+        order: Dict = get_order(order_id)
         if not order:
             # #tbdnikhil - remove this block once payment_status callback is implemented
             order = get_order_for_user_id(tracker.sender_id)
@@ -72,15 +68,15 @@ class ActionPaymentCallback(Action):
         update_order(order_id, payment_status=payment_status)
 
         if payment_status.get("status") == "complete":
-            cart = order["cart"]
-            patient = get_json_key(order, "metadata.patient", {})
-            cart_item = next(iter(cart["items"] or []), {})
-            doctor = get_doctor(cart_item["doctor_id"])
+            cart: Dict = order.get("cart")
+            patient: Dict = get_json_key(order, "metadata.patient", {})
+            cart_item = next(iter(cart.get("items") or []), {})
+            doctor: Dict = get_doctor(cart_item.get("doctor_id"))
             doctor_chat_id = doctor.get("user_id")
 
             credentials = doctor.get("credentials")
             guest_emails = [patient.get("email")]
-            start_date = datetime.fromisoformat(cart_item["appointment_datetime"])
+            start_date = datetime.fromisoformat(cart_item.get("appointment_datetime"))
             end_date = start_date + timedelta(minutes=get_meeting_duration_in_minutes())
             meeting: Dict = create_meeting(
                 credentials=credentials,
@@ -114,7 +110,19 @@ class ActionPaymentCallback(Action):
             )
 
             json_message = {"text": text, "disable_web_page_preview": True}
-            dispatcher.utter_message(json_message=json_message)
+            patient_json_message = deepcopy(json_message)
+            patient_json_message["reply_markup"] = {
+                "keyboard": [
+                    [
+                        {
+                            "title": "Contact Doctor",
+                            "payload": f"/EXT_patient_send_message{{\"o_id\":\"{str(order['_id'])}\"}}",
+                        }
+                    ]
+                ],
+                "type": "inline",
+            }
+            dispatcher.utter_message(json_message=patient_json_message)
 
             if get_admin_group_id():
                 admin_json_message = deepcopy(json_message)
@@ -126,6 +134,17 @@ class ActionPaymentCallback(Action):
             if doctor_chat_id:
                 doctor_json_message = deepcopy(json_message)
                 doctor_json_message["chat_id"] = doctor_chat_id
+                doctor_json_message["reply_markup"] = {
+                    "keyboard": [
+                        [
+                            {
+                                "title": "Contact Patient",
+                                "payload": f"/EXT_doctor_send_message{{\"o_id\":\"{str(order['_id'])}\"}}",
+                            }
+                        ]
+                    ],
+                    "type": "inline",
+                }
                 dispatcher.utter_message(json_message=doctor_json_message)
             else:
                 logger.warn("Doctor chat id not set.")

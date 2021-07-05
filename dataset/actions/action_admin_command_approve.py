@@ -50,8 +50,9 @@ class ActionAdminCommandApprove(Action):
                         + "/setdescription <DESCRIPTION> - update description\n"
                         + "/settimeslots <TIME SLOT LIST> - update available time slots for the upcoming week\n"
                         + "/setfee <CONSULTATION FEE> - update consultation fee\n"
+                        + "/setgoogleid - update Google ID for meetings\n"
                         + "\n"
-                        + f"To update your connected Google ID for creating meetings, please click this link -> {google_auth_url}"
+                        + f"To update your Google ID for creating meetings, please click this link -> {google_auth_url}\n"
                         + "\n"
                         + "To update your bank account details or for any other queries, please contact the admin @askmydoctorsupport.\n"
                     ),

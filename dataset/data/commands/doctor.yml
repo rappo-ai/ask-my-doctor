@@ -5,6 +5,7 @@ actions:
   - action_doctor_command_deactivate
   - action_doctor_command_setdescription
   - action_doctor_command_setfee
+  - action_doctor_command_setgoogleid
   - action_doctor_command_setname
   - action_doctor_command_setphonenumber
   - action_doctor_command_setphoto
@@ -15,6 +16,7 @@ intents:
   - activate
   - deactivate
   - setfee
+  - setgoogleid
   - setname
   - setdescription
   - setphonenumber
@@ -77,6 +79,12 @@ nlu:
       match_condition: "start"
     examples: |
       - /setfee
+  - intent: setgoogleid
+    metadata:
+      keyword_intent: true
+      match_condition: "exact"
+    examples: |
+      - /setgoogleid
 
 rules:
   - rule: activate doctor listing
@@ -107,6 +115,13 @@ rules:
     steps:
       - intent: setfee
       - action: action_doctor_command_setfee
+  - rule: update doctor googleid
+    condition:
+      - slot_was_set:
+          - is_admin: true
+    steps:
+      - intent: setgoogleid
+      - action: action_doctor_command_setgoogleid
   - rule: update doctor name
     condition:
       - slot_was_set:
