@@ -9,6 +9,7 @@ sudo swapon /swapfile
 # Setup Firewall
 sudo ufw allow http
 sudo ufw allow https
+sudo ufw allow 8081
 
 # SSH deploy key setup
 # tbdrenzil - manually create ~/.ssh/id_gitdeploykey
