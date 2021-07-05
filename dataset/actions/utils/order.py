@@ -1,32 +1,30 @@
+from bson.objectid import ObjectId
 from typing import Dict, Optional, Text
 
-from actions.utils.json import get_json_key
-
-orders: Dict = {}
+from actions.db.store import db
 
 
 def create_order(user_id: Text, cart: Dict):
-    order_id = len(orders) + 1
-    orders[order_id] = {"user_id": user_id, "cart": cart}
-    return order_id
+    return db.order.insert_one({"user_id": user_id, "cart": cart}).inserted_id
 
 
-def get_order(order_id):
-    return orders[order_id]
+def get_order(id):
+    return db.order.find_one({"_id": ObjectId(id)})
+
+
+def get_order_for_user_id(user_id):
+    return db.order.find_one({"user_id": user_id})
 
 
 def update_order(
-    order_id: int,
+    id,
     cart: Optional[Dict] = None,
     payment_link: Optional[Dict] = None,
     payment_status: Optional[Dict] = None,
     meeting: Optional[Dict] = None,
     metadata: Optional[Dict] = None,
 ):
-    order = orders[order_id]
-
-    if not order:
-        raise KeyError("order_id not found")
+    order = {}
 
     if cart:
         order["cart"] = cart
@@ -43,22 +41,4 @@ def update_order(
     if metadata:
         order["metadata"] = metadata
 
-
-def get_appointment_info(order_id):
-    return get_json_key(orders, f"{order_id}.appointment_info", {})
-
-
-def get_patient_info(order_id):
-    return get_json_key(orders, f"{order_id}.patient_info", {})
-
-
-def get_payment_info(order_id):
-    return get_json_key(orders, f"{order_id}.payment_info", {})
-
-
-def get_meeting_info(order_id):
-    return get_json_key(orders, f"{order_id}.meeting_info", {})
-
-
-def get_metadata(order_id):
-    return get_json_key(orders, f"{order_id}.metadata", {})
+    db.order.update_one({"_id": ObjectId(id)}, {"$set": order})

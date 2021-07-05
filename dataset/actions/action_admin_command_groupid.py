@@ -4,12 +4,12 @@ from typing import Any, AnyStr, Match, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.admin import set_admin_group_id
+from actions.utils.admin_config import set_admin_group_id
 
 
-class ActionSetAdminGroupId(Action):
+class ActionAdminCommandGroupId(Action):
     def name(self) -> Text:
-        return "action_set_admin_group_id"
+        return "action_admin_command_groupid"
 
     def run(
         self,

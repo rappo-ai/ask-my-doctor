@@ -3,7 +3,7 @@ from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.admin import get_specialities
+from actions.utils.admin_config import get_specialities
 
 
 class ActionAskDoctorSignupSpeciality(Action):
@@ -17,7 +17,7 @@ class ActionAskDoctorSignupSpeciality(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
-        text = f"Please select your speciality (or enter a new one):"
+        text = f"Please select your speciality:"
         reply_markup = {
             "keyboard": [[s] for s in get_specialities()],
         }

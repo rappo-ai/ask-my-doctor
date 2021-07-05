@@ -1,10 +1,21 @@
 version: "2.0"
 
 actions:
-  - action_set_admin_group_id
+  - action_admin_command_addspeciality
+  - action_admin_command_approve
+  - action_admin_command_deletespeciality
+  - action_admin_command_groupid
+  - action_admin_command_reject
+  - action_admin_command_resetdb
 
 intents:
+  - addspeciality
   - admin
+  - approve
+  - deletespeciality
+  - groupid
+  - reject
+  - resetdb
 
 nlu:
   - intent: admin
@@ -19,6 +30,36 @@ nlu:
       match_condition: "start"
     examples: |
       - /groupid
+  - intent: resetdb
+    metadata:
+      keyword_intent: true
+      match_condition: "exact"
+    examples: |
+      - /resetdb
+  - intent: approve
+    metadata:
+      keyword_intent: true
+      match_condition: "start"
+    examples: |
+      - /approve
+  - intent: reject
+    metadata:
+      keyword_intent: true
+      match_condition: "start"
+    examples: |
+      - /reject
+  - intent: addspeciality
+    metadata:
+      keyword_intent: true
+      match_condition: "start"
+    examples: |
+      - /addspeciality
+  - intent: deletespeciality
+    metadata:
+      keyword_intent: true
+      match_condition: "start"
+    examples: |
+      - /deletespeciality
 
 responses:
   utter_admin_menu_options:
@@ -29,7 +70,6 @@ rules:
   - rule: show admin menu options
     condition:
       - slot_was_set:
-          - chat_type: private
           - is_admin: true
     steps:
       - intent: admin
@@ -37,8 +77,42 @@ rules:
   - rule: set admin group id
     condition:
       - slot_was_set:
-          - chat_type: private
           - is_admin: true
     steps:
       - intent: groupid
-      - action: action_set_admin_group_id
+      - action: action_admin_command_groupid
+  - rule: reset db
+    condition:
+      - slot_was_set:
+          - is_admin: true
+    steps:
+      - intent: resetdb
+      - action: action_admin_command_resetdb
+  - rule: approve request
+    condition:
+      - slot_was_set:
+          - is_admin: true
+    steps:
+      - intent: approve
+      - action: action_admin_command_approve
+  - rule: reject request
+    condition:
+      - slot_was_set:
+          - is_admin: true
+    steps:
+      - intent: reject
+      - action: action_admin_command_reject
+  - rule: add speciality
+    condition:
+      - slot_was_set:
+          - is_admin: true
+    steps:
+      - intent: addspeciality
+      - action: action_admin_command_addspeciality
+  - rule: delete speciality
+    condition:
+      - slot_was_set:
+          - is_admin: true
+    steps:
+      - intent: deletespeciality
+      - action: action_admin_command_deletespeciality

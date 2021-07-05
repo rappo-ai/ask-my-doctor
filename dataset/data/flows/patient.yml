@@ -3,8 +3,12 @@ version: "2.0"
 actions:
   - action_confirm_patient
   - action_on_patient_set
+  - action_patient_send_message
   - action_reset_patient_form
+  - action_reset_patient_send_message_form
   - action_set_patient
+  - validate_patient_form
+  - validate_patient_send_message_form
 
 forms:
   patient_form:
@@ -17,12 +21,16 @@ forms:
         - type: from_text
       patient__email:
         - type: from_text
+  patient_send_message_form:
 
 intents:
   - EXTERNAL_confirm_patient
+  - EXT_patient_send_message
   - EXTERNAL_update_patient
 
 responses:
+  utter_ask_patient_send_message__message_id:
+    - text: Please enter the message you want to send to the doctor.
   utter_update_patient_start:
     - text: We need a few details of the patient to proceed.
   utter_ask_patient__name:
@@ -78,6 +86,26 @@ rules:
           - requested_slot: null
       - action: action_set_patient
       - action: action_on_patient_set
+  - rule: Activate patient_send_message_form
+    condition:
+      - slot_was_set:
+          - chat_type: private
+    steps:
+      - intent: EXT_patient_send_message
+      - action: action_reset_patient_send_message_form
+      - action: patient_send_message_form
+      - active_loop: patient_send_message_form
+  - rule: Deactivate patient_send_message_form
+    condition:
+      - active_loop: patient_send_message_form
+      - slot_was_set:
+          - chat_type: private
+    steps:
+      - action: patient_send_message_form
+      - active_loop: null
+      - slot_was_set:
+          - requested_slot: null
+      - action: action_patient_send_message
 
 slots:
   patient__age:
@@ -87,4 +115,8 @@ slots:
   patient__name:
     type: text
   patient__phone_number:
+    type: text
+  patient_send_message__message_id:
+    type: text
+  patient_send_message__order_id:
     type: text

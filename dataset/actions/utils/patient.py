@@ -1,23 +1,19 @@
-from copy import deepcopy
-from typing import Dict
+from bson.objectid import ObjectId
+from typing import Dict, Text
 
-patients = []
+from actions.db.store import db
 
 
 def add_patient(patient: Dict):
-    id = len(patients)
-    patient_copy = deepcopy(patient)
-    patient_copy["_id"] = id
-    patients.append(patient)
-    return patient_copy["_id"]
+    return db.patient.insert_one(patient).inserted_id
 
 
-def get_patient(id: int):
-    return next(iter([p for p in patients if p.get("_id") == id]), None)
+def get_patient(id: Text):
+    return db.patient.find_one({"_id": ObjectId(id)})
 
 
 def get_patient_for_user_id(user_id):
-    return next(iter([p for p in patients if p["user_id"] == user_id]), None)
+    return db.patient.find_one({"user_id": user_id})
 
 
 def print_patient(patient: Dict):
@@ -30,8 +26,4 @@ def print_patient(patient: Dict):
 
 
 def update_patient(patient: Dict):
-    patient_dbitem: Dict = get_patient(patient.get("_id"))
-    if patient_dbitem:
-        patient_dbitem.update(patient)
-        return True
-    return False
+    db.patient.update_one({"_id": patient.get("_id")}, {"$set": patient})

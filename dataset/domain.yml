@@ -17,8 +17,12 @@ actions:
 
   - action_confirm_patient
   - action_on_patient_set
+  - action_patient_send_message
   - action_reset_patient_form
+  - action_reset_patient_send_message_form
   - action_set_patient
+  - validate_patient_form
+  - validate_patient_send_message_form
 
   - action_change_order
   - action_create_order
@@ -27,11 +31,31 @@ actions:
 
   - action_ask_doctor_signup__consultation_fee
   - action_ask_doctor_signup__speciality
-  - action_confirm_doctor_signup
+  - action_doctor_send_message
+  - action_doctor_setgoogleauth
   - action_doctor_signup
+  - action_reset_doctor_send_message_form
   - action_reset_doctor_signup_form
+  - validate_doctor_signup_form
+  - validate_doctor_send_message_form
 
-  - action_set_admin_group_id
+  - action_admin_command_addspeciality
+  - action_admin_command_approve
+  - action_admin_command_deletespeciality
+  - action_admin_command_groupid
+  - action_admin_command_reject
+  - action_admin_command_resetdb
+
+  - action_doctor_command_activate
+  - action_doctor_command_deactivate
+  - action_doctor_command_setdescription
+  - action_doctor_command_setfee
+  - action_doctor_command_setgoogleid
+  - action_doctor_command_setname
+  - action_doctor_command_setphonenumber
+  - action_doctor_command_setphoto
+  - action_doctor_command_setspeciality
+  - action_doctor_command_settimeslots
 
 forms:
   search_form:
@@ -54,17 +78,19 @@ forms:
         - type: from_text
       patient__email:
         - type: from_text
+  patient_send_message_form:
+    required_slots: {}
   doctor_signup_form:
     required_slots:
       doctor_signup__name:
         - type: from_text
       doctor_signup__number:
         - type: from_text
+      doctor_signup__photo:
+        - type: from_text
       doctor_signup__speciality:
         - type: from_text
       doctor_signup__description:
-        - type: from_text
-      doctor_signup__availability:
         - type: from_text
       doctor_signup__consultation_fee:
         - type: from_text
@@ -74,6 +100,8 @@ forms:
         - type: from_text
       doctor_signup__bank_account_ifsc:
         - type: from_text
+  doctor_send_message_form:
+    required_slots: {}
 
 session_config:
   session_expiration_time: 60
@@ -106,7 +134,13 @@ slots:
     type: text
   patient__email:
     type: text
-  doctor_signup__availability:
+  patient_send_message__message_id:
+    type: text
+  patient_send_message__order_id:
+    type: text
+  doctor_send_message__message_id:
+    type: text
+  doctor_send_message__order_id:
     type: text
   doctor_signup__bank_account_number:
     type: text
@@ -121,6 +155,8 @@ slots:
   doctor_signup__name:
     type: text
   doctor_signup__number:
+    type: text
+  doctor_signup__photo:
     type: text
   doctor_signup__speciality:
     type: text

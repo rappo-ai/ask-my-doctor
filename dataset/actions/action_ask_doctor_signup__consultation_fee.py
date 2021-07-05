@@ -3,7 +3,7 @@ from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.admin import get_commission_rate
+from actions.utils.admin_config import get_commission_rate
 
 
 class ActionAskDoctorSignupConsultationFee(Action):
