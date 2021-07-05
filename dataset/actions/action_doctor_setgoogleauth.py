@@ -33,7 +33,7 @@ class ActionDoctorSetGoogleAuth(Action):
         credentials: Dict = get_entity(
             entities, "credentials", {"access_token": "dummyaccesstoken"}
         )
-        email: Text = get_entity(entities, "email", "tbd@gmail.com")
+        email: Text = get_entity(entities, "email", "doctor@gmail.com")
 
         user_id = tracker.sender_id
         doctor = get_doctor_for_user_id(user_id)

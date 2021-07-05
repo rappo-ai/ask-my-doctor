@@ -39,7 +39,15 @@ class ActionNewDoctorSignup(Action):
         doctor["photo"] = tracker.get_slot("doctor_signup__photo")
         doctor["speciality"] = tracker.get_slot("doctor_signup__speciality")
         doctor["description"] = tracker.get_slot("doctor_signup__description")
-        doctor["time_slots"] = tracker.get_slot("doctor_signup__time_slots")
+        doctor["time_slots"] = {
+            "mon": [],
+            "tue": [],
+            "wed": [],
+            "thu": [],
+            "fri": [],
+            "sat": [],
+            "sun": [],
+        }
         doctor["fee"] = int(tracker.get_slot("doctor_signup__consultation_fee"))
         doctor["bank_account_number"] = tracker.get_slot(
             "doctor_signup__bank_account_number"

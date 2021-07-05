@@ -15,7 +15,6 @@ from actions.utils.validate import (
     validate_phone_number,
     validate_photo,
     validate_speciality,
-    validate_time_slots,
 )
 
 
@@ -104,24 +103,6 @@ class ValidateDoctorSignupForm(FormValidationAction):
                 }
             )
             return {"doctor_signup__description": None}
-
-    def validate_doctor_signup__time_slots(
-        self,
-        slot_value: Any,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: DomainDict,
-    ) -> Dict[Text, Any]:
-        time_slots = validate_time_slots(slot_value)
-        if time_slots:
-            return {"doctor_signup__time_slots": time_slots}
-        else:
-            dispatcher.utter_message(
-                json_message={
-                    "text": 'Time slots must be in the format "Mon, 09:00-13:00". The minutes must be either 00, 15, 30 or 45. You can specify multiple slots by separating them with a comma, and multiple days by separating them with a semicolon. For example "Mon, 10:00-12:00, 14:00-17:00; Tue, 10:00-12:00, 14:00-17:00".'
-                }
-            )
-            return {"doctor_signup__time_slots": None}
 
     def validate_doctor_signup__consultation_fee(
         self,
