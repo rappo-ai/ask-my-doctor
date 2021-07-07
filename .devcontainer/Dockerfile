@@ -10,6 +10,7 @@ RUN apt-get update && \
     git \
     nodejs && \
     . /opt/venv/bin/activate && \
-    pip install black
+    pip install razorpay && \
+    pip install black 
 
 USER 1001

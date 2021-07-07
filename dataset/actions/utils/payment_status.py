@@ -2,8 +2,7 @@ from typing import Dict
 
 
 def get_order_id_for_payment_status(payment_status: Dict):
-    # #tbdnikhil - return the order id from the incoming payment status
-    return payment_status.get("order_id")
+    return payment_status.get("razorpay_payment_link_reference_id")
 
 
 def print_payment_status(payment_status: Dict):
