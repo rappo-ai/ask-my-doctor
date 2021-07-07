@@ -4,13 +4,14 @@ from typing import Any, AnyStr, Match, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
+from actions.utils.admin_config import is_admin_group
 from actions.utils.doctor import get_doctor, update_doctor
 from actions.utils.meet import get_google_auth_url
 
 
-class ActionAdminCommandApprove(Action):
+class ActionCommandApprove(Action):
     def name(self) -> Text:
-        return "action_admin_command_approve"
+        return "action_command_approve"
 
     def run(
         self,
@@ -18,6 +19,9 @@ class ActionAdminCommandApprove(Action):
         tracker: Tracker,
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
+
+        if not is_admin_group(tracker.sender_id):
+            return []
 
         message_text = tracker.latest_message.get("text")
         regex = r"^(/\w+)\s+#(\w+)$"
@@ -50,8 +54,9 @@ class ActionAdminCommandApprove(Action):
                         + "/setdescription <DESCRIPTION> - update description\n"
                         + "/settimeslots <TIME SLOT LIST> - update available time slots for the upcoming week\n"
                         + "/setfee <CONSULTATION FEE> - update consultation fee\n"
+                        + "/setgoogleid - update Google ID for meetings\n"
                         + "\n"
-                        + f"To update your connected Google ID for creating meetings, please click this link -> {google_auth_url}"
+                        + f"To update your Google ID for creating meetings, please click this link -> {google_auth_url}\n"
                         + "\n"
                         + "To update your bank account details or for any other queries, please contact the admin @askmydoctorsupport.\n"
                     ),

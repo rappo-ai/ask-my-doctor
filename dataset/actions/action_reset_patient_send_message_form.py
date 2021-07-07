@@ -7,9 +7,9 @@ from rasa_sdk.executor import CollectingDispatcher
 from actions.utils.entity import get_entity
 
 
-class ActionResetAppointmentForm(Action):
+class ActionResetPatientSendMessageForm(Action):
     def name(self) -> Text:
-        return "action_reset_appointment_form"
+        return "action_reset_patient_send_message_form"
 
     def run(
         self,
@@ -19,9 +19,8 @@ class ActionResetAppointmentForm(Action):
     ) -> List[Dict[Text, Any]]:
 
         entities = tracker.latest_message.get("entities", [])
-        doctor_id = get_entity(entities, "d_id", "")
+        order_id = get_entity(entities, "o_id", "")
         return [
-            SlotSet("appointment__doctor_id", doctor_id),
-            SlotSet("appointment__date", None),
-            SlotSet("appointment__time", None),
+            SlotSet("patient_send_message__order_id", order_id),
+            SlotSet("patient_send_message__message_id", None),
         ]

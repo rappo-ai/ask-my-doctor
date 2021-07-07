@@ -4,14 +4,19 @@ from typing import Any, AnyStr, Match, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.admin_config import get_admin_group_id
-from actions.utils.doctor import get_doctor, get_doctor_for_user_id, update_doctor
+from actions.utils.admin_config import get_admin_group_id, is_admin_group
+from actions.utils.doctor import (
+    get_doctor,
+    get_doctor_for_user_id,
+    is_approved_doctor,
+    update_doctor,
+)
 from actions.utils.validate import validate_phone_number
 
 
-class ActionDoctorCommandSetPhoneNumber(Action):
+class ActionCommandSetPhoneNumber(Action):
     def name(self) -> Text:
-        return "action_doctor_command_setphonenumber"
+        return "action_command_setphonenumber"
 
     def run(
         self,
@@ -20,17 +25,20 @@ class ActionDoctorCommandSetPhoneNumber(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
+        _is_admin_group = is_admin_group(tracker.sender_id)
+        if not (_is_admin_group or is_approved_doctor(tracker.sender_id)):
+            return []
+
         message_text = tracker.latest_message.get("text")
-        is_admin = tracker.sender_id == get_admin_group_id()
         regex = r"^(/\w+)(\s+#(\w+))?(.+)$"
-        if is_admin:
+        if _is_admin_group:
             regex = r"^(/\w+)(\s+#(\w+))(.+)$"
         matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
         phone_number = matches and validate_phone_number(matches.group(4))
         if matches and phone_number:
             doctor = {}
             doctor_id = ""
-            if is_admin:
+            if _is_admin_group:
                 doctor_id = matches.group(3)
                 doctor = get_doctor(doctor_id)
             else:
@@ -52,7 +60,7 @@ class ActionDoctorCommandSetPhoneNumber(Action):
             )
         else:
             usage = "/setphonenumber <PHONE NUMBER>"
-            if is_admin:
+            if _is_admin_group:
                 usage = "/setphonenumber <DOCTOR ID> <PHONE NUMBER>"
             dispatcher.utter_message(
                 json_message={

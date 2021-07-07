@@ -77,6 +77,12 @@ def lazy_init():
         )
 
 
+def is_approved_doctor(chat_id: Text):
+    return bool(
+        db.doctor.find_one({"user_id": chat_id, "onboarding_status": "approved"})
+    )
+
+
 def add_doctor(doctor: Dict):
     lazy_init()
     return db.doctor.insert_one(doctor).inserted_id

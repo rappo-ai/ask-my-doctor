@@ -4,14 +4,19 @@ from typing import Any, AnyStr, Match, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.admin_config import get_admin_group_id
-from actions.utils.doctor import get_doctor, get_doctor_for_user_id, update_doctor
-from actions.utils.validate import validate_name
+from actions.utils.admin_config import get_admin_group_id, is_admin_group
+from actions.utils.doctor import (
+    get_doctor,
+    get_doctor_for_user_id,
+    is_approved_doctor,
+    update_doctor,
+)
+from actions.utils.validate import validate_consulation_fee
 
 
-class ActionDoctorCommandSetName(Action):
+class ActionCommandSetFee(Action):
     def name(self) -> Text:
-        return "action_doctor_command_setname"
+        return "action_command_setfee"
 
     def run(
         self,
@@ -20,44 +25,46 @@ class ActionDoctorCommandSetName(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
+        _is_admin_group = is_admin_group(tracker.sender_id)
+        if not (_is_admin_group or is_approved_doctor(tracker.sender_id)):
+            return []
+
         message_text = tracker.latest_message.get("text")
-        is_admin = tracker.sender_id == get_admin_group_id()
         regex = r"^(/\w+)(\s+#(\w+))?(.+)$"
-        if is_admin:
+        if _is_admin_group:
             regex = r"^(/\w+)(\s+#(\w+))(.+)$"
         matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
-        name = matches and validate_name(matches.group(4))
-        if matches and name:
+        fee = matches and validate_consulation_fee(matches.group(4))
+        if matches and fee:
             doctor = {}
             doctor_id = ""
-            if is_admin:
+            if _is_admin_group:
                 doctor_id = matches.group(3)
                 doctor = get_doctor(doctor_id)
             else:
                 doctor = get_doctor_for_user_id(tracker.sender_id)
                 doctor_id = str(doctor["_id"])
-
-            doctor["name"] = name
+            doctor["fee"] = int(fee)
             update_doctor(doctor)
             dispatcher.utter_message(
                 json_message={
                     "chat_id": get_admin_group_id(),
-                    "text": f"{doctor['name']} with ID #{doctor_id}, name has been updated to \"{name}\".",
+                    "text": f"{doctor['name']} with ID #{doctor_id}, consultation fee has been updated to Rs. {fee}.",
                 }
             )
             dispatcher.utter_message(
                 json_message={
                     "chat_id": doctor["user_id"],
-                    "text": f'Your name has been updated to "{name}".\n',
+                    "text": (f"Your consultation fee has been updated to Rs. {fee}.\n"),
                 }
             )
         else:
-            usage = "/setname <NAME>"
-            if is_admin:
-                usage = "/setname <DOCTOR ID> <NAME>"
+            usage = "/setfee <CONSULTATION FEE>"
+            if _is_admin_group:
+                usage = "/setfee <DOCTOR ID> <CONSULTATION FEE>"
             dispatcher.utter_message(
                 json_message={
-                    "text": f"The command format is incorrect. Usage:\n\n{usage}\n\nName cannot contain special characters other than apostrophe or period."
+                    "text": f"The command format is incorrect. Usage:\n\n{usage}\n\nConsultation fee must be a number in multiples of 50. The minimum fee is 100. The amount is automatically converted to Rupees, so no need to add the Rupee prefix / suffix."
                 }
             )
 

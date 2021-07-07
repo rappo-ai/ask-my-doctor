@@ -9,6 +9,7 @@ sudo swapon /swapfile
 # Setup Firewall
 sudo ufw allow http
 sudo ufw allow https
+sudo ufw allow 8081
 
 # SSH deploy key setup
 # tbdrenzil - manually create ~/.ssh/id_gitdeploykey
@@ -32,4 +33,4 @@ git clone git@github.com:rappo-ai/ask-my-doctor.git
 # launch docker
 cd ~/ask-my-doctor
 chmod -R 775 dataset
-docker-compose -f docker-compose.base.yml -f docker-compose.yml up --build -d
+docker-compose -f docker-compose.base.yml -f docker-compose.yml up --build --force-recreate -d
