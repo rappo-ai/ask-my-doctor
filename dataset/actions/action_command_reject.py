@@ -4,12 +4,13 @@ from typing import Any, AnyStr, Match, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
+from actions.utils.admin_config import is_admin_group
 from actions.utils.doctor import get_doctor, update_doctor
 
 
-class ActionAdminCommandReject(Action):
+class ActionCommandReject(Action):
     def name(self) -> Text:
-        return "action_admin_command_reject"
+        return "action_command_reject"
 
     def run(
         self,
@@ -17,6 +18,9 @@ class ActionAdminCommandReject(Action):
         tracker: Tracker,
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
+
+        if not is_admin_group(tracker.sender_id):
+            return []
 
         message_text = tracker.latest_message.get("text")
         regex = r"^(/\w+)\s+#(\w+)\s+(.+)$"

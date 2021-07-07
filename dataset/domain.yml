@@ -39,23 +39,23 @@ actions:
   - validate_doctor_signup_form
   - validate_doctor_send_message_form
 
-  - action_admin_command_addspeciality
-  - action_admin_command_approve
-  - action_admin_command_deletespeciality
-  - action_admin_command_groupid
-  - action_admin_command_reject
-  - action_admin_command_resetdb
+  - action_command_addspeciality
+  - action_command_approve
+  - action_command_deletespeciality
+  - action_command_groupid
+  - action_command_reject
+  - action_command_resetdb
 
-  - action_doctor_command_activate
-  - action_doctor_command_deactivate
-  - action_doctor_command_setdescription
-  - action_doctor_command_setfee
-  - action_doctor_command_setgoogleid
-  - action_doctor_command_setname
-  - action_doctor_command_setphonenumber
-  - action_doctor_command_setphoto
-  - action_doctor_command_setspeciality
-  - action_doctor_command_settimeslots
+  - action_command_activate
+  - action_command_deactivate
+  - action_command_setdescription
+  - action_command_setfee
+  - action_command_setgoogleid
+  - action_command_setname
+  - action_command_setphonenumber
+  - action_command_setphoto
+  - action_command_setspeciality
+  - action_command_settimeslots
 
 forms:
   search_form:
@@ -116,8 +116,6 @@ slots:
       - channel
   first_name:
     type: text
-  is_admin:
-    type: bool
   search__speciality:
     type: text
   appointment__date:

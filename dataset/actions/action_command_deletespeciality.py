@@ -4,12 +4,16 @@ from typing import Any, AnyStr, Match, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.admin_config import get_specialities, set_specialities
+from actions.utils.admin_config import (
+    is_admin_group,
+    get_specialities,
+    set_specialities,
+)
 
 
-class ActionAdminCommandAddSpeciality(Action):
+class ActionCommandDeleteSpeciality(Action):
     def name(self) -> Text:
-        return "action_admin_command_addspeciality"
+        return "action_command_deletespeciality"
 
     def run(
         self,
@@ -18,17 +22,20 @@ class ActionAdminCommandAddSpeciality(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
-        message_text = tracker.latest_message.get("text")
+        if not is_admin_group(tracker.sender_id):
+            return []
+
+        message_text: Text = tracker.latest_message.get("text")
         regex = r"^(/\w+)\s+([\w -]+)$"
         matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
         if matches:
             speciality = matches.group(2).strip()
             specialities: list = get_specialities()
-            if speciality in specialities:
+            if not speciality in specialities:
                 dispatcher.utter_message(
                     json_message={
                         "text": (
-                            f'"{speciality}" speciality already exists. Current list of specialities:\n'
+                            f'"{speciality}" speciality doesn\'t exist. Current list of specialities:\n'
                             + "\n"
                             + "\n".join(specialities)
                         )
@@ -36,12 +43,12 @@ class ActionAdminCommandAddSpeciality(Action):
                 )
                 return []
 
-            specialities.append(speciality)
+            specialities.remove(speciality)
             set_specialities(specialities)
             dispatcher.utter_message(
                 json_message={
                     "text": (
-                        f'"{speciality}" speciality added. Current list of specialities:\n'
+                        f'"{speciality}" speciality removed. Current list of specialities:\n'
                         + "\n"
                         + "\n".join(specialities)
                     )
@@ -50,7 +57,7 @@ class ActionAdminCommandAddSpeciality(Action):
         else:
             dispatcher.utter_message(
                 json_message={
-                    "text": "The command format is incorrect. Usage:\n\n/addspeciality <SPECIALITY>"
+                    "text": "The command format is incorrect. Usage:\n\n/deletespeciality <SPECIALITY>"
                 }
             )
 

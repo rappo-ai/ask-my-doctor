@@ -37,9 +37,6 @@ class ActionSessionStart(Action):
         if first_name is not None:
             slots.append(SlotSet(key="first_name", value=first_name))
 
-        # tbd - restrict admins
-        slots.append(SlotSet(key="is_admin", value=True))
-
         return slots
 
     async def run(

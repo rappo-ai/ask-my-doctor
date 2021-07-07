@@ -4,14 +4,18 @@ from typing import Any, AnyStr, Match, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.admin_config import get_admin_group_id
-from actions.utils.doctor import get_doctor, get_doctor_for_user_id, update_doctor
-from actions.utils.validate import validate_description
+from actions.utils.admin_config import get_admin_group_id, is_admin_group
+from actions.utils.doctor import (
+    get_doctor,
+    get_doctor_for_user_id,
+    is_approved_doctor,
+    update_doctor,
+)
 
 
-class ActionDoctorCommandSetDescription(Action):
+class ActionCommandDeactivate(Action):
     def name(self) -> Text:
-        return "action_doctor_command_setdescription"
+        return "action_command_deactivate"
 
     def run(
         self,
@@ -20,45 +24,47 @@ class ActionDoctorCommandSetDescription(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
+        _is_admin_group = is_admin_group(tracker.sender_id)
+        if not (_is_admin_group or is_approved_doctor(tracker.sender_id)):
+            return []
+
         message_text = tracker.latest_message.get("text")
-        is_admin = tracker.sender_id == get_admin_group_id()
-        regex = r"^(/\w+)(\s+#(\w+))?(.+)$"
-        if is_admin:
-            regex = r"^(/\w+)(\s+#(\w+))(.+)$"
+        regex = r"^(/\w+)(\s+#(\w+))?$"
+        if _is_admin_group:
+            regex = r"^(/\w+)(\s+#(\w+))$"
         matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
-        description = matches and validate_description(matches.group(4))
-        if matches and description:
+        if matches:
             doctor = {}
             doctor_id = ""
-            if is_admin:
+            if _is_admin_group:
                 doctor_id = matches.group(3)
                 doctor = get_doctor(doctor_id)
             else:
                 doctor = get_doctor_for_user_id(tracker.sender_id)
                 doctor_id = str(doctor["_id"])
-            doctor["description"] = description
+            doctor["listing_status"] = "disabled"
             update_doctor(doctor)
             dispatcher.utter_message(
                 json_message={
                     "chat_id": get_admin_group_id(),
-                    "text": f"{doctor['name']} with ID #{doctor_id}, description has been updated to \"{description}\".",
+                    "text": f"{doctor['name']} with ID #{doctor_id} has been deactivated.",
                 }
             )
             dispatcher.utter_message(
                 json_message={
                     "chat_id": doctor["user_id"],
                     "text": (
-                        f'Your description has been updated to "{description}".\n'
+                        f"Your listing is inactive. You can re-activate your listing with /activate.\n"
                     ),
                 }
             )
         else:
-            usage = "/setdescription <DESCRIPTION>"
-            if is_admin:
-                usage = "/setdescription <DOCTOR ID> <DESCRIPTION>"
+            usage = "/deactivate"
+            if _is_admin_group:
+                usage = "/deactivate <DOCTOR ID>"
             dispatcher.utter_message(
                 json_message={
-                    "text": f"The command format is incorrect. Usage:\n\n{usage}\n\nDescription cannot be more than 200 characters long."
+                    "text": f"The command format is incorrect. Usage:\n\n{usage}"
                 }
             )
 
