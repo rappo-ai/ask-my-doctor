@@ -7,9 +7,9 @@ from actions.utils.doctor import get_doctor_for_user_id
 from actions.utils.meet import get_google_auth_url
 
 
-class ActionDoctorCommandSetGoogleID(Action):
+class ActionCommandSetGoogleID(Action):
     def name(self) -> Text:
-        return "action_doctor_command_setgoogleid"
+        return "action_command_setgoogleid"
 
     def run(
         self,

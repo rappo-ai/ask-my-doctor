@@ -4,15 +4,20 @@ from typing import Any, AnyStr, Match, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.admin_config import get_admin_group_id
+from actions.utils.admin_config import get_admin_group_id, is_admin_group
 from actions.utils.date import print_time_slots
-from actions.utils.doctor import get_doctor, get_doctor_for_user_id, update_doctor
+from actions.utils.doctor import (
+    get_doctor,
+    get_doctor_for_user_id,
+    is_approved_doctor,
+    update_doctor,
+)
 from actions.utils.validate import validate_time_slots
 
 
-class ActionDoctorCommandSetTimeSlots(Action):
+class ActionCommandSetTimeSlots(Action):
     def name(self) -> Text:
-        return "action_doctor_command_settimeslots"
+        return "action_command_settimeslots"
 
     def run(
         self,
@@ -21,17 +26,20 @@ class ActionDoctorCommandSetTimeSlots(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
+        _is_admin_group = is_admin_group(tracker.sender_id)
+        if not (_is_admin_group or is_approved_doctor(tracker.sender_id)):
+            return []
+
         message_text = tracker.latest_message.get("text")
-        is_admin = tracker.sender_id == get_admin_group_id()
         regex = r"^(/\w+)(\s+#(\w+))?(.+)$"
-        if is_admin:
+        if _is_admin_group:
             regex = r"^(/\w+)(\s+#(\w+))(.+)$"
         matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
         new_time_slots = matches and validate_time_slots(matches.group(4))
         if matches and new_time_slots:
             doctor: Dict = {}
             doctor_id = ""
-            if is_admin:
+            if _is_admin_group:
                 doctor_id = matches.group(3)
                 doctor = get_doctor(doctor_id)
             else:
@@ -56,7 +64,7 @@ class ActionDoctorCommandSetTimeSlots(Action):
             )
         else:
             usage = "/settimeslots <TIME SLOTS>"
-            if is_admin:
+            if _is_admin_group:
                 usage = "/settimeslots <DOCTOR ID> <TIME SLOTS>"
             dispatcher.utter_message(
                 json_message={

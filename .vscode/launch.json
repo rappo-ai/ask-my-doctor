@@ -43,6 +43,9 @@
         "-vv",
         "--auto-reload",
       ],
+      "env": {
+        "RAPPO_ENV": "debug",
+      },
       "pathMappings": [
         {
           "localRoot": "${workspaceFolder}/.venv",

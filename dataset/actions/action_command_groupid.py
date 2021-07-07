@@ -4,12 +4,12 @@ from typing import Any, AnyStr, Match, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.admin_config import set_admin_group_id
+from actions.utils.admin_config import is_super_admin, set_admin_group_id
 
 
-class ActionAdminCommandGroupId(Action):
+class ActionCommandGroupId(Action):
     def name(self) -> Text:
-        return "action_admin_command_groupid"
+        return "action_command_groupid"
 
     def run(
         self,
@@ -17,6 +17,9 @@ class ActionAdminCommandGroupId(Action):
         tracker: Tracker,
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
+
+        if not is_super_admin(tracker.sender_id):
+            return []
 
         message_text = tracker.latest_message.get("text")
         regex = r"^(/\w+)\s+(-?\d+)$"
