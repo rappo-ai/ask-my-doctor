@@ -154,3 +154,25 @@ def print_doctor_summary(doctor: Dict):
 def update_doctor(doctor: Dict):
     lazy_init()
     db.doctor.update_one({"_id": doctor.get("_id")}, {"$set": doctor})
+
+
+def get_doctor_command_help(is_admin: bool = False):
+    doctor_id_arg = (is_admin and "<DOCTOR ID> ") or ""
+    command_help = (
+        +f"/activate {doctor_id_arg}- activate listing\n"
+        + f"/deactivate {doctor_id_arg}- deactivate listing\n"
+        + f"/setname {doctor_id_arg}<NAME> - update name\n"
+        + f"/setphoto {doctor_id_arg}- update profile photo by replying to image message\n"
+        + f"/setphonenumber {doctor_id_arg}<PHONE NUMBER>- update phone number\n"
+        + f"/setspeciality {doctor_id_arg}<SPECIALITY> - update speciality\n"
+        + f"/setdescription {doctor_id_arg}<DESCRIPTION> - update description\n"
+        + f"/settimeslots {doctor_id_arg}<TIME SLOT LIST> - update available time slots for the upcoming week\n"
+        + f"/setfee {doctor_id_arg}<CONSULTATION FEE> - update consultation fee\n"
+    )
+    if not is_admin:
+        command_help = command_help + (
+            "/setgoogleid - update Google ID for meetings\n"
+            + "\n"
+            + "To update your bank account details or for any other queries, please contact the admin @askmydoctorsupport.\n"
+        )
+    return command_help

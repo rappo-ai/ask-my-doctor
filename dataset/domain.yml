@@ -2,6 +2,7 @@ version: "2.0"
 
 actions:
   - action_session_start
+  - action_help
 
   - action_ask_search__speciality
   - action_on_search_set
