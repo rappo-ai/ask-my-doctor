@@ -142,7 +142,6 @@ def print_doctor_profile(
         + f"Phone Number: {doctor.get('phone_number')}\n"
         + f"Speciality: {doctor.get('speciality')}\n"
         + f"Description: {doctor.get('description')}\n"
-        + f"Availability: {doctor.get('availability')}\n"
         + f"Consultation Fee: {doctor.get('fee')}\n"
     )
     if include_time_slots:
@@ -164,6 +163,13 @@ def print_doctor_profile(
     return profile
 
 
+def get_doctor_card(doctor: Dict) -> Dict:
+    caption = print_doctor_profile(
+        doctor, include_time_slots=True, include_google_id=True
+    )
+    return {"photo": doctor.get("photo"), "caption": caption}
+
+
 def print_doctor_summary(doctor: Dict):
     return (
         f"Name: {doctor.get('name')}\n"
@@ -181,7 +187,8 @@ def update_doctor(doctor: Dict):
 def get_doctor_command_help(is_admin: bool = False):
     doctor_id_arg = (is_admin and "<DOCTOR ID> ") or ""
     command_help = (
-        f"/activate {doctor_id_arg}- activate listing\n"
+        f"/profile {doctor_id_arg}- view profile\n"
+        + f"/activate {doctor_id_arg}- activate listing\n"
         + f"/deactivate {doctor_id_arg}- deactivate listing\n"
         + f"/setname {doctor_id_arg}<NAME> - update name\n"
         + f"/setphoto {doctor_id_arg}- update profile photo by replying to image message\n"

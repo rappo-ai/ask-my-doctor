@@ -10,9 +10,9 @@ from rasa_sdk.executor import CollectingDispatcher
 from actions.utils.admin_config import is_admin_group
 from actions.utils.doctor import (
     get_doctor,
+    get_doctor_card,
     get_doctor_for_user_id,
     is_approved_doctor,
-    print_doctor_profile,
 )
 
 logger = logging.getLogger(__name__)
@@ -48,11 +48,7 @@ class ActionCommandProfile(Action):
                 doctor = get_doctor_for_user_id(tracker.sender_id)
                 doctor_id = str(doctor["_id"])
 
-            caption = print_doctor_profile(
-                doctor, include_time_slots=True, include_google_id=True
-            )
-            json_message = {"photo": doctor.get("photo"), "caption": caption}
-            dispatcher.utter_message(json_message=json_message)
+            dispatcher.utter_message(json_message=get_doctor_card(doctor))
         else:
             usage = "/profile"
             if _is_admin_group:

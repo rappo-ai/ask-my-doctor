@@ -7,6 +7,7 @@ from rasa_sdk.executor import CollectingDispatcher
 from actions.utils.admin_config import get_admin_group_id, is_admin_group
 from actions.utils.doctor import (
     get_doctor,
+    get_doctor_card,
     get_doctor_for_user_id,
     is_approved_doctor,
     update_doctor,
@@ -29,6 +30,7 @@ class ActionCommandSetPhoneNumber(Action):
         if not (_is_admin_group or is_approved_doctor(tracker.sender_id)):
             return []
 
+        command_user = "ADMIN" if _is_admin_group else "DOCTOR"
         message_text = tracker.latest_message.get("text")
         regex = r"^(/\w+)(\s+#(\w+))?(.+)$"
         if _is_admin_group:
@@ -46,16 +48,26 @@ class ActionCommandSetPhoneNumber(Action):
                 doctor_id = str(doctor["_id"])
             doctor["phone_number"] = phone_number
             update_doctor(doctor)
+
+            doctor_card = get_doctor_card(doctor)
+
+            dispatcher.utter_message(
+                json_message={**doctor_card, "chat_id": get_admin_group_id()}
+            )
             dispatcher.utter_message(
                 json_message={
                     "chat_id": get_admin_group_id(),
-                    "text": f"{doctor['name']} with ID #{doctor_id}, phone number has been updated to \"{phone_number}\".",
+                    "text": f"{doctor['name']} with ID #{doctor_id}, phone number has been updated to \"{phone_number}\" by {command_user}.",
                 }
+            )
+
+            dispatcher.utter_message(
+                json_message={**doctor_card, "chat_id": doctor["user_id"]}
             )
             dispatcher.utter_message(
                 json_message={
                     "chat_id": doctor["user_id"],
-                    "text": f'Your phone number has been updated to "{phone_number}".\n',
+                    "text": f'Your phone number has been updated to "{phone_number}" by {command_user}.\n',
                 }
             )
         else:
