@@ -3,7 +3,11 @@ from typing import Dict, Text
 
 from actions.db.store import db
 from actions.utils.admin_config import get_advance_appointment_days
-from actions.utils.date import format_time_slots_for_date, get_upcoming_availability
+from actions.utils.date import (
+    format_time_slots_for_date,
+    get_upcoming_availability,
+    print_time_slots,
+)
 
 
 def lazy_init():
@@ -125,21 +129,45 @@ def get_upcoming_appointment_dates(doctor_id):
     return get_upcoming_availability(doctor_time_slots, get_advance_appointment_days())
 
 
-def print_doctor_signup_form(doctor: Dict):
-    return (
+def print_doctor_profile(
+    doctor: Dict,
+    include_time_slots: bool = False,
+    include_google_id: bool = False,
+    include_bank_details: bool = False,
+):
+    profile = (
         f"ID: #{doctor.get('_id')}\n"
         + "\n"
         + f"Name: {doctor.get('name')}\n"
         + f"Phone Number: {doctor.get('phone_number')}\n"
         + f"Speciality: {doctor.get('speciality')}\n"
         + f"Description: {doctor.get('description')}\n"
-        + f"Availability: {doctor.get('availability')}\n"
-        + f"Consultation Fee: {doctor.get('fee')}\n\n"
-        + f"Bank Details\n\n"
-        + f"Account number: {doctor.get('bank_account_number')}\n"
-        + f"Account name: {doctor.get('bank_account_name')}\n"
-        + f"Account IFSC: {doctor.get('bank_account_ifsc')}\n"
+        + f"Consultation Fee: {doctor.get('fee')}\n"
     )
+    if include_time_slots:
+        profile = profile + (
+            f"Time Slots: {print_time_slots(doctor.get('time_slots'))}\n"
+        )
+    if include_google_id:
+        profile = profile + (
+            f"Google ID: {'Connected' if doctor.get('credentials') else 'Not connected'}\n"
+        )
+    if include_bank_details:
+        profile = profile + (
+            "\n"
+            + "Bank Details\n\n"
+            + f"Account number: {doctor.get('bank_account_number')}\n"
+            + f"Account name: {doctor.get('bank_account_name')}\n"
+            + f"Account IFSC: {doctor.get('bank_account_ifsc')}\n"
+        )
+    return profile
+
+
+def get_doctor_card(doctor: Dict) -> Dict:
+    caption = print_doctor_profile(
+        doctor, include_time_slots=True, include_google_id=True
+    )
+    return {"photo": doctor.get("photo"), "caption": caption}
 
 
 def print_doctor_summary(doctor: Dict):
@@ -159,7 +187,8 @@ def update_doctor(doctor: Dict):
 def get_doctor_command_help(is_admin: bool = False):
     doctor_id_arg = (is_admin and "<DOCTOR ID> ") or ""
     command_help = (
-        +f"/activate {doctor_id_arg}- activate listing\n"
+        f"/profile {doctor_id_arg}- view profile\n"
+        + f"/activate {doctor_id_arg}- activate listing\n"
         + f"/deactivate {doctor_id_arg}- deactivate listing\n"
         + f"/setname {doctor_id_arg}<NAME> - update name\n"
         + f"/setphoto {doctor_id_arg}- update profile photo by replying to image message\n"

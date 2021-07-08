@@ -41,7 +41,7 @@ class ActionCommandApprove(Action):
                     "text": (
                         f"Your application has been approved. Please use /setgoogleid to connect your Google ID to create meetings, and /settimeslots to update your timeslots for the upcoming week. Once you have done this, use /activate to make your listing live.\n"
                         + "\n"
-                        "Here is the list of commands to update your profile:\n"
+                        "Here is the list of commands to view or update your doctor profile:\n"
                         + "\n"
                         + get_doctor_command_help()
                     ),

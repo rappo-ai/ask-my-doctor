@@ -37,7 +37,7 @@ class ActionHelp(Action):
 
         if is_approved_doctor(tracker.sender_id):
             text = (
-                "Here is the list of commands to update your profile:\n"
+                "Here is the list of commands to view or update your doctor profile:\n"
                 + "\n"
                 + get_doctor_command_help()
             )

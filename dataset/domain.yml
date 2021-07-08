@@ -57,6 +57,7 @@ actions:
   - action_command_setphoto
   - action_command_setspeciality
   - action_command_settimeslots
+  - action_command_profile
 
 forms:
   search_form:
