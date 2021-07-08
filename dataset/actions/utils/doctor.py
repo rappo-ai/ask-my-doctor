@@ -136,13 +136,21 @@ def get_upcoming_appointment_dates(doctor_id):
 
 def print_doctor_profile(
     doctor: Dict,
+    include_status: bool = False,
     include_time_slots: bool = False,
     include_google_id: bool = False,
     include_bank_details: bool = False,
 ):
-    profile = (
-        f"ID: #{doctor.get('_id')}\n"
-        + "\n"
+    profile = f"ID: #{doctor.get('_id')}\n"
+
+    if include_status:
+        profile = profile + (
+            "\n"
+            + f"Onboarding Status: {str(doctor.get('onboarding_status')).capitalize()}\n"
+            + f"Listing Status: {str(doctor.get('listing_status')).capitalize()}\n"
+        )
+    profile = profile + (
+        "\n"
         + f"Name: {doctor.get('name')}\n"
         + f"Phone Number: {doctor.get('phone_number')}\n"
         + f"Speciality: {doctor.get('speciality')}\n"
@@ -170,7 +178,7 @@ def print_doctor_profile(
 
 def get_doctor_card(doctor: Dict) -> Dict:
     caption = print_doctor_profile(
-        doctor, include_time_slots=True, include_google_id=True
+        doctor, include_status=True, include_time_slots=True, include_google_id=True
     )
     return {"photo": doctor.get("photo"), "caption": caption}
 
