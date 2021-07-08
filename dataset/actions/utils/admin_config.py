@@ -15,7 +15,7 @@ def lazy_init():
                 "_id": ObjectId(ADMIN_CONFID_OBJECT_ID),
                 "super_admins": [],
                 "advance_appointment_days": 7,
-                "commission_rate": 20,
+                "commission_rate": 10,
                 "meeting_duration_minutes": 15,
                 "specialities": [
                     "General Surgeon",
