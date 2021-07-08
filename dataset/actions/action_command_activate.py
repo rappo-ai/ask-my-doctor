@@ -66,7 +66,7 @@ class ActionCommandActivate(Action):
                 dispatcher.utter_message(
                     json_message={
                         "chat_id": doctor["user_id"],
-                        "text": f'Your listing cannot be activated as you haven\'t added your time slots. Please use "/settimeslots <TIME_SLOTS>".',
+                        "text": f"Your listing cannot be activated as you haven't added your time slots. Please use /settimeslots.",
                     }
                 )
                 return
