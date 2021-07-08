@@ -20,7 +20,9 @@ class ActionOnSearchSet(Action):
         dispatcher.utter_message(json_message={"text": "Please choose a doctor:"})
 
         speciality = tracker.get_slot("search__speciality")
-        doctors = get_doctors(speciality=speciality)
+        doctors = get_doctors(
+            speciality=speciality, onboarding_status="approved", listing_status="active"
+        )
         for d in doctors:
             reply_markup = {
                 "keyboard": [
