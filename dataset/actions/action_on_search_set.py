@@ -3,7 +3,7 @@ from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.doctor import get_doctors_for_speciality, print_doctor_summary
+from actions.utils.doctor import get_doctors, print_doctor_summary
 
 
 class ActionOnSearchSet(Action):
@@ -20,7 +20,7 @@ class ActionOnSearchSet(Action):
         dispatcher.utter_message(json_message={"text": "Please choose a doctor:"})
 
         speciality = tracker.get_slot("search__speciality")
-        doctors = get_doctors_for_speciality(speciality)
+        doctors = get_doctors(speciality=speciality)
         for d in doctors:
             reply_markup = {
                 "keyboard": [

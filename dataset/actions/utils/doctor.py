@@ -113,15 +113,20 @@ def get_doctor_time_slots(id):
     return doctor.get("time_slots")
 
 
-def get_doctors_for_speciality(speciality: Text):
+def get_doctors(
+    speciality: Text = None,
+    onboarding_status: Text = None,
+    listing_status: Text = None,
+):
     lazy_init()
-    return db.doctor.find(
-        {
-            "speciality": speciality,
-            "onboarding_status": "approved",
-            "listing_status": "active",
-        }
-    )
+    query = {}
+    if speciality:
+        query.update({"speciality": speciality})
+    if onboarding_status:
+        query.update({"onboarding_status": onboarding_status})
+    if listing_status:
+        query.update({"listing_status": listing_status})
+    return db.doctor.find(query)
 
 
 def get_upcoming_appointment_dates(doctor_id):
