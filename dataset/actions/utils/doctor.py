@@ -113,15 +113,20 @@ def get_doctor_time_slots(id):
     return doctor.get("time_slots")
 
 
-def get_doctors_for_speciality(speciality: Text):
+def get_doctors(
+    speciality: Text = None,
+    onboarding_status: Text = None,
+    listing_status: Text = None,
+):
     lazy_init()
-    return db.doctor.find(
-        {
-            "speciality": speciality,
-            "onboarding_status": "approved",
-            "listing_status": "active",
-        }
-    )
+    query = {}
+    if speciality:
+        query.update({"speciality": speciality})
+    if onboarding_status:
+        query.update({"onboarding_status": onboarding_status})
+    if listing_status:
+        query.update({"listing_status": listing_status})
+    return db.doctor.find(query)
 
 
 def get_upcoming_appointment_dates(doctor_id):
@@ -131,13 +136,21 @@ def get_upcoming_appointment_dates(doctor_id):
 
 def print_doctor_profile(
     doctor: Dict,
+    include_status: bool = False,
     include_time_slots: bool = False,
     include_google_id: bool = False,
     include_bank_details: bool = False,
 ):
-    profile = (
-        f"ID: #{doctor.get('_id')}\n"
-        + "\n"
+    profile = f"ID: #{doctor.get('_id')}\n"
+
+    if include_status:
+        profile = profile + (
+            "\n"
+            + f"Onboarding Status: {str(doctor.get('onboarding_status')).capitalize()}\n"
+            + f"Listing Status: {str(doctor.get('listing_status')).capitalize()}\n"
+        )
+    profile = profile + (
+        "\n"
         + f"Name: {doctor.get('name')}\n"
         + f"Phone Number: {doctor.get('phone_number')}\n"
         + f"Speciality: {doctor.get('speciality')}\n"
@@ -165,7 +178,7 @@ def print_doctor_profile(
 
 def get_doctor_card(doctor: Dict) -> Dict:
     caption = print_doctor_profile(
-        doctor, include_time_slots=True, include_google_id=True
+        doctor, include_status=True, include_time_slots=True, include_google_id=True
     )
     return {"photo": doctor.get("photo"), "caption": caption}
 

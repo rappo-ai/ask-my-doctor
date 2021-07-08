@@ -26,6 +26,7 @@ class ActionHelp(Action):
                 + "/deletespeciality <SPECIALITY> - delete a speciality\n"
                 + "/approve <DOCTOR ID> - approve a doctor\n"
                 + "/reject <DOCTOR ID> <REASON> - reject a doctor\n"
+                + "/listdoctors <SPECIALITY> - list all doctors for a speciality\n"
                 + "\n"
                 + "Additional commands to update doctor profiles:\n"
                 + "\n"

@@ -44,6 +44,7 @@ actions:
   - action_command_approve
   - action_command_deletespeciality
   - action_command_groupid
+  - action_command_listdoctors
   - action_command_reject
   - action_command_resetdb
 
