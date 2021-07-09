@@ -26,6 +26,12 @@ from actions.utils.order import (
 from actions.utils.patient import print_patient
 from actions.utils.payment_status import (
     get_order_id_for_payment_status,
+    get_payment_id,
+    get_payment_amount,
+    get_payment_date,
+    get_payment_mode,
+    get_payment_status,
+    get_payment_details,
     print_payment_status,
 )
 from actions.utils.sheets import update_order_in_spreadsheet
@@ -57,15 +63,12 @@ class ActionPaymentCallback(Action):
         if not order:
             logger.error("Unable to find order for this payment.")
 
-        payment_id = payment_status.get("razorpay_payment_id")
-        resp = client.payment.fetch(payment_id)
-        amount_rupees = resp["amount"] / 100
-        timestamp = datetime.fromtimestamp(resp["created_at"]).strftime(
-            "%d-%m-%Y %H:%M:%S"
-        )
-        date = timestamp
-        mode = resp["method"]
-        status = payment_status.get("razorpay_payment_link_status")
+        payment_id = get_payment_id(payment_status)
+        resp = get_payment_details(payment_status)
+        amount_rupees = get_payment_amount(resp) / 100
+        date = get_payment_date(resp)
+        mode = get_payment_mode(resp)
+        status = get_payment_status(payment_status)
 
         payment_details = {
             "amount_rupees": amount_rupees,

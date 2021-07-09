@@ -1,10 +1,46 @@
 from typing import Dict
 import datetime
 import json
+import razorpay
+
+client = razorpay.Client(auth=("rzp_test_rD6PXVUtWKrB8q", "xzeXnI5qAtOWSX96cwSeCw8n"))
 
 
 def get_order_id_for_payment_status(payment_status: Dict):
     return payment_status.get("razorpay_payment_link_reference_id")
+
+
+def get_payment_id(payment_status: Dict):
+    return payment_status.get("razorpay_payment_id")
+
+
+# amount,date,mode,status
+
+
+def get_payment_amount(payment_status: Dict):
+    return payment_status["amount"]
+
+
+def get_payment_date(payment_status: Dict):
+    timestamp = datetime.datetime.fromtimestamp(payment_status["created_at"]).strftime(
+        "%d-%m-%Y %H:%M:%S"
+    )
+    date = timestamp
+    return date
+
+
+def get_payment_mode(payment_status: Dict):
+    return payment_status["method"]
+
+
+def get_payment_status(payment_status: Dict):
+    return payment_status.get("razorpay_payment_link_status")
+
+
+def get_payment_details(payment_status: Dict):
+    payment_id = payment_status.get("razorpay_payment_id")
+    resp = client.payment.fetch(payment_id)
+    return resp
 
 
 def print_payment_status(payment_status: Dict):
@@ -17,8 +53,8 @@ def print_payment_status(payment_status: Dict):
 
     return (
         f"Amount: {amount_rupees}\n"
-        + f"Transaction ID: {payment_status.get('razorpay_payment_id', '')}\n"
+        + f"Payment ID: {payment_status.get('razorpay_payment_id', '')}\n"
         + f"Date: {date}\n"
         + f"Mode: {mode}\n"
-        + f"Mode: {status}\n"
+        + f"Status of Payment: {status}\n"
     )
