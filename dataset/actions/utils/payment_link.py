@@ -1,10 +1,16 @@
+import base64
 import json
+import http.client
 from typing import Text
 import razorpay
 import requests
 from requests.structures import CaseInsensitiveDict
 
 from actions.utils.host import get_host_url
+from dotenv import load_dotenv
+import os
+
+load_dotenv("/workspace/.env")
 
 
 def create_payment_link(
@@ -15,20 +21,17 @@ def create_payment_link(
     description: Text,
     order_id: Text,
 ):
-
-    client = razorpay.Client(
-        auth=("rzp_test_rD6PXVUtWKrB8q", "xzeXnI5qAtOWSX96cwSeCw8n")
-    )
     url = "https://api.razorpay.com/v1/payment_links"
+
+    credentials = os.getenv("RAZORPAY_KEY_ID") + ":" + os.getenv("RAZORPAY_SECRET_KEY")
+    base64_credentials = base64.b64encode(credentials.encode("utf8"))
+    credential = base64_credentials.decode("utf8")
 
     headers = CaseInsensitiveDict()
     headers["Content-type"] = "application/json"
-    headers[
-        "Authorization"
-    ] = "Basic cnpwX3Rlc3RfckQ2UFhWVXRXS3JCOHE6eHplWG5JNXFBdE9XU1g5NmN3U2VDdzhu"
+    headers["Authorization"] = "basic " + credential
 
     amount_paise = amount_rupees * 100
-    # "reference_id": str(order_id),
     url_pay = get_host_url("/webhooks/telegram/payment_callback")
 
     data1 = {

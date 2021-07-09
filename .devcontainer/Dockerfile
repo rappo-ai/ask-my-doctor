@@ -11,6 +11,7 @@ RUN apt-get update && \
     nodejs && \
     . /opt/venv/bin/activate && \
     pip install razorpay && \
+    pip install python-dotenv && \
     pip install black 
 
 USER 1001

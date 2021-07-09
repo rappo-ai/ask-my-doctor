@@ -7,8 +7,6 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 import razorpay
 
-client = razorpay.Client(auth=("rzp_test_rD6PXVUtWKrB8q", "xzeXnI5qAtOWSX96cwSeCw8n"))
-
 from actions.utils.admin_config import (
     get_admin_group_id,
     get_meeting_duration_in_minutes,
