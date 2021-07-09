@@ -4,14 +4,20 @@ from typing import Any, AnyStr, Match, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.admin_config import get_admin_group_id
-from actions.utils.doctor import get_doctor, get_doctor_for_user_id, update_doctor
+from actions.utils.admin_config import get_admin_group_id, is_admin_group
+from actions.utils.doctor import (
+    get_doctor,
+    get_doctor_card,
+    get_doctor_for_user_id,
+    is_approved_doctor,
+    update_doctor,
+)
 from actions.utils.validate import validate_phone_number
 
 
-class ActionDoctorCommandSetPhoneNumber(Action):
+class ActionCommandSetPhoneNumber(Action):
     def name(self) -> Text:
-        return "action_doctor_command_setphonenumber"
+        return "action_command_setphonenumber"
 
     def run(
         self,
@@ -20,17 +26,21 @@ class ActionDoctorCommandSetPhoneNumber(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
+        _is_admin_group = is_admin_group(tracker.sender_id)
+        if not (_is_admin_group or is_approved_doctor(tracker.sender_id)):
+            return []
+
+        command_user = "ADMIN" if _is_admin_group else "DOCTOR"
         message_text = tracker.latest_message.get("text")
-        is_admin = tracker.sender_id == get_admin_group_id()
         regex = r"^(/\w+)(\s+#(\w+))?(.+)$"
-        if is_admin:
+        if _is_admin_group:
             regex = r"^(/\w+)(\s+#(\w+))(.+)$"
         matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
         phone_number = matches and validate_phone_number(matches.group(4))
         if matches and phone_number:
             doctor = {}
             doctor_id = ""
-            if is_admin:
+            if _is_admin_group:
                 doctor_id = matches.group(3)
                 doctor = get_doctor(doctor_id)
             else:
@@ -38,21 +48,31 @@ class ActionDoctorCommandSetPhoneNumber(Action):
                 doctor_id = str(doctor["_id"])
             doctor["phone_number"] = phone_number
             update_doctor(doctor)
+
+            doctor_card = get_doctor_card(doctor)
+
+            dispatcher.utter_message(
+                json_message={**doctor_card, "chat_id": get_admin_group_id()}
+            )
             dispatcher.utter_message(
                 json_message={
                     "chat_id": get_admin_group_id(),
-                    "text": f"{doctor['name']} with ID #{doctor_id}, phone number has been updated to \"{phone_number}\".",
+                    "text": f"{doctor['name']} with ID #{doctor_id}, phone number has been updated to \"{phone_number}\" by {command_user}.",
                 }
+            )
+
+            dispatcher.utter_message(
+                json_message={**doctor_card, "chat_id": doctor["user_id"]}
             )
             dispatcher.utter_message(
                 json_message={
                     "chat_id": doctor["user_id"],
-                    "text": f'Your phone number has been updated to "{phone_number}".\n',
+                    "text": f'Your phone number has been updated to "{phone_number}" by {command_user}.\n',
                 }
             )
         else:
             usage = "/setphonenumber <PHONE NUMBER>"
-            if is_admin:
+            if _is_admin_group:
                 usage = "/setphonenumber <DOCTOR ID> <PHONE NUMBER>"
             dispatcher.utter_message(
                 json_message={

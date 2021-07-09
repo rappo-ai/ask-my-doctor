@@ -3,7 +3,11 @@ from typing import Dict, Text
 
 from actions.db.store import db
 from actions.utils.admin_config import get_advance_appointment_days
-from actions.utils.date import format_time_slots_for_date, get_upcoming_availability
+from actions.utils.date import (
+    format_time_slots_for_date,
+    get_upcoming_availability,
+    print_time_slots,
+)
 
 
 def lazy_init():
@@ -77,6 +81,12 @@ def lazy_init():
         )
 
 
+def is_approved_doctor(chat_id: Text):
+    return bool(
+        db.doctor.find_one({"user_id": chat_id, "onboarding_status": "approved"})
+    )
+
+
 def add_doctor(doctor: Dict):
     lazy_init()
     return db.doctor.insert_one(doctor).inserted_id
@@ -103,15 +113,20 @@ def get_doctor_time_slots(id):
     return doctor.get("time_slots")
 
 
-def get_doctors_for_speciality(speciality: Text):
+def get_doctors(
+    speciality: Text = None,
+    onboarding_status: Text = None,
+    listing_status: Text = None,
+):
     lazy_init()
-    return db.doctor.find(
-        {
-            "speciality": speciality,
-            "onboarding_status": "approved",
-            "listing_status": "active",
-        }
-    )
+    query = {}
+    if speciality:
+        query.update({"speciality": speciality})
+    if onboarding_status:
+        query.update({"onboarding_status": onboarding_status})
+    if listing_status:
+        query.update({"listing_status": listing_status})
+    return db.doctor.find(query)
 
 
 def get_upcoming_appointment_dates(doctor_id):
@@ -119,21 +134,53 @@ def get_upcoming_appointment_dates(doctor_id):
     return get_upcoming_availability(doctor_time_slots, get_advance_appointment_days())
 
 
-def print_doctor_signup_form(doctor: Dict):
-    return (
-        f"ID: #{doctor.get('_id')}\n"
-        + "\n"
+def print_doctor_profile(
+    doctor: Dict,
+    include_status: bool = False,
+    include_time_slots: bool = False,
+    include_google_id: bool = False,
+    include_bank_details: bool = False,
+):
+    profile = f"ID: #{doctor.get('_id')}\n"
+
+    if include_status:
+        profile = profile + (
+            "\n"
+            + f"Onboarding Status: {str(doctor.get('onboarding_status')).capitalize()}\n"
+            + f"Listing Status: {str(doctor.get('listing_status')).capitalize()}\n"
+        )
+    profile = profile + (
+        "\n"
         + f"Name: {doctor.get('name')}\n"
         + f"Phone Number: {doctor.get('phone_number')}\n"
         + f"Speciality: {doctor.get('speciality')}\n"
         + f"Description: {doctor.get('description')}\n"
-        + f"Availability: {doctor.get('availability')}\n"
-        + f"Consultation Fee: {doctor.get('fee')}\n\n"
-        + f"Bank Details\n\n"
-        + f"Account number: {doctor.get('bank_account_number')}\n"
-        + f"Account name: {doctor.get('bank_account_name')}\n"
-        + f"Account IFSC: {doctor.get('bank_account_ifsc')}\n"
+        + f"Consultation Fee: {doctor.get('fee')}\n"
     )
+    if include_time_slots:
+        profile = profile + (
+            f"Time Slots: {print_time_slots(doctor.get('time_slots'))}\n"
+        )
+    if include_google_id:
+        profile = profile + (
+            f"Google ID: {'Connected' if doctor.get('credentials') else 'Not connected'}\n"
+        )
+    if include_bank_details:
+        profile = profile + (
+            "\n"
+            + "Bank Details\n\n"
+            + f"Account number: {doctor.get('bank_account_number')}\n"
+            + f"Account name: {doctor.get('bank_account_name')}\n"
+            + f"Account IFSC: {doctor.get('bank_account_ifsc')}\n"
+        )
+    return profile
+
+
+def get_doctor_card(doctor: Dict) -> Dict:
+    caption = print_doctor_profile(
+        doctor, include_status=True, include_time_slots=True, include_google_id=True
+    )
+    return {"photo": doctor.get("photo"), "caption": caption}
 
 
 def print_doctor_summary(doctor: Dict):
@@ -148,3 +195,26 @@ def print_doctor_summary(doctor: Dict):
 def update_doctor(doctor: Dict):
     lazy_init()
     db.doctor.update_one({"_id": doctor.get("_id")}, {"$set": doctor})
+
+
+def get_doctor_command_help(is_admin: bool = False):
+    doctor_id_arg = (is_admin and "<DOCTOR ID> ") or ""
+    command_help = (
+        f"/profile {doctor_id_arg}- view profile\n"
+        + f"/activate {doctor_id_arg}- activate listing\n"
+        + f"/deactivate {doctor_id_arg}- deactivate listing\n"
+        + f"/setname {doctor_id_arg}<NAME> - update name\n"
+        + f"/setphoto {doctor_id_arg}- update profile photo by replying to image message\n"
+        + f"/setphonenumber {doctor_id_arg}<PHONE NUMBER>- update phone number\n"
+        + f"/setspeciality {doctor_id_arg}<SPECIALITY> - update speciality\n"
+        + f"/setdescription {doctor_id_arg}<DESCRIPTION> - update description\n"
+        + f"/settimeslots {doctor_id_arg}<TIME SLOT LIST> - update available time slots for the upcoming week\n"
+        + f"/setfee {doctor_id_arg}<CONSULTATION FEE> - update consultation fee\n"
+    )
+    if not is_admin:
+        command_help = command_help + (
+            "/setgoogleid - update Google ID for meetings\n"
+            + "\n"
+            + "To update your bank account details or for any other queries, please contact the admin @askmydoctorsupport.\n"
+        )
+    return command_help
