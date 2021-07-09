@@ -37,8 +37,8 @@ class ActionCommandSetTimeSlots(Action):
         if _is_admin_group:
             regex = r"^(/\w+)(\s+#(\w+))(.+)$"
         matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
-        new_time_slots = matches and validate_time_slots(matches.group(4))
-        if matches and new_time_slots:
+        new_weekly_slots = matches and validate_time_slots(matches.group(4))
+        if matches and new_weekly_slots:
             doctor: Dict = {}
             doctor_id = ""
             if _is_admin_group:
@@ -47,13 +47,13 @@ class ActionCommandSetTimeSlots(Action):
             else:
                 doctor = get_doctor_for_user_id(tracker.sender_id)
                 doctor_id = str(doctor["_id"])
-            time_slots = doctor.get("time_slots", {})
-            time_slots.update(new_time_slots)
-            doctor["time_slots"] = time_slots
+            weekly_slots = doctor.get("weekly_slots", {})
+            weekly_slots.update(new_weekly_slots)
+            doctor["weekly_slots"] = weekly_slots
             update_doctor(doctor)
 
             doctor_card = get_doctor_card(doctor)
-            time_slots_str = print_time_slots(time_slots)
+            weekly_slots_str = print_time_slots(weekly_slots)
 
             dispatcher.utter_message(
                 json_message={**doctor_card, "chat_id": get_admin_group_id()}
@@ -61,7 +61,7 @@ class ActionCommandSetTimeSlots(Action):
             dispatcher.utter_message(
                 json_message={
                     "chat_id": get_admin_group_id(),
-                    "text": f"{doctor['name']} with ID #{doctor_id}, time slots have been updated to \"{time_slots_str}\" by {command_user}.",
+                    "text": f"{doctor['name']} with ID #{doctor_id}, time slots have been updated to \"{weekly_slots_str}\" by {command_user}.",
                 }
             )
 
@@ -71,7 +71,7 @@ class ActionCommandSetTimeSlots(Action):
             dispatcher.utter_message(
                 json_message={
                     "chat_id": doctor["user_id"],
-                    "text": f'Your time slots have been updated to "{time_slots_str}" by {command_user}.',
+                    "text": f'Your time slots have been updated to "{weekly_slots_str}" by {command_user}.',
                 }
             )
         else:
