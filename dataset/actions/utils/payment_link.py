@@ -15,7 +15,6 @@ def create_payment_link(
     description: Text,
     order_id: Text,
 ):
-    # #tbdnikhil - create Razorpay payment link here; add / remove fields as needed
 
     client = razorpay.Client(
         auth=("rzp_test_rD6PXVUtWKrB8q", "xzeXnI5qAtOWSX96cwSeCw8n")
@@ -59,14 +58,13 @@ def create_payment_link(
                         "linked_account_notes": ["branch"],
                     }
                 ]
-            }
+            },
+            "checkout": {"name": "AskMyDoctor"},
         },
     }
 
     r = json.dumps(data1)
-
     resp = requests.post(url, headers=headers, data=r)
-    l = True
     info = json.loads(resp.text)
 
     payment_link_info = {"link": info["short_url"]}

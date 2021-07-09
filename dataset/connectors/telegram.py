@@ -350,12 +350,7 @@ class TelegramInput(InputChannel):
                 except Exception as e:
                     logger.error(e)
 
-                return response.redirect("https://google.com")
-                # here args contains the query parameters and i would like to pass it to the below intent
-
-                """ UserMessage{
-                    /EXTERNAL_payment_callback{"payment_status": r}
-                } """
+                return response.redirect("https://t.me/NikhilRasabot")
 
         @telegram_webhook.route("/webhook", methods=["GET", "POST"])
         async def message(request: Request) -> Any:

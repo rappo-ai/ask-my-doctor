@@ -1,4 +1,6 @@
 from typing import Dict
+import datetime
+import json
 
 
 def get_order_id_for_payment_status(payment_status: Dict):
@@ -6,10 +8,20 @@ def get_order_id_for_payment_status(payment_status: Dict):
 
 
 def print_payment_status(payment_status: Dict):
-    # #tbdnikhil modify the output as per actual payment status object (this print is what's shown to patient)
+    payment_id = payment_status.get("razorpay_payment_id")
+
+    amount_rupees = payment_status["payment_details"]["amount_rupees"]
+    timestamp = datetime.datetime.fromtimestamp(
+        payment_status["payment_details"]["dateTime_DD/MM/YYYY"]
+    )
+    date = timestamp
+    mode = payment_status["payment_details"]["mode_payment"]
+    status = payment_status["payment_details"]["status"]
+
     return (
-        f"Amount: {payment_status.get('amount', '')}\n"
-        + f"Transaction ID: {payment_status.get('transaction_id', '')}\n"
-        + f"Date: {payment_status.get('date', '')}\n"
-        + f"Mode: {payment_status.get('mode', '')}\n"
+        f"Amount: {amount_rupees}\n"
+        + f"Transaction ID: {payment_status.get('razorpay_payment_id', '')}\n"
+        + f"Date: {date}\n"
+        + f"Mode: {mode}\n"
+        + f"Mode: {status}\n"
     )

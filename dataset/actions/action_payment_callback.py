@@ -5,6 +5,9 @@ from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
+import razorpay
+
+client = razorpay.Client(auth=("rzp_test_rD6PXVUtWKrB8q", "xzeXnI5qAtOWSX96cwSeCw8n"))
 
 from actions.utils.admin_config import (
     get_admin_group_id,
@@ -42,10 +45,6 @@ class ActionPaymentCallback(Action):
     ) -> List[Dict[Text, Any]]:
 
         entities = tracker.latest_message.get("entities", [])
-        # #tbdnikhil - set the payment status object in webhook as an entity for intent EXTERNAL_payment_callback.
-        # You can trigger this intent with entity from webhook using /EXTERNAL_payment_callback{"payment_status": "<PAYMENT_STATUS_DATA>"}
-        # Not sure if you can send JSON directly as the value of "payment_status"; if JSON doesn't work you can
-        # send a serialized JSON string and deserialize it here.
 
         payment_status: Dict = get_entity(
             entities,
@@ -56,10 +55,27 @@ class ActionPaymentCallback(Action):
         order_id = get_order_id_for_payment_status(payment_status)
         order: Dict = get_order(order_id)
         if not order:
-            # #tbdnikhil - remove this block once payment_status callback is implemented
-            """order = get_order_for_user_id(tracker.sender_id)
-            order_id = order.get("_id")"""
             logger.error("Unable to find order for this payment.")
+
+        payment_id = payment_status.get("razorpay_payment_id")
+        resp = client.payment.fetch(payment_id)
+        amount_rupees = resp["amount"] / 100
+        timestamp = datetime.fromtimestamp(resp["created_at"]).strftime(
+            "%d-%m-%Y %H:%M:%S"
+        )
+        date = timestamp
+        mode = resp["method"]
+        status = payment_status.get("razorpay_payment_link_status")
+
+        payment_details = {
+            "amount_rupees": amount_rupees,
+            "dateTime_DD/MM/YYYY": date,
+            "Payment_id": payment_id,
+            "mode_payment": mode,
+            "status": status,
+        }
+
+        payment_status["payment_details"] = payment_details
 
         update_order(order_id, payment_status=payment_status)
 
