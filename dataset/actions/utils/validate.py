@@ -102,7 +102,7 @@ def validate_speciality(speciality: Text):
 
 def validate_time_slots(time_slots_str: Text):
     def slot_start_value(slot):
-        return slot["start_hour"] * 100 + slot["start_minute"]
+        return slot["start_hour"] * 60 + slot["start_minute"]
 
     def slot_end_value(slot):
         end_hour = (
@@ -110,7 +110,7 @@ def validate_time_slots(time_slots_str: Text):
             if slot["end_hour"] == 0 and slot["end_minute"] == 0
             else slot["end_hour"]
         )
-        return end_hour * 100 + slot["end_minute"]
+        return end_hour * 60 + slot["end_minute"]
 
     def merge_overlapping_slots(slot_to_merge, other_slot):
         if slot_start_value(slot_to_merge) > slot_end_value(
