@@ -5,6 +5,7 @@ actions:
   - action_command_approve
   - action_command_deletespeciality
   - action_command_groupid
+  - action_command_listdoctors
   - action_command_reject
   - action_command_resetdb
 
@@ -14,6 +15,7 @@ intents:
   - approve
   - deletespeciality
   - groupid
+  - listdoctors
   - reject
   - resetdb
 
@@ -54,6 +56,12 @@ nlu:
       match_condition: "start"
     examples: |
       - /deletespeciality
+  - intent: listdoctors
+    metadata:
+      keyword_intent: true
+      match_condition: "start"
+    examples: |
+      - /listdoctors
 
 rules:
   - rule: set admin group id
@@ -80,3 +88,7 @@ rules:
     steps:
       - intent: deletespeciality
       - action: action_command_deletespeciality
+  - rule: list doctors
+    steps:
+      - intent: listdoctors
+      - action: action_command_listdoctors

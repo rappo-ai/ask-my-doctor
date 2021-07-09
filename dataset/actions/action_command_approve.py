@@ -5,8 +5,7 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import is_admin_group
-from actions.utils.doctor import get_doctor, update_doctor
-from actions.utils.meet import get_google_auth_url
+from actions.utils.doctor import get_doctor, get_doctor_command_help, update_doctor
 
 
 class ActionCommandApprove(Action):
@@ -36,29 +35,15 @@ class ActionCommandApprove(Action):
                     "text": f"{doctor['name']} with ID {doctor_id} has been approved. Please use /activate #{doctor_id} to make this doctor's listing live."
                 }
             )
-            google_auth_url = get_google_auth_url(doctor["user_id"])
             dispatcher.utter_message(
                 json_message={
                     "chat_id": doctor["user_id"],
                     "text": (
-                        f"Your application has been approved. Please use /activate to make your listing live.\n"
+                        f"Your application has been approved. Please use /setgoogleid to connect your Google ID to create meetings, and /settimeslots to update your timeslots for the upcoming week. Once you have done this, use /activate to make your listing live.\n"
                         + "\n"
-                        + "Here are the full list of commands you can use:\n"
+                        "Here is the list of commands to view or update your doctor profile:\n"
                         + "\n"
-                        + "/activate - activate listing\n"
-                        + "/deactivate - deactivate listing\n"
-                        + "/setname <NAME> - update name\n"
-                        + "/setphoto - update profile photo by replying to image message\n"
-                        + "/setphonenumber <PHONE NUMBER>- update phone number\n"
-                        + "/setspeciality <SPECIALITY> - update speciality\n"
-                        + "/setdescription <DESCRIPTION> - update description\n"
-                        + "/settimeslots <TIME SLOT LIST> - update available time slots for the upcoming week\n"
-                        + "/setfee <CONSULTATION FEE> - update consultation fee\n"
-                        + "/setgoogleid - update Google ID for meetings\n"
-                        + "\n"
-                        + f"To update your Google ID for creating meetings, please click this link -> {google_auth_url}\n"
-                        + "\n"
-                        + "To update your bank account details or for any other queries, please contact the admin @askmydoctorsupport.\n"
+                        + get_doctor_command_help()
                     ),
                 }
             )

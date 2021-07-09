@@ -11,6 +11,7 @@ actions:
   - action_command_setphoto
   - action_command_setspeciality
   - action_command_settimeslots
+  - action_command_profile
 
 intents:
   - activate
@@ -23,6 +24,7 @@ intents:
   - setphoto
   - setspeciality
   - settimeslots
+  - profile
 
 nlu:
   - intent: activate
@@ -85,6 +87,12 @@ nlu:
       match_condition: "exact"
     examples: |
       - /setgoogleid
+  - intent: profile
+    metadata:
+      keyword_intent: true
+      match_condition: "start"
+    examples: |
+      - /profile
 
 rules:
   - rule: activate doctor listing
@@ -127,3 +135,7 @@ rules:
     steps:
       - intent: settimeslots
       - action: action_command_settimeslots
+  - rule: show doctor profile
+    steps:
+      - intent: profile
+      - action: action_command_profile
