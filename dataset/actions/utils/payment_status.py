@@ -2,10 +2,7 @@ from typing import Dict
 import datetime
 import json
 import razorpay
-from dotenv import load_dotenv
 import os
-
-load_dotenv("/workspace/.env")
 
 client = razorpay.Client(
     auth=(os.getenv("RAZORPAY_KEY_ID"), os.getenv("RAZORPAY_SECRET_KEY"))
@@ -18,9 +15,6 @@ def get_order_id_for_payment_status(payment_status: Dict):
 
 def get_payment_id(payment_status: Dict):
     return payment_status.get("razorpay_payment_id")
-
-
-# amount,date,mode,status
 
 
 def get_payment_amount(payment_status: Dict):

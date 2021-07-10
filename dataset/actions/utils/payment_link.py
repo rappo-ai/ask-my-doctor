@@ -7,10 +7,7 @@ import requests
 from requests.structures import CaseInsensitiveDict
 
 from actions.utils.host import get_host_url
-from dotenv import load_dotenv
 import os
-
-load_dotenv("/workspace/.env")
 
 
 def create_payment_link(

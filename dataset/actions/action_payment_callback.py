@@ -79,12 +79,11 @@ class ActionPaymentCallback(Action):
 
         update_order(order_id, payment_status=payment_status)
 
-        if payment_status.get("razorpay_payment_link_status") == "paid":
+        if get_payment_status(payment_status) == "paid":
             cart: Dict = order.get("cart")
             patient: Dict = get_json_key(order, "metadata.patient", {})
             cart_item = next(iter(cart.get("items") or []), {})
             doctor: Dict = get_doctor(cart_item.get("doctor_id"))
-
             doctor_chat_id = doctor.get("user_id")
 
             credentials = doctor.get("credentials")

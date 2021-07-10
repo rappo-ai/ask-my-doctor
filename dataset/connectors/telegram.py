@@ -307,37 +307,36 @@ class TelegramInput(InputChannel):
 
         @telegram_webhook.route("/payment_callback", methods=["GET", "POST"])
         async def payload(request: Request) -> Any:
+            def getDetails(args, key):
+                return next(iter(args[key]), "")
+
             if request.method == "GET":
                 try:
                     disable_nlu_bypass = True
                     payload = request.json
                     args = request.args
                     payment_status = {
-                        "razorpay_payment_id": next(
-                            iter(args["razorpay_payment_id"]), ""
+                        "razorpay_payment_id": getDetails(args, "razorpay_payment_id"),
+                        "razorpay_payment_link_id": getDetails(
+                            args, "razorpay_payment_link_id"
                         ),
-                        "razorpay_payment_link_id": next(
-                            iter(args["razorpay_payment_link_id"]), ""
+                        "razorpay_payment_link_reference_id": getDetails(
+                            args, "razorpay_payment_link_reference_id"
                         ),
-                        "razorpay_payment_link_reference_id": next(
-                            iter(args["razorpay_payment_link_reference_id"]), ""
+                        "razorpay_payment_link_status": getDetails(
+                            args, "razorpay_payment_link_status"
                         ),
-                        "razorpay_payment_link_status": next(
-                            iter(args["razorpay_payment_link_status"]), ""
-                        ),
-                        "razorpay_signature": next(
-                            iter(args["razorpay_signature"]), ""
-                        ),
+                        "razorpay_signature": getDetails(args, "razorpay_signature"),
                     }
                     order_id = next(
                         iter(args["razorpay_payment_link_reference_id"]), ""
                     )
+
                     order = get_order(order_id)
                     sender_id = get_json_key(order, "metadata.patient.user_id", "")
-                    var = json.dumps(payment_status)
-                    printstat = (
-                        f'/EXTERNAL_payment_callback{{"payment_status": { var } }}'
-                    )
+                    payment_status_str = json.dumps(payment_status)
+                    printstat = f'/EXTERNAL_payment_callback{{"payment_status": { payment_status_str } }}'
+
                     await on_new_message(
                         UserMessage(
                             printstat,
@@ -350,7 +349,9 @@ class TelegramInput(InputChannel):
                 except Exception as e:
                     logger.error(e)
 
-                return response.redirect("https://t.me/NikhilRasabot")
+                user = self.verify
+                bot_link = "https://t.me/" + user
+                return response.redirect(bot_link)
 
         @telegram_webhook.route("/webhook", methods=["GET", "POST"])
         async def message(request: Request) -> Any:
