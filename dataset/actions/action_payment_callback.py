@@ -60,20 +60,7 @@ class ActionPaymentCallback(Action):
         if not order:
             logger.error("Unable to find order for this payment.")
 
-        payment_id = get_payment_id(payment_status)
-        resp = get_payment_details(payment_status)
-        amount_rupees = get_payment_amount(resp) / 100
-        date = get_payment_date(resp)
-        mode = get_payment_mode(resp)
-        status = get_payment_status(payment_status)
-
-        payment_details = {
-            "amount_rupees": amount_rupees,
-            "dateTime_DD/MM/YYYY": date,
-            "Payment_id": payment_id,
-            "mode_payment": mode,
-            "status": status,
-        }
+        payment_details = get_payment_details(payment_status)
 
         payment_status["payment_details"] = payment_details
 
