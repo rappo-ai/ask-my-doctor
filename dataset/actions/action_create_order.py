@@ -6,11 +6,7 @@ from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.cart import get_cart, get_cart_total, print_cart
 from actions.utils.doctor import get_doctor
-from actions.utils.order import (
-    create_order,
-    get_order,
-    update_order,
-)
+from actions.utils.order import create_order, get_order, update_order
 from actions.utils.payment_link import create_payment_link
 from actions.utils.patient import get_patient_for_user_id, print_patient
 from actions.utils.sheets import update_order_in_spreadsheet
