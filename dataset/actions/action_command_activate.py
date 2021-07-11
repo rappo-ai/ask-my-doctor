@@ -58,7 +58,7 @@ class ActionCommandActivate(Action):
                     }
                 )
                 return
-            if all(value == [] for value in doctor.get("time_slots", {}).values()):
+            if all(value == [] for value in doctor.get("weekly_slots", {}).values()):
                 dispatcher.utter_message(
                     json_message={
                         "chat_id": get_admin_group_id(),
