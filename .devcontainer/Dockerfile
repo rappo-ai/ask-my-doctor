@@ -11,6 +11,8 @@ RUN apt-get update && \
     nodejs && \
     . /opt/venv/bin/activate && \
     pip install black && \
-    pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib
+    pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib && \
+    pip install razorpay && \
+    pip install python-dotenv && \
 
 USER 1001
