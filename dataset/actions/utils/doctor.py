@@ -4,7 +4,7 @@ from typing import Dict, Text
 from actions.db.store import db
 from actions.utils.admin_config import get_advance_appointment_days
 from actions.utils.date import (
-    format_time_slots_for_date,
+    generate_time_slots_for_date,
     get_upcoming_availability,
     print_time_slots,
 )
@@ -21,7 +21,7 @@ def lazy_init():
                     "fee": 600,
                     "description": "Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum",
                     "photo": "https://storage.googleapis.com/ask-my-doctor-public/stethoscope.png",
-                    "time_slots": {
+                    "weekly_slots": {
                         "mon": [{"start": "17:00", "end": "19:00"}],
                         "tue": [{"start": "17:00", "end": "19:00"}],
                         "wed": [{"start": "17:00", "end": "19:00"}],
@@ -42,7 +42,7 @@ def lazy_init():
                     "fee": 400,
                     "description": "Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum",
                     "photo": "https://storage.googleapis.com/ask-my-doctor-public/stethoscope.png",
-                    "time_slots": {
+                    "weekly_slots": {
                         "mon": [],
                         "tue": [],
                         "wed": [],
@@ -63,7 +63,7 @@ def lazy_init():
                     "fee": 700,
                     "description": "Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum",
                     "photo": "https://storage.googleapis.com/ask-my-doctor-public/stethoscope.png",
-                    "time_slots": {
+                    "weekly_slots": {
                         "mon": [{"start": "17:00", "end": "19:00"}],
                         "tue": [],
                         "wed": [{"start": "17:00", "end": "19:00"}],
@@ -93,8 +93,8 @@ def add_doctor(doctor: Dict):
 
 
 def get_available_time_slots(doctor_id, date: Text):
-    doctor_time_slots = get_doctor_time_slots(doctor_id)
-    return format_time_slots_for_date(doctor_time_slots, date)
+    doctor_weekly_slots = get_doctor_weekly_slots(doctor_id)
+    return generate_time_slots_for_date(doctor_weekly_slots, date)
 
 
 def get_doctor(id):
@@ -107,10 +107,10 @@ def get_doctor_for_user_id(user_id: Text):
     return db.doctor.find_one({"user_id": user_id})
 
 
-def get_doctor_time_slots(id):
+def get_doctor_weekly_slots(id):
     lazy_init()
     doctor: Dict = db.doctor.find_one({"_id": ObjectId(id)})
-    return doctor.get("time_slots")
+    return doctor.get("weekly_slots")
 
 
 def get_doctors(
@@ -130,8 +130,10 @@ def get_doctors(
 
 
 def get_upcoming_appointment_dates(doctor_id):
-    doctor_time_slots = get_doctor_time_slots(doctor_id)
-    return get_upcoming_availability(doctor_time_slots, get_advance_appointment_days())
+    doctor_weekly_slots = get_doctor_weekly_slots(doctor_id)
+    return get_upcoming_availability(
+        doctor_weekly_slots, get_advance_appointment_days()
+    )
 
 
 def print_doctor_profile(
@@ -159,7 +161,7 @@ def print_doctor_profile(
     )
     if include_time_slots:
         profile = profile + (
-            f"Time Slots: {print_time_slots(doctor.get('time_slots'))}\n"
+            f"Time Slots: {print_time_slots(doctor.get('weekly_slots'))}\n"
         )
     if include_google_id:
         profile = profile + (
