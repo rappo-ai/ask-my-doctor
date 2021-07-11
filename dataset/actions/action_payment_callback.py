@@ -11,19 +11,16 @@ from actions.utils.admin_config import (
     get_meeting_duration_in_minutes,
 )
 from actions.utils.cart import print_cart
+from actions.utils.debug import is_debug_env
 from actions.utils.doctor import get_doctor
 from actions.utils.entity import get_entity
 from actions.utils.json import get_json_key
 from actions.utils.meet import create_meeting
-from actions.utils.order import (
-    get_order,
-    get_order_for_user_id,
-    update_order,
-)
+from actions.utils.order import get_order, get_order_for_user_id, update_order
 from actions.utils.patient import print_patient
 from actions.utils.payment_status import (
+    fetch_payment_details,
     get_order_id_for_payment_status,
-    get_payment_details,
     print_payment_status,
 )
 from actions.utils.sheets import update_order_in_spreadsheet
@@ -50,18 +47,31 @@ class ActionPaymentCallback(Action):
             {},
         )
 
+        if not payment_status:
+            if is_debug_env():
+                payment_status = {
+                    "razorpay_payment_link_reference_id": "000000000000000000000001",
+                    "razorpay_payment_link_status": "paid",
+                }
+            else:
+                return []
+
         order_id = get_order_id_for_payment_status(payment_status)
         order: Dict = get_order(order_id)
-        if not order:
-            logger.error("Unable to find order for this payment.")
+        if not order and is_debug_env():
+            logger.warn(
+                "Unable to find order for this payment. Fetching some order for this user for debugging."
+            )
+            order = get_order_for_user_id(tracker.sender_id)
+            order_id = order.get("_id")
 
-        payment_details = get_payment_details(payment_status)
+        payment_details = fetch_payment_details(payment_status)
 
         payment_status["payment_details"] = payment_details
 
         update_order(order_id, payment_status=payment_status)
 
-        if get_json_key(payment_status, "payment_details.status") == "paid":
+        if get_json_key(payment_status, "razorpay_payment_link_status") == "paid":
             cart: Dict = order.get("cart")
             patient: Dict = get_json_key(order, "metadata.patient", {})
             cart_item = next(iter(cart.get("items") or []), {})
