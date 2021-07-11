@@ -16,9 +16,11 @@ from telebot.types import (
 )
 from typing import Dict, Text, Any, List, Optional, Callable, Awaitable
 
+from google_auth_oauthlib.helpers import credentials_from_session
 from rasa.core.channels.channel import InputChannel, UserMessage, OutputChannel
 from rasa.shared.constants import INTENT_MESSAGE_PREFIX
 from rasa.shared.core.constants import USER_INTENT_RESTART
+from requests_oauthlib import OAuth2Session
 
 logger = logging.getLogger(__name__)
 
@@ -243,6 +245,59 @@ class TelegramInput(InputChannel):
         @telegram_webhook.route("/", methods=["GET"])
         async def health(_: Request) -> HTTPResponse:
             return response.json({"status": "ok"})
+
+        @telegram_webhook.route("/oauth", methods=["GET"])
+        async def google_oauth(request: Request) -> Any:
+            if request.method == "GET":
+                try:
+                    disable_nlu_bypass = True
+                    args = request.args
+
+                    token_url = "https://oauth2.googleapis.com/token"
+                    client_secret = "fQ28EXqDQHeV0k0UFJr-N8xu"
+                    client_id = "881461713261-dhrt5ug8hf8tr2uiqsiihnj24492flt6.apps.googleusercontent.com"
+                    client_config = {
+                        "client_id": "881461713261-dhrt5ug8hf8tr2uiqsiihnj24492flt6.apps.googleusercontent.com",
+                        "project_id": "spread-313410",
+                        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                        "token_uri": "https://oauth2.googleapis.com/token",
+                        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                        "client_secret": "fQ28EXqDQHeV0k0UFJr-N8xu",
+                    }
+                    print(request.args)
+                    print("state", args["state"][0])
+                    print("code", args["code"][0])
+
+                    # Fetch the access token
+                    google = OAuth2Session(client_id, state=args["state"][0])
+
+                    google.fetch_token(
+                        token_url, client_secret=client_secret, code=args["code"][0]
+                    )
+                    creds = credentials_from_session(
+                        google, client_config=client_config
+                    )
+                    print("creds:", creds)
+
+                    # print("user_id--",user_id)
+                    doctor = get_doctor_for_user_id(user_id)
+                    sender_id = get_json_key(doctor, "metadata.doctor.user_id", "")
+                    print("user_id", user_id)
+                    print("sender_id", sender_id)
+                    printstat = f'/EXTERNAL_on_google_auth{{"credentials"={creds}}}'
+                    await on_new_message(
+                        UserMessage(
+                            printstat,
+                            out_channel,
+                            sender_id,
+                            input_channel=self.name(),
+                            metadata={},
+                        )
+                    )
+                except Exception as e:
+                    logger.error(e)
+
+                return response.redirect("https://t.me/tuil_askdoctorbot")
 
         @telegram_webhook.route("/set_webhook", methods=["GET", "POST"])
         async def set_webhook(_: Request) -> HTTPResponse:
