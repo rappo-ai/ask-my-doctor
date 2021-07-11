@@ -23,11 +23,6 @@ from actions.utils.order import (
 from actions.utils.patient import print_patient
 from actions.utils.payment_status import (
     get_order_id_for_payment_status,
-    get_payment_id,
-    get_payment_amount,
-    get_payment_date,
-    get_payment_mode,
-    get_payment_status,
     get_payment_details,
     print_payment_status,
 )
@@ -66,7 +61,7 @@ class ActionPaymentCallback(Action):
 
         update_order(order_id, payment_status=payment_status)
 
-        if get_payment_status(payment_status) == "paid":
+        if get_json_key(payment_status, "payment_details.status") == "paid":
             cart: Dict = order.get("cart")
             patient: Dict = get_json_key(order, "metadata.patient", {})
             cart_item = next(iter(cart.get("items") or []), {})

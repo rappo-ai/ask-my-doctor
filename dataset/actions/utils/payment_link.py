@@ -9,6 +9,11 @@ from requests.structures import CaseInsensitiveDict
 from actions.utils.host import get_host_url
 import os
 
+from actions.utils.admin_config import (
+    get_account_number,
+    set_account_number,
+)
+
 
 def create_payment_link(
     amount_rupees: int,
@@ -28,7 +33,9 @@ def create_payment_link(
     headers["Content-type"] = "application/json"
     headers["Authorization"] = "basic " + credential
 
+    account_number = get_account_number()
     amount_paise = amount_rupees * 100
+    amount_transferred = amount_rupees * 0.95 * 100
     url_pay = get_host_url("/webhooks/telegram/payment_callback")
 
     data1 = {
@@ -48,8 +55,9 @@ def create_payment_link(
             "order": {
                 "transfers": [
                     {
-                        "account": "acc_HLeMvH2h0YvRvT",
-                        "amount": 500,
+                        "account": account_number,
+                        "amount": amount_transferred,
+                        "currency": "INR",
                         "currency": "INR",
                         "notes": {
                             "branch": "Acme Corp Bangalore North",

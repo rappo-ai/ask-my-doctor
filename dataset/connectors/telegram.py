@@ -306,8 +306,8 @@ class TelegramInput(InputChannel):
                 return response.text("Invalid webhook")
 
         @telegram_webhook.route("/payment_callback", methods=["GET", "POST"])
-        async def payload(request: Request) -> Any:
-            def getDetails(args, key):
+        async def payment_callback(request: Request) -> Any:
+            def get_details(args, key):
                 return next(iter(args[key]), "")
 
             if request.method == "GET":
@@ -316,22 +316,19 @@ class TelegramInput(InputChannel):
                     payload = request.json
                     args = request.args
                     payment_status = {
-                        "razorpay_payment_id": getDetails(args, "razorpay_payment_id"),
-                        "razorpay_payment_link_id": getDetails(
+                        "razorpay_payment_id": get_details(args, "razorpay_payment_id"),
+                        "razorpay_payment_link_id": get_details(
                             args, "razorpay_payment_link_id"
                         ),
-                        "razorpay_payment_link_reference_id": getDetails(
+                        "razorpay_payment_link_reference_id": get_details(
                             args, "razorpay_payment_link_reference_id"
                         ),
-                        "razorpay_payment_link_status": getDetails(
+                        "razorpay_payment_link_status": get_details(
                             args, "razorpay_payment_link_status"
                         ),
-                        "razorpay_signature": getDetails(args, "razorpay_signature"),
+                        "razorpay_signature": get_details(args, "razorpay_signature"),
                     }
-                    order_id = next(
-                        iter(args["razorpay_payment_link_reference_id"]), ""
-                    )
-
+                    order_id = get_details(args, "razorpay_payment_link_reference_id")
                     order = get_order(order_id)
                     sender_id = get_json_key(order, "metadata.patient.user_id", "")
                     payment_status_str = json.dumps(payment_status)

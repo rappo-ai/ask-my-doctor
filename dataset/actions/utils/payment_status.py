@@ -4,6 +4,10 @@ import json
 import razorpay
 import os
 
+from actions.utils.json import (
+    get_json_key,
+)
+
 client = razorpay.Client(
     auth=(os.getenv("RAZORPAY_KEY_ID"), os.getenv("RAZORPAY_SECRET_KEY"))
 )
@@ -13,8 +17,12 @@ def get_order_id_for_payment_status(payment_status: Dict):
     return payment_status.get("razorpay_payment_link_reference_id")
 
 
+def get_payment_id(payment_status: Dict):
+    return payment_status.get("razorpay_payment_id")
+
+
 def get_payment_details(payment_status: Dict):
-    payment_id = payment_status.get("razorpay_payment_id")
+    payment_id = get_payment_id(payment_status)
     resp = client.payment.fetch(payment_id)
     amount_rupees = resp["amount"] / 100
     timestamp = datetime.datetime.fromtimestamp(resp["created_at"]).strftime(
@@ -35,12 +43,11 @@ def get_payment_details(payment_status: Dict):
 
 
 def print_payment_status(payment_status: Dict):
-    payment_id = payment_status.get("razorpay_payment_id")
-
-    amount_rupees = payment_status["payment_details"]["amount_rupees"]
-    date = payment_status["payment_details"]["dateTime_DD/MM/YYYY"]
-    mode = payment_status["payment_details"]["mode_payment"]
-    status = payment_status["payment_details"]["status"]
+    payment_id = get_payment_id(payment_status)
+    amount_rupees = get_json_key(payment_status, "payment_details.amount_rupees")
+    date = get_json_key(payment_status, "payment_details.dateTime_DD/MM/YYYY")
+    mode = get_json_key(payment_status, "payment_details.mode_payment")
+    status = get_json_key(payment_status, "payment_details.status")
 
     return (
         f"Amount: {amount_rupees}\n"
