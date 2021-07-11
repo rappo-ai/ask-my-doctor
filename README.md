@@ -5,7 +5,7 @@ AskMyDoctor source code repository.
 
 ## Environment Variables
 
-Copy .env.template to .env and set the Telegram bot token and Telegram bot username.
+Copy .env.template to .env and set the Telegram bot token and Telegram bot username and the razorpay Keyid and razorpay secretkey.
 
 ## Launch without debugging (Production)
 
