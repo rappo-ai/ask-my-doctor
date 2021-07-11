@@ -23,6 +23,7 @@ from actions.utils.order import (
 from actions.utils.patient import print_patient
 from actions.utils.payment_status import (
     get_order_id_for_payment_status,
+    get_payment_details,
     print_payment_status,
 )
 from actions.utils.sheets import update_order_in_spreadsheet
@@ -42,32 +43,25 @@ class ActionPaymentCallback(Action):
     ) -> List[Dict[Text, Any]]:
 
         entities = tracker.latest_message.get("entities", [])
-        # #tbdnikhil - set the payment status object in webhook as an entity for intent EXTERNAL_payment_callback.
-        # You can trigger this intent with entity from webhook using /EXTERNAL_payment_callback{"payment_status": "<PAYMENT_STATUS_DATA>"}
-        # Not sure if you can send JSON directly as the value of "payment_status"; if JSON doesn't work you can
-        # send a serialized JSON string and deserialize it here.
+
         payment_status: Dict = get_entity(
             entities,
             "payment_status",
-            {
-                "status": "complete",
-                "amount": 300,
-                "transaction_id": "1234567890",
-                "date": "July 1st, 2021 5:15 PM IST",
-                "mode": "Credit Card",
-                "order_id": "000000000000000000000000",
-            },
+            {},
         )
 
         order_id = get_order_id_for_payment_status(payment_status)
         order: Dict = get_order(order_id)
         if not order:
-            # #tbdnikhil - remove this block once payment_status callback is implemented
-            order = get_order_for_user_id(tracker.sender_id)
-            order_id = order.get("_id")
+            logger.error("Unable to find order for this payment.")
+
+        payment_details = get_payment_details(payment_status)
+
+        payment_status["payment_details"] = payment_details
+
         update_order(order_id, payment_status=payment_status)
 
-        if payment_status.get("status") == "complete":
+        if get_json_key(payment_status, "payment_details.status") == "paid":
             cart: Dict = order.get("cart")
             patient: Dict = get_json_key(order, "metadata.patient", {})
             cart_item = next(iter(cart.get("items") or []), {})

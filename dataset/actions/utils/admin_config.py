@@ -17,6 +17,7 @@ def lazy_init():
                 "advance_appointment_days": 7,
                 "commission_rate": 10,
                 "meeting_duration_minutes": 15,
+                "account_number": "acc_HLeMvH2h0YvRvT",
                 "specialities": [
                     "General Surgeon",
                     "Paediatrician",
@@ -30,6 +31,21 @@ def is_super_admin(chat_id: Text):
     if is_debug_env():
         return True
     return chat_id in get_super_admins()
+
+
+def get_account_number():
+    lazy_init()
+    return db.admin_config.find_one({"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}).get(
+        "account_number"
+    )
+
+
+def set_account_number(account_number: Text):
+    lazy_init()
+    db.admin_config.update_one(
+        {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)},
+        {"$set": {"account_number": account_number}},
+    )
 
 
 def is_admin_group(chat_id: Text):
