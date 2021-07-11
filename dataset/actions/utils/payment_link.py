@@ -58,12 +58,6 @@ def create_payment_link(
                         "account": account_number,
                         "amount": amount_transferred,
                         "currency": "INR",
-                        "currency": "INR",
-                        "notes": {
-                            "branch": "Acme Corp Bangalore North",
-                            "name": "Nikhil Hulle",
-                        },
-                        "linked_account_notes": ["branch"],
                     }
                 ]
             },
