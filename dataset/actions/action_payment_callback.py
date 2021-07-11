@@ -59,7 +59,7 @@ class ActionPaymentCallback(Action):
         order_id = get_order_id_for_payment_status(payment_status)
         order: Dict = get_order(order_id)
         if not order and is_debug_env():
-            logger.error(
+            logger.warn(
                 "Unable to find order for this payment. Fetching some order for this user for debugging."
             )
             order = get_order_for_user_id(tracker.sender_id)
@@ -71,7 +71,7 @@ class ActionPaymentCallback(Action):
 
         update_order(order_id, payment_status=payment_status)
 
-        if get_json_key(payment_status, "payment_details.status") == "paid":
+        if get_json_key(payment_status, "razorpay_payment_link_status") == "paid":
             cart: Dict = order.get("cart")
             patient: Dict = get_json_key(order, "metadata.patient", {})
             cart_item = next(iter(cart.get("items") or []), {})

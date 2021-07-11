@@ -64,7 +64,7 @@ class ActionCreateOrder(Action):
             + "\n"
             + f"Consultation fee: Rs. {cart_amount}\n"
             + "\n"
-            + f"Click here to pay -> {payment_link.get('link')}\n"
+            + f"Click here to pay -> {payment_link.get('short_url')}\n"
         )
 
         json_message = {"text": text}

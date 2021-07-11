@@ -32,7 +32,7 @@ def create_payment_link(
         logger.warn(
             "RAZORPAY_KEY_ID or RAZORPAY_SECRET_KEY not set, using dummy payment link"
         )
-        return {"link": "https://rzp.io/i/8sxP5EFYC"}
+        return {"short_url": "https://rzp.io/i/8sxP5EFYC"}
 
     url = "https://api.razorpay.com/v1/payment_links"
 
@@ -78,7 +78,6 @@ def create_payment_link(
 
     r = json.dumps(data1)
     resp = requests.post(url, headers=headers, data=r)
-    info = json.loads(resp.text)
+    payment_link_info = json.loads(resp.text)
 
-    payment_link_info = {"link": info["short_url"]}
     return payment_link_info
