@@ -268,10 +268,13 @@ class TelegramInput(InputChannel):
                     print("state", args["state"][0])
                     print("code", args["code"][0])
 
+                    redirect_uri = request.url.partition("?")[0]
                     # Fetch the access token
-                    google = OAuth2Session(client_id, state=args["state"][0])
+                    google = OAuth2Session(
+                        client_id, state=args["state"][0], redirect_uri=redirect_uri
+                    )
 
-                    google.fetch_token(
+                    token = google.fetch_token(
                         token_url, client_secret=client_secret, code=args["code"][0]
                     )
                     creds = credentials_from_session(
