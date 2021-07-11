@@ -41,7 +41,7 @@ class ActionDoctorSetGoogleAuth(Action):
             dispatcher.utter_message(
                 json_message={
                     "chat_id": get_admin_group_id(),
-                    "text": f"{doctor['name']} with ID #{doctor['_id']}, Google account with email {doctor['email']} has been linked.",
+                    "text": f"{doctor['name']} with ID #{doctor['_id']}, Google account has been linked.",
                 }
             )
             dispatcher.utter_message(

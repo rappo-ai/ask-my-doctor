@@ -1,13 +1,17 @@
 import datetime
+from googleapiclient.discovery import build
+from google.oauth2.credentials import Credentials
+from google.auth.transport.requests import Request
 import os
 from requests_oauthlib import OAuth2Session
 
 from actions.utils.debug import is_debug_env
-from actions.utils.helper import Create_Service, convert_to_RFC_datetime, insert_token
 from actions.utils.host import get_host_url
 
-REDIRECT_URI_DEBUG = "http://localhost:5005/webhooks/telegram/oauth"
+API_NAME = "calendar"
+API_VERSION = "v3"
 AUTHORIZATION_BASE_URL = "https://accounts.google.com/o/oauth2/auth"
+REDIRECT_URI_DEBUG = "http://localhost:5005/webhooks/telegram/oauth"
 SCOPES = [
     "https://www.googleapis.com/auth/calendar",
 ]
@@ -20,7 +24,6 @@ def get_google_auth_url(user_id):
         redirect_uri = REDIRECT_URI_DEBUG
     else:
         redirect_uri = get_host_url("/webhooks/telegram/oauth")
-   
 
     google = OAuth2Session(client_id, scope=SCOPES, redirect_uri=redirect_uri)
 
@@ -32,63 +35,47 @@ def get_google_auth_url(user_id):
 
 
 def create_meeting(credentials, guest_emails, start_date, end_date):
-    # tbdemily
-    insert_token()
-    print(guest_emails)
-    print(start_date)
-    print(end_date)
-    service = Create_Service()
-    dt = convert_to_RFC_datetime()
-    print(dt)
-    # event = {
-    # 'summary': 'doctor meet',
-    # 'start': {
-    #     'dateTime': convert_to_RFC_datetime(2021,6,30,2,20),
-    # },
-    # 'end': {
-    #     'dateTime': convert_to_RFC_datetime(2021,6,30,3,20),
-    # },
-    # 'attendees': [
-    #     {'email': 'emily_b180614cs@nitc.ac.in'},
-    #     {'email': 'ey2anu@gmail.com'},
-    # ],
-    # 'conferenceData' : {
-    #     'createRequest': {
-    #     'requestId':'zsd',
-    #     'conferenceSolutionKey' : {
-    #         'type' : 'hangoutsMeet'
-    #     }
-    #     }
-    # },
-    # # 'reminders': {
-    # #   'useDefault':True
-    # # }
-    # }
 
-    # conferenceDataVersion= 1
-    # sendUpdates='all'
+    client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
+    client_secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
+    credentials["client_id"] = client_id
+    credentials["client_secret"] = client_secret
+    creds = Credentials.from_authorized_user_info(credentials, scopes=SCOPES)
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
 
-    # event = service.events().insert(
-    # calendarId='primary',
-    # conferenceDataVersion=conferenceDataVersion,
-    # sendUpdates=sendUpdates,
-    # body=event
-    # ).execute()
+    service = build(API_NAME, API_VERSION, credentials=creds)
 
-    # print(event)
-    # id=event.get('id')
-    # print (id)
-    # print ('Event created: %s',event.get('hangoutLink'))
+    event = {
+        "summary": "doctor meet",
+        "start": {"dateTime": start_date.isoformat(sep="T")},
+        "end": {
+            "dateTime": end_date.isoformat(sep="T"),
+        },
+        "attendees": [
+            {"email": guest_emails[0]},
+        ],
+        "conferenceData": {
+            "createRequest": {
+                "requestId": "zsd",
+                "conferenceSolutionKey": {"type": "hangoutsMeet"},
+            }
+        },
+    }
 
-    # event_move_resp=service.events().move(
-    # calendarId='primary',
-    # eventId=id,
-    # destination='ey2anu@gmail.com',
-    # sendUpdates=sendUpdates
-    # ).execute()
+    conferenceDataVersion = 1
+    sendUpdates = "all"
 
-    # pprint(event_move_resp)
+    event = (
+        service.events()
+        .insert(
+            calendarId="primary",
+            conferenceDataVersion=conferenceDataVersion,
+            sendUpdates=sendUpdates,
+            body=event,
+        )
+        .execute()
+    )
 
-    # #tbdemily - create the google meet meeting using these credentials
-    # - these credentials are same as those passed from webhook (see get_google_auth_url)
-    return {"link": "https://meet.google.com/vix-uaxv-hcx"}
+    return {"link": event.get("hangoutLink")}
