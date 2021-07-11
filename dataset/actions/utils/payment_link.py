@@ -1,8 +1,8 @@
 import base64
 import json
 import http.client
+import logging
 from typing import Text
-import razorpay
 import requests
 from requests.structures import CaseInsensitiveDict
 
@@ -14,6 +14,8 @@ from actions.utils.admin_config import (
     set_account_number,
 )
 
+logger = logging.getLogger(__name__)
+
 
 def create_payment_link(
     amount_rupees: int,
@@ -23,9 +25,18 @@ def create_payment_link(
     description: Text,
     order_id: Text,
 ):
+    razorpay_key_id = os.getenv("RAZORPAY_KEY_ID")
+    razorpay_secret_key = os.getenv("RAZORPAY_SECRET_KEY")
+
+    if not (razorpay_key_id and razorpay_secret_key):
+        logger.warn(
+            "RAZORPAY_KEY_ID or RAZORPAY_SECRET_KEY not set, using dummy payment link"
+        )
+        return {"short_url": "https://rzp.io/i/8sxP5EFYC"}
+
     url = "https://api.razorpay.com/v1/payment_links"
 
-    credentials = os.getenv("RAZORPAY_KEY_ID") + ":" + os.getenv("RAZORPAY_SECRET_KEY")
+    credentials = razorpay_key_id + ":" + razorpay_secret_key
     base64_credentials = base64.b64encode(credentials.encode("utf8"))
     credential = base64_credentials.decode("utf8")
 
@@ -67,7 +78,6 @@ def create_payment_link(
 
     r = json.dumps(data1)
     resp = requests.post(url, headers=headers, data=r)
-    info = json.loads(resp.text)
+    payment_link_info = json.loads(resp.text)
 
-    payment_link_info = {"link": info["short_url"]}
     return payment_link_info
