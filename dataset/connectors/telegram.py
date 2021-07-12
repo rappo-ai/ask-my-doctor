@@ -188,7 +188,11 @@ class TelegramOutput(TeleBot, OutputChannel):
                 reply_markup = InlineKeyboardMarkup()
                 [
                     reply_markup.add(
-                        InlineKeyboardButton(col["title"], callback_data=col["payload"])
+                        InlineKeyboardButton(
+                            col.get("title"),
+                            callback_data=col.get("payload"),
+                            url=col.get("url"),
+                        )
                     )
                     for row in reply_markup_json.get("keyboard", [])
                     for col in row
