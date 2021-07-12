@@ -38,6 +38,7 @@ forms:
 intents:
   - EXT_doctor_send_message
   - EXTERNAL_doctor_signup
+  - EXTERNAL_on_google_auth
 
 responses:
   utter_ask_doctor_send_message__message_id:

@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from bson.objectid import ObjectId
 from copy import deepcopy
 from sanic import Blueprint, response
@@ -17,11 +18,15 @@ from telebot.types import (
 )
 from typing import Dict, Text, Any, List, Optional, Callable, Awaitable
 
+from google_auth_oauthlib.helpers import credentials_from_session
 from rasa.core.channels.channel import InputChannel, UserMessage, OutputChannel
 from rasa.shared.constants import INTENT_MESSAGE_PREFIX
 from rasa.shared.core.constants import USER_INTENT_RESTART
+from requests_oauthlib import OAuth2Session
 
 logger = logging.getLogger(__name__)
+
+GOOGLE_OAUTH_TOKEN_URL = "https://oauth2.googleapis.com/token"
 
 
 class MongoDataStore:
@@ -294,6 +299,45 @@ class TelegramInput(InputChannel):
         @telegram_webhook.route("/", methods=["GET"])
         async def health(_: Request) -> HTTPResponse:
             return response.json({"status": "ok"})
+
+        @telegram_webhook.route("/oauth", methods=["GET"])
+        async def google_oauth(request: Request) -> Any:
+            if request.method == "GET":
+                try:
+                    args = request.args
+                    client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
+                    client_secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
+                    state = args["state"][0]
+                    redirect_uri = request.url.partition("?")[0]
+
+                    google = OAuth2Session(
+                        client_id, state=state, redirect_uri=redirect_uri
+                    )
+
+                    token = google.fetch_token(
+                        GOOGLE_OAUTH_TOKEN_URL,
+                        client_secret=client_secret,
+                        code=args["code"][0],
+                    )
+
+                    sender_id = state
+                    token_str = json.dumps(token)
+                    message = f'/EXTERNAL_on_google_auth{{"credentials": {token_str}}}'
+                    await on_new_message(
+                        UserMessage(
+                            message,
+                            out_channel,
+                            sender_id,
+                            input_channel=self.name(),
+                            metadata={},
+                        )
+                    )
+                except Exception as e:
+                    logger.error(e)
+
+                user = self.verify
+                bot_link = "https://t.me/" + user
+                return response.redirect(bot_link)
 
         @telegram_webhook.route("/set_webhook", methods=["GET", "POST"])
         async def set_webhook(_: Request) -> HTTPResponse:
