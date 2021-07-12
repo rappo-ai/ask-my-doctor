@@ -80,13 +80,16 @@ class ActionPaymentCallback(Action):
 
             credentials = doctor.get("credentials")
             guest_emails = [patient.get("email")]
+            meet_title = "Appointment with " + patient.get("name")
             start_date = datetime.fromisoformat(cart_item.get("appointment_datetime"))
             end_date = start_date + timedelta(minutes=get_meeting_duration_in_minutes())
             meeting: Dict = create_meeting(
                 credentials=credentials,
                 guest_emails=guest_emails,
+                title=meet_title,
                 start_date=start_date,
                 end_date=end_date,
+                requestId=order_id,
             )
 
             update_order(order_id, meeting=meeting)
@@ -110,7 +113,7 @@ class ActionPaymentCallback(Action):
                 + "\n"
                 + print_payment_status(payment_status)
                 + "\n"
-                + f"Your appointment has been scheduled. Please join this meeting link at the date and time of the appointment:\n{meeting.get('link')}\n\nIf you need any help with this booking, please click /help."
+                + f"Your appointment has been scheduled. Please join this meeting link at the date and time of the appointment:\n{meeting.get('hangoutLink')}\n\nIf you need any help with this booking, please click /help."
             )
 
             json_message = {"text": text, "disable_web_page_preview": True}

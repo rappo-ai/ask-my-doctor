@@ -1,3 +1,4 @@
+from copy import deepcopy
 import datetime
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
@@ -11,10 +12,14 @@ from actions.utils.host import get_host_url
 API_NAME = "calendar"
 API_VERSION = "v3"
 AUTHORIZATION_BASE_URL = "https://accounts.google.com/o/oauth2/auth"
+CALENDAR_ID = "primary"
+CONFERENCE_DATA_VERSION = 1
+HANGOUTS_MEET = "hangoutsMeet"
 REDIRECT_URI_DEBUG = "http://localhost:5005/webhooks/telegram/oauth"
 SCOPES = [
-    "https://www.googleapis.com/auth/calendar",
+    "https://www.googleapis.com/auth/calendar.events",
 ]
+SEND_UPDATES = "all"
 
 
 def get_google_auth_url(user_id):
@@ -34,13 +39,15 @@ def get_google_auth_url(user_id):
     return authorization_url
 
 
-def create_meeting(credentials, guest_emails, start_date, end_date):
+def create_meeting(credentials, guest_emails, title, start_date, end_date, requestId):
 
-    client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
-    client_secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
-    credentials["client_id"] = client_id
-    credentials["client_secret"] = client_secret
-    creds = Credentials.from_authorized_user_info(credentials, scopes=SCOPES)
+    google_oauth_credentials = deepcopy(credentials)
+    google_oauth_credentials["client_id"] = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
+    google_oauth_credentials["client_secret"] = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
+
+    creds = Credentials.from_authorized_user_info(
+        google_oauth_credentials, scopes=SCOPES
+    )
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
@@ -48,34 +55,32 @@ def create_meeting(credentials, guest_emails, start_date, end_date):
     service = build(API_NAME, API_VERSION, credentials=creds)
 
     event = {
-        "summary": "doctor meet",
+        "summary": title,
         "start": {"dateTime": start_date.isoformat(sep="T")},
         "end": {
             "dateTime": end_date.isoformat(sep="T"),
         },
-        "attendees": [
-            {"email": guest_emails[0]},
-        ],
+        "attendees": [[{"email": x} for x in guest_emails]],
         "conferenceData": {
             "createRequest": {
-                "requestId": "zsd",
-                "conferenceSolutionKey": {"type": "hangoutsMeet"},
+                "requestId": requestId,
+                "conferenceSolutionKey": {"type": HANGOUTS_MEET},
             }
         },
+        "reminders": {
+            "useDefault": False,
+        },
     }
-
-    conferenceDataVersion = 1
-    sendUpdates = "all"
 
     event = (
         service.events()
         .insert(
-            calendarId="primary",
-            conferenceDataVersion=conferenceDataVersion,
-            sendUpdates=sendUpdates,
+            calendarId=CALENDAR_ID,
+            conferenceDataVersion=CONFERENCE_DATA_VERSION,
+            sendUpdates=SEND_UPDATES,
             body=event,
         )
         .execute()
     )
 
-    return {"link": event.get("hangoutLink")}
+    return event
