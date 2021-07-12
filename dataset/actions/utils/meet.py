@@ -11,6 +11,7 @@ AUTHORIZATION_BASE_URL = "https://accounts.google.com/o/oauth2/auth"
 CALENDAR_ID = "primary"
 CONFERENCE_DATA_VERSION = 1
 HANGOUTS_MEET = "hangoutsMeet"
+MOCK_HANGOUT_LINK = "https://meet.google.com/ejd-oszg-vrk"
 REDIRECT_URI_DEBUG = "http://localhost:5005/webhooks/telegram/oauth"
 SCOPES = [
     "https://www.googleapis.com/auth/calendar.events",
@@ -46,7 +47,7 @@ def create_meeting(credentials, guest_emails, title, start_date, end_date, reque
     client_secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
 
     if not (client_id and client_secret):
-        return {"hangoutLink": "https://meet.google.com/ejd-oszg-vrk"}
+        return {"hangoutLink": MOCK_HANGOUT_LINK}
 
     from googleapiclient.discovery import build
     from google.oauth2.credentials import Credentials
