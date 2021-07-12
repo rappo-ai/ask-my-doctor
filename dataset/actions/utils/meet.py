@@ -1,10 +1,6 @@
 from copy import deepcopy
 import datetime
-from googleapiclient.discovery import build
-from google.oauth2.credentials import Credentials
-from google.auth.transport.requests import Request
 import os
-from requests_oauthlib import OAuth2Session
 
 from actions.utils.debug import is_debug_env
 from actions.utils.host import get_host_url
@@ -25,6 +21,11 @@ SEND_UPDATES = "all"
 def get_google_auth_url(user_id):
     client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
 
+    if not client_id:
+        return AUTHORIZATION_BASE_URL
+
+    from requests_oauthlib import OAuth2Session
+
     if is_debug_env():
         redirect_uri = REDIRECT_URI_DEBUG
     else:
@@ -41,9 +42,19 @@ def get_google_auth_url(user_id):
 
 def create_meeting(credentials, guest_emails, title, start_date, end_date, requestId):
 
+    client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
+    client_secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
+
+    if not (client_id and client_secret):
+        return {"hangoutLink": "https://meet.google.com/ejd-oszg-vrk"}
+
+    from googleapiclient.discovery import build
+    from google.oauth2.credentials import Credentials
+    from google.auth.transport.requests import Request
+
     google_oauth_credentials = deepcopy(credentials)
-    google_oauth_credentials["client_id"] = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
-    google_oauth_credentials["client_secret"] = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
+    google_oauth_credentials["client_id"] = client_id
+    google_oauth_credentials["client_secret"] = client_secret
 
     creds = Credentials.from_authorized_user_info(
         google_oauth_credentials, scopes=SCOPES
