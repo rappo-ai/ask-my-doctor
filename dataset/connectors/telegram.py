@@ -1,8 +1,8 @@
+from bson.objectid import ObjectId
+from copy import deepcopy
 import json
 import logging
 import os
-from bson.objectid import ObjectId
-from copy import deepcopy
 from sanic import Blueprint, response
 from sanic.request import Request
 from sanic.response import HTTPResponse
@@ -18,15 +18,11 @@ from telebot.types import (
 )
 from typing import Dict, Text, Any, List, Optional, Callable, Awaitable
 
-from google_auth_oauthlib.helpers import credentials_from_session
 from rasa.core.channels.channel import InputChannel, UserMessage, OutputChannel
 from rasa.shared.constants import INTENT_MESSAGE_PREFIX
 from rasa.shared.core.constants import USER_INTENT_RESTART
-from requests_oauthlib import OAuth2Session
 
 logger = logging.getLogger(__name__)
-
-GOOGLE_OAUTH_TOKEN_URL = "https://oauth2.googleapis.com/token"
 
 
 class MongoDataStore:
@@ -308,6 +304,10 @@ class TelegramInput(InputChannel):
         async def google_oauth(request: Request) -> Any:
             if request.method == "GET":
                 try:
+                    from requests_oauthlib import OAuth2Session
+
+                    GOOGLE_OAUTH_TOKEN_URL = "https://oauth2.googleapis.com/token"
+
                     args = request.args
                     client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
                     client_secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
