@@ -60,7 +60,7 @@ def create_meeting(credentials, guest_emails, title, start_date, end_date, reque
         "end": {
             "dateTime": end_date.isoformat(sep="T"),
         },
-        "attendees": [[{"email": x} for x in guest_emails]],
+        "attendees": [{"email": x} for x in guest_emails],
         "conferenceData": {
             "createRequest": {
                 "requestId": requestId,
