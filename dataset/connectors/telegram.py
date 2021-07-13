@@ -1,5 +1,6 @@
 from bson.objectid import ObjectId
 from copy import deepcopy
+from dotenv import load_dotenv
 import json
 import logging
 import os
@@ -23,6 +24,8 @@ from rasa.shared.constants import INTENT_MESSAGE_PREFIX
 from rasa.shared.core.constants import USER_INTENT_RESTART
 
 logger = logging.getLogger(__name__)
+
+load_dotenv()
 
 
 class MongoDataStore:
