@@ -1,4 +1,4 @@
-from typing import Text
+from typing import List, Text
 from bson.objectid import ObjectId
 
 from actions.db.store import db
@@ -9,6 +9,15 @@ ADMIN_CONFID_OBJECT_ID = "000000000000000000000001"
 
 def lazy_init():
     admin_config = db.admin_config.find_one({"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)})
+    specialities = (
+        [
+            "General Surgeon",
+            "Paediatrician",
+            "Gynaecologist",
+        ]
+        if is_debug_env()
+        else []
+    )
     if not admin_config:
         db.admin_config.insert_one(
             {
@@ -19,11 +28,7 @@ def lazy_init():
                 "commission_rate": 10,
                 "meeting_duration_minutes": 15,
                 "account_number": "acc_HLeMvH2h0YvRvT",
-                "specialities": [
-                    "General Surgeon",
-                    "Paediatrician",
-                    "Gynaecologist",
-                ],
+                "specialities": specialities,
             },
         )
 
@@ -141,9 +146,17 @@ def get_specialities():
     )
 
 
-def set_specialities(specialities: list):
+def set_specialities(specialities: List):
     lazy_init()
     db.admin_config.update_one(
         {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)},
         {"$set": {"specialities": specialities}},
     )
+
+
+def print_specialities(specialities: List):
+    if specialities:
+        text = "Current list of specialities:\n" + "\n" + "\n".join(specialities)
+    else:
+        text = "There are no specialities. Please use /addspeciality.\n"
+    return text
