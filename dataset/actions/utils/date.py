@@ -7,17 +7,17 @@ from actions.utils.admin_config import (
 )
 
 WEEK_DAYS_INDEX = {
-    "Monday": 0,
-    "Tuesday": 1,
-    "Wednesday": 2,
-    "Thursday": 3,
-    "Friday": 4,
-    "Saturday": 5,
-    "Sunday": 6,
+    "Mon": 0,
+    "Tue": 1,
+    "Wed": 2,
+    "Thu": 3,
+    "Fri": 4,
+    "Sat": 5,
+    "Sun": 6,
 }
 WEEK_DAYS_SHORT = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 
-DATE_FORMAT = "%A, %b %d, %Y"
+DATE_FORMAT = "%a, %b %d, %Y"
 TIME_FORMAT = "%H:%M"
 
 IST_TZINFO = timezone(timedelta(hours=5, minutes=30))

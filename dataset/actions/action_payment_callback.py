@@ -39,6 +39,7 @@ class ActionPaymentCallback(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
+        admin_group_id = get_admin_group_id()
         entities = tracker.latest_message.get("entities", [])
 
         payment_status: Dict = get_entity(
@@ -92,7 +93,26 @@ class ActionPaymentCallback(Action):
                 requestId=order_id,
             )
 
-            update_order(order_id, meeting=meeting)
+            if meeting:
+                update_order(order_id, meeting=meeting)
+            else:
+                dispatcher.utter_message(
+                    json_message={
+                        "text": f"Something went wrong when generating the meeting link for order #{order_id}. Please use /help to contact support."
+                    }
+                )
+                dispatcher.utter_message(
+                    json_message={
+                        "chat_id": doctor_chat_id,
+                        "text": f"Something went wrong when generating the meeting link for order #{order_id}. Please use /help to contact support.",
+                    }
+                )
+                dispatcher.utter_message(
+                    json_message={
+                        "chat_id": admin_group_id,
+                        "text": f"Something went wrong when generating the meeting link for order #{order_id}.",
+                    }
+                )
 
             update_order_in_spreadsheet(get_order(order_id))
 
@@ -131,9 +151,9 @@ class ActionPaymentCallback(Action):
             }
             dispatcher.utter_message(json_message=patient_json_message)
 
-            if get_admin_group_id():
+            if admin_group_id:
                 admin_json_message = deepcopy(json_message)
-                admin_json_message["chat_id"] = get_admin_group_id()
+                admin_json_message["chat_id"] = admin_group_id
                 dispatcher.utter_message(json_message=admin_json_message)
             else:
                 logger.warn("Admin group id not set. Use /admin or /groupid.")
