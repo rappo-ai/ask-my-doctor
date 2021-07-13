@@ -1,5 +1,15 @@
 version: "3.9"
 services:
+  mongo:
+    image: mongo
+    volumes:
+      - mongodb:/data/db
+  mongo-express:
+    image: mongo-express
+    ports:
+      - 8081:8081
+    depends_on:
+      - mongo
   rasa:
     volumes:
       - ./dataset:/app
@@ -24,13 +34,7 @@ services:
       rasa train -vv > /app/train_logs.txt
       rasa run actions -vv > /app/run_actions_logs.txt & rasa run -vv --log-file /app/run_logs.txt
       "
-  mongo:
-    image: mongo
-    volumes:
-      - mongodb:/data/db
-  mongo-express:
-    image: mongo-express
-    ports:
-      - 8081:8081
+    depends_on:
+      - mongo
 volumes:
   mongodb:
