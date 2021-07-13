@@ -21,7 +21,7 @@ ssh-add ~/.ssh/id_gitdeploykey
 cd ~
 ssh -o "StrictHostKeyChecking no" github.com
 git clone git@github.com:rappo-ai/ask-my-doctor.git
-chmod -R 775 ~/ask-my-doctor/dataset
+chmod -R g+w ~/ask-my-doctor
 
 # update credentials
 # tbdrenzil - manually create ~/ask-my-doctor/.env
