@@ -3,6 +3,7 @@ from typing import Dict, Text
 
 from actions.db.store import db
 from actions.utils.admin_config import get_advance_appointment_days
+from actions.utils.debug import is_debug_env
 from actions.utils.date import (
     generate_time_slots_for_date,
     get_upcoming_availability,
@@ -11,7 +12,7 @@ from actions.utils.date import (
 
 
 def lazy_init():
-    if not db.doctor.find_one({"listing_status": "active"}):
+    if is_debug_env() and not db.doctor.find_one({"listing_status": "active"}):
         db.doctor.insert_many(
             [
                 {

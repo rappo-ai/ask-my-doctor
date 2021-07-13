@@ -27,11 +27,18 @@ class ActionOnSearchSet(Action):
             )
             return []
 
-        dispatcher.utter_message(json_message={"text": "Please choose a doctor:"})
-
         doctors = get_doctors(
             speciality=speciality, onboarding_status="approved", listing_status="active"
         )
+        if not doctors.count():
+            dispatcher.utter_message(
+                json_message={
+                    "text": f"No doctors found for speciality '{speciality}'. Use /help to contact support."
+                }
+            )
+            return []
+        else:
+            dispatcher.utter_message(json_message={"text": "Please choose a doctor:"})
         for d in doctors:
             reply_markup = {
                 "keyboard": [
