@@ -417,7 +417,9 @@ class TelegramInput(InputChannel):
                 else:
                     msg = update.message
                     if self._is_text_message(msg):
-                        text = msg.text.replace("/bot", "")
+                        text = msg.text
+                        if text.startswith("/"):
+                            text = text.replace(f"@{self.verify}", "")
                     elif self._is_photo_message(msg):
                         text = json.dumps(request_dict)
                     elif self._is_location_message(msg):
