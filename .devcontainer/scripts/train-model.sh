@@ -1,3 +1,3 @@
 #!/bin/bash
 
-(cd /app && rasa train -vv > /app/train_logs.txt)
+(cd /app/dataset && rasa train -vv > /app/train_logs.txt)

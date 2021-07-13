@@ -8,9 +8,9 @@
       "name": "rasa run",
       "type": "python",
       "request": "launch",
-      "cwd": "/app",
+      "cwd": "/app/dataset",
       "python": "/opt/venv/bin/python",
-      "program": "/workspace/.devcontainer/scripts/launch-rasa-server.py",
+      "program": "/app/.devcontainer/scripts/launch-rasa-server.py",
       "args": [
         "run",
         "-vv",
@@ -23,7 +23,7 @@
           "remoteRoot": "/opt/venv"
         },
         {
-          "localRoot": "${workspaceFolder}/dataset",
+          "localRoot": "${workspaceFolder}",
           "remoteRoot": "/app"
         },
       ],
@@ -34,7 +34,7 @@
       "name": "rasa run actions",
       "type": "python",
       "request": "launch",
-      "cwd": "/app",
+      "cwd": "/app/dataset",
       "python": "/opt/venv/bin/python",
       "program": "/opt/venv/bin/rasa",
       "args": [
@@ -52,7 +52,7 @@
           "remoteRoot": "/opt/venv"
         },
         {
-          "localRoot": "${workspaceFolder}/dataset",
+          "localRoot": "${workspaceFolder}",
           "remoteRoot": "/app"
         }
       ],
