@@ -29,7 +29,7 @@ def get_google_auth_url(user_id):
     client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
 
     if not client_id:
-        logger.debug("oauth client_id not set in env, using mock google auth url")
+        logger.warn("oauth client_id not set in env, using mock google auth url")
         return MOCK_AUTH_URL
 
     from requests_oauthlib import OAuth2Session
@@ -55,7 +55,7 @@ def create_meeting(credentials, guest_emails, title, start_date, end_date, reque
         client_secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
 
         if not (client_id and client_secret):
-            logger.debug(
+            logger.warn(
                 "oauth client_id or client_secret not set in env, using mock meeting link"
             )
             return {"hangoutLink": MOCK_HANGOUT_LINK}
