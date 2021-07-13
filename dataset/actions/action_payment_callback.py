@@ -135,11 +135,12 @@ class ActionPaymentCallback(Action):
                 },
             }
             patient_json_message = deepcopy(json_message)
-            patient_json_message["reply_markup"]["keyboard"][0].append(
+            patient_json_message["reply_markup"]["keyboard"][0].insert(
+                1,
                 {
                     "title": "Contact Doctor",
                     "payload": f"/EXT_patient_send_message{{\"o_id\":\"{str(order['_id'])}\"}}",
-                }
+                },
             )
             dispatcher.utter_message(json_message=patient_json_message)
 
@@ -153,11 +154,12 @@ class ActionPaymentCallback(Action):
             if doctor_chat_id:
                 doctor_json_message = deepcopy(json_message)
                 doctor_json_message["chat_id"] = doctor_chat_id
-                doctor_json_message["reply_markup"]["keyboard"][0].append(
+                doctor_json_message["reply_markup"]["keyboard"][0].insert(
+                    1,
                     {
                         "title": "Contact Patient",
                         "payload": f"/EXT_doctor_send_message{{\"o_id\":\"{str(order['_id'])}\"}}",
-                    }
+                    },
                 )
                 dispatcher.utter_message(json_message=doctor_json_message)
             else:
