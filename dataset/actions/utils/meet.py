@@ -15,7 +15,7 @@ CALENDAR_ID = "primary"
 CONFERENCE_DATA_VERSION = 1
 HANGOUTS_MEET = "hangoutsMeet"
 MOCK_AUTH_URL = AUTHORIZATION_BASE_URL
-MOCK_HANGOUT_LINK = "https://meet.google.com/ejd-oszg-vrk"
+MOCK_HANGOUT_LINK = "https://meet.google.com"
 REDIRECT_URI_DEBUG = "http://localhost:5005/webhooks/telegram/oauth"
 SCOPES = [
     "https://www.googleapis.com/auth/calendar.events",
