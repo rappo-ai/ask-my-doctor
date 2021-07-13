@@ -18,6 +18,7 @@ from telebot.types import (
     Message,
 )
 from typing import Dict, Text, Any, List, Optional, Callable, Awaitable
+from urllib.parse import urlunparse
 
 from rasa.core.channels.channel import InputChannel, UserMessage, OutputChannel
 from rasa.shared.constants import INTENT_MESSAGE_PREFIX
@@ -324,7 +325,10 @@ class TelegramInput(InputChannel):
                     client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
                     client_secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
                     state = args["state"][0]
-                    redirect_uri = request.url.partition("?")[0]
+                    scheme = "https" if request.host.find("localhost") == -1 else "http"
+                    redirect_uri = urlunparse(
+                        (scheme, request.host, request.path, None, "", None)
+                    )
 
                     google = OAuth2Session(
                         client_id, state=state, redirect_uri=redirect_uri
