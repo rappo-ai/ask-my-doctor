@@ -17,12 +17,28 @@ class ActionOnSearchSet(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
-        dispatcher.utter_message(json_message={"text": "Please choose a doctor:"})
-
         speciality = tracker.get_slot("search__speciality")
+
+        if not speciality:
+            dispatcher.utter_message(
+                json_message={
+                    "text": "There are no specialities to choose from. Please use /help to contact support."
+                }
+            )
+            return []
+
         doctors = get_doctors(
             speciality=speciality, onboarding_status="approved", listing_status="active"
         )
+        if not doctors.count():
+            dispatcher.utter_message(
+                json_message={
+                    "text": f"No doctors found for speciality '{speciality}'. Use /help to contact support."
+                }
+            )
+            return []
+        else:
+            dispatcher.utter_message(json_message={"text": "Please choose a doctor:"})
         for d in doctors:
             reply_markup = {
                 "keyboard": [

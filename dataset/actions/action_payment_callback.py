@@ -39,6 +39,7 @@ class ActionPaymentCallback(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
+        admin_group_id = get_admin_group_id()
         entities = tracker.latest_message.get("entities", [])
 
         payment_status: Dict = get_entity(
@@ -92,7 +93,8 @@ class ActionPaymentCallback(Action):
                 requestId=order_id,
             )
 
-            update_order(order_id, meeting=meeting)
+            if meeting:
+                update_order(order_id, meeting=meeting)
 
             update_order_in_spreadsheet(get_order(order_id))
 
@@ -116,27 +118,33 @@ class ActionPaymentCallback(Action):
                 + f"Your appointment has been scheduled. Please join the meeting at the date and time of the appointment.\n\nIf you need any help with this booking, please contact support."
             )
 
+            keyboard = [[]]
+
+            if meeting:
+                keyboard[0].append(
+                    {
+                        "title": "Join Meeting",
+                        "url": f"{meeting.get('hangoutLink')}",
+                    }
+                )
+
+            keyboard[0].append(
+                {
+                    "title": "Contact Support",
+                    "payload": "/help",
+                }
+            )
+
             json_message = {
                 "text": text,
                 "reply_markup": {
-                    "keyboard": [
-                        [
-                            {
-                                "title": "Join Meeting",
-                                "url": f"{meeting.get('hangoutLink')}",
-                            },
-                            {
-                                "title": "Contact Support",
-                                "payload": "/help",
-                            },
-                        ]
-                    ],
+                    "keyboard": keyboard,
                     "type": "inline",
                 },
             }
             patient_json_message = deepcopy(json_message)
             patient_json_message["reply_markup"]["keyboard"][0].insert(
-                1,
+                len(keyboard[0]) - 1,
                 {
                     "title": "Contact Doctor",
                     "payload": f"/EXT_patient_send_message{{\"o_id\":\"{str(order['_id'])}\"}}",
@@ -144,9 +152,9 @@ class ActionPaymentCallback(Action):
             )
             dispatcher.utter_message(json_message=patient_json_message)
 
-            if get_admin_group_id():
+            if admin_group_id:
                 admin_json_message = deepcopy(json_message)
-                admin_json_message["chat_id"] = get_admin_group_id()
+                admin_json_message["chat_id"] = admin_group_id
                 dispatcher.utter_message(json_message=admin_json_message)
             else:
                 logger.warn("Admin group id not set. Use /admin or /groupid.")
@@ -155,7 +163,7 @@ class ActionPaymentCallback(Action):
                 doctor_json_message = deepcopy(json_message)
                 doctor_json_message["chat_id"] = doctor_chat_id
                 doctor_json_message["reply_markup"]["keyboard"][0].insert(
-                    1,
+                    len(keyboard[0]) - 1,
                     {
                         "title": "Contact Patient",
                         "payload": f"/EXT_doctor_send_message{{\"o_id\":\"{str(order['_id'])}\"}}",
@@ -164,6 +172,17 @@ class ActionPaymentCallback(Action):
                 dispatcher.utter_message(json_message=doctor_json_message)
             else:
                 logger.warn("Doctor chat id not set.")
+
+            if not meeting:
+                [
+                    dispatcher.utter_message(
+                        json_message={
+                            "chat_id": chat_id,
+                            "text": f"Something went wrong when generating the meeting link for order #{order_id}. Please use /help to contact support.",
+                        }
+                    )
+                    for chat_id in [tracker.sender_id, admin_group_id, doctor_chat_id]
+                ]
         else:
             json_message = {"text": "Payment error"}
             dispatcher.utter_message(json_message=json_message)

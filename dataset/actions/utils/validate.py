@@ -1,6 +1,6 @@
 import json
 import re
-from typing import Any, List, Text
+from typing import Any, Dict, List, Text
 
 from actions.utils.admin_config import get_specialities
 from actions.utils.date import WEEK_DAYS_SHORT
@@ -75,7 +75,7 @@ def validate_phone_number(phone_number: Text):
     return None
 
 
-def validate_photo(update: Any):
+def validate_photo(update: Any, size: Dict = None):
     update_dict = None
     try:
         if isinstance(update, str):
@@ -87,7 +87,13 @@ def validate_photo(update: Any):
         photo = get_json_key(update_dict, "message.photo") or get_json_key(
             update_dict, "message.reply_to_message.photo"
         )
-        return photo[0].get("file_id")
+        original_photo = photo[len(photo) - 1]
+        if size and (
+            original_photo.get("width") != size.get("width")
+            or original_photo.get("height") != size.get("height")
+        ):
+            return None
+        return original_photo.get("file_id")
     except Exception:
         pass
     return None

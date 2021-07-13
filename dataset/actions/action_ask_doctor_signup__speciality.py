@@ -4,6 +4,7 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import get_specialities
+from actions.utils.buttons import add_padding
 
 
 class ActionAskDoctorSignupSpeciality(Action):
@@ -18,8 +19,13 @@ class ActionAskDoctorSignupSpeciality(Action):
     ) -> List[Dict[Text, Any]]:
 
         text = f"Please select your speciality:"
+        specialities = get_specialities()
+        row_width = 2
+        add_padding(specialities, row_width)
         reply_markup = {
-            "keyboard": [[s] for s in get_specialities()],
+            "keyboard": [[s for s in specialities]],
+            "resize_keyboard": True,
+            "row_width": row_width,
         }
         json_message = {"text": text, "reply_markup": reply_markup}
         dispatcher.utter_message(json_message=json_message)

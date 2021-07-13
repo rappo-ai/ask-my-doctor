@@ -24,11 +24,11 @@ rules:
     steps:
       - intent: start
       - action: utter_greet
-      - action: utter_main_menu
+      - action: action_main_menu
   - rule: NLU Fallback
     condition:
       - slot_was_set:
           - chat_type: private
     steps:
       - intent: nlu_fallback
-      - action: utter_main_menu
+      - action: action_main_menu

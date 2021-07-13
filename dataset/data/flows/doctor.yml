@@ -60,7 +60,7 @@ responses:
   utter_ask_doctor_signup__number:
     - text: "What is your phone number?"
   utter_ask_doctor_signup__photo:
-    - text: "Please send a photo to use as your profile picture."
+    - text: "Please send a photo to use as your profile picture. It should be 256 x 256 px."
 
 rules:
   - rule: Start new doctor signup form

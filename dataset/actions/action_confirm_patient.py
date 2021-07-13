@@ -31,6 +31,7 @@ class ActionConfirmPatient(Action):
             )
             reply_markup = {
                 "keyboard": [["Yes", "No"]],
+                "resize_keyboard": True,
             }
             json_message = {"text": text, "reply_markup": reply_markup}
             dispatcher.utter_message(json_message=json_message)

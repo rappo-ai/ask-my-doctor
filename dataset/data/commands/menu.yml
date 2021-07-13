@@ -1,5 +1,8 @@
 version: "2.0"
 
+actions:
+  - action_main_menu
+
 intents:
   - menu
 
@@ -23,15 +26,6 @@ nlu:
     examples: |
       - Contact Support
 
-responses:
-  utter_main_menu:
-    - text: |
-        What would you like to do?
-      buttons:
-        - title: Browse Doctors
-        - title: Contact Support
-      button_type: reply
-
 rules:
   - rule: Command /menu
     condition:
@@ -39,4 +33,4 @@ rules:
           - chat_type: private
     steps:
       - intent: menu
-      - action: utter_main_menu
+      - action: action_main_menu

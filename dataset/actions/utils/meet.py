@@ -15,12 +15,14 @@ CALENDAR_ID = "primary"
 CONFERENCE_DATA_VERSION = 1
 HANGOUTS_MEET = "hangoutsMeet"
 MOCK_AUTH_URL = AUTHORIZATION_BASE_URL
-MOCK_HANGOUT_LINK = "https://meet.google.com/ejd-oszg-vrk"
+MOCK_HANGOUT_LINK = "https://meet.google.com"
 REDIRECT_URI_DEBUG = "http://localhost:5005/webhooks/telegram/oauth"
 SCOPES = [
     "https://www.googleapis.com/auth/calendar.events",
 ]
 SEND_UPDATES = "all"
+
+logger = logging.getLogger(__name__)
 
 
 def get_google_auth_url(user_id):
@@ -47,60 +49,65 @@ def get_google_auth_url(user_id):
 
 
 def create_meeting(credentials, guest_emails, title, start_date, end_date, requestId):
+    response = {}
+    try:
+        client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
+        client_secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
 
-    client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
-    client_secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
+        if not (client_id and client_secret):
+            logger.debug(
+                "oauth client_id or client_secret not set in env, using mock meeting link"
+            )
+            return {"hangoutLink": MOCK_HANGOUT_LINK}
 
-    if not (client_id and client_secret):
-        logger.debug(
-            "oauth client_id or client_secret not set in env, using mock meeting link"
+        from googleapiclient.discovery import build
+        from google.oauth2.credentials import Credentials
+        from google.auth.transport.requests import Request
+
+        google_oauth_credentials = deepcopy(credentials)
+        google_oauth_credentials["client_id"] = client_id
+        google_oauth_credentials["client_secret"] = client_secret
+
+        creds = Credentials.from_authorized_user_info(
+            google_oauth_credentials, scopes=SCOPES
         )
-        return {"hangoutLink": MOCK_HANGOUT_LINK}
 
-    from googleapiclient.discovery import build
-    from google.oauth2.credentials import Credentials
-    from google.auth.transport.requests import Request
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
 
-    google_oauth_credentials = deepcopy(credentials)
-    google_oauth_credentials["client_id"] = client_id
-    google_oauth_credentials["client_secret"] = client_secret
+        service = build(API_NAME, API_VERSION, credentials=creds)
 
-    creds = Credentials.from_authorized_user_info(
-        google_oauth_credentials, scopes=SCOPES
-    )
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
+        request_body = {
+            "summary": title,
+            "start": {"dateTime": start_date.isoformat(sep="T")},
+            "end": {
+                "dateTime": end_date.isoformat(sep="T"),
+            },
+            "attendees": [{"email": x} for x in guest_emails],
+            "conferenceData": {
+                "createRequest": {
+                    "requestId": requestId,
+                    "conferenceSolutionKey": {"type": HANGOUTS_MEET},
+                }
+            },
+            "reminders": {
+                "useDefault": False,
+            },
+        }
 
-    service = build(API_NAME, API_VERSION, credentials=creds)
-
-    event = {
-        "summary": title,
-        "start": {"dateTime": start_date.isoformat(sep="T")},
-        "end": {
-            "dateTime": end_date.isoformat(sep="T"),
-        },
-        "attendees": [{"email": x} for x in guest_emails],
-        "conferenceData": {
-            "createRequest": {
-                "requestId": requestId,
-                "conferenceSolutionKey": {"type": HANGOUTS_MEET},
-            }
-        },
-        "reminders": {
-            "useDefault": False,
-        },
-    }
-
-    event = (
-        service.events()
-        .insert(
-            calendarId=CALENDAR_ID,
-            conferenceDataVersion=CONFERENCE_DATA_VERSION,
-            sendUpdates=SEND_UPDATES,
-            body=event,
+        event = (
+            service.events()
+            .insert(
+                calendarId=CALENDAR_ID,
+                conferenceDataVersion=CONFERENCE_DATA_VERSION,
+                sendUpdates=SEND_UPDATES,
+                body=request_body,
+            )
+            .execute()
         )
-        .execute()
-    )
+        response = event
+    except Exception as e:
+        logger.error(e)
 
-    return event
+    return response
