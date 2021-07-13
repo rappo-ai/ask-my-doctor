@@ -113,7 +113,7 @@ class ActionPaymentCallback(Action):
                 + "\n"
                 + print_payment_status(payment_status)
                 + "\n"
-                + f"Your appointment has been scheduled. Please click Join Meeting at the date and time of the appointment.\n\nIf you need any help with this booking, please click Help."
+                + f"Your appointment has been scheduled. Please join the meeting at the date and time of the appointment.\n\nIf you need any help with this booking, please contact support."
             )
 
             json_message = {
@@ -126,7 +126,7 @@ class ActionPaymentCallback(Action):
                                 "url": f"{meeting.get('hangoutLink')}",
                             },
                             {
-                                "title": "Help",
+                                "title": "Contact Support",
                                 "payload": "/help",
                             },
                         ]
