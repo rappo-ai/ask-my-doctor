@@ -6,11 +6,7 @@ from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.cart import get_cart, get_cart_total, print_cart
 from actions.utils.doctor import get_doctor
-from actions.utils.order import (
-    create_order,
-    get_order,
-    update_order,
-)
+from actions.utils.order import create_order, get_order, update_order
 from actions.utils.payment_link import create_payment_link
 from actions.utils.patient import get_patient_for_user_id, print_patient
 from actions.utils.sheets import update_order_in_spreadsheet
@@ -41,8 +37,6 @@ class ActionCreateOrder(Action):
         patient: Dict = get_patient_for_user_id(user_id)
         patient.pop("_id", None)
 
-        # #tbdnikhil - create Razorpay payment link, add / remove fields as needed; set the callback_url to
-        # your webhook added in dataset/connectors/telegram.py. Can use get_host_url utility to get the host url.
         payment_link: Dict = create_payment_link(
             cart_amount,
             patient["name"],
@@ -69,11 +63,20 @@ class ActionCreateOrder(Action):
             + print_patient(patient)
             + "\n"
             + f"Consultation fee: Rs. {cart_amount}\n"
-            + "\n"
-            + f"Click here to pay -> {payment_link.get('link')}\n"
         )
+        reply_markup = {
+            "keyboard": [
+                [
+                    {
+                        "title": f"Pay ₹{cart_amount}",
+                        "url": payment_link.get("short_url"),
+                    }
+                ]
+            ],
+            "type": "inline",
+        }
 
-        json_message = {"text": text}
+        json_message = {"text": text, "reply_markup": reply_markup}
         dispatcher.utter_message(json_message=json_message)
 
         return []

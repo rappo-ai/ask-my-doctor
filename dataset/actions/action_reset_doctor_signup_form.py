@@ -22,7 +22,6 @@ class ActionResetDoctorSignupForm(Action):
             SlotSet("doctor_signup__photo", None),
             SlotSet("doctor_signup__speciality", None),
             SlotSet("doctor_signup__description", None),
-            SlotSet("doctor_signup__time_slots", None),
             SlotSet("doctor_signup__consultation_fee", None),
             SlotSet("doctor_signup__bank_account_number", None),
             SlotSet("doctor_signup__bank_account_name", None),

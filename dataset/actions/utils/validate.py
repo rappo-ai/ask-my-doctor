@@ -1,6 +1,6 @@
 import json
 import re
-from typing import Any, Text
+from typing import Any, List, Text
 
 from actions.utils.admin_config import get_specialities
 from actions.utils.date import WEEK_DAYS_SHORT
@@ -101,27 +101,68 @@ def validate_speciality(speciality: Text):
 
 
 def validate_time_slots(time_slots_str: Text):
+    def slot_start_value(slot):
+        return slot["start_hour"] * 60 + slot["start_minute"]
+
+    def slot_end_value(slot):
+        end_hour = (
+            24
+            if slot["end_hour"] == 0 and slot["end_minute"] == 0
+            else slot["end_hour"]
+        )
+        return end_hour * 60 + slot["end_minute"]
+
+    def merge_overlapping_slots(slot_to_merge, other_slot):
+        if slot_start_value(slot_to_merge) > slot_end_value(
+            other_slot
+        ) or slot_start_value(other_slot) > slot_end_value(slot_to_merge):
+            return True
+        if slot_start_value(other_slot) < slot_start_value(slot_to_merge):
+            slot_to_merge["start_hour"] = other_slot["start_hour"]
+            slot_to_merge["start_minute"] = other_slot["start_minute"]
+            slot_to_merge["start"] = other_slot["start"]
+        if slot_end_value(other_slot) > slot_end_value(slot_to_merge):
+            slot_to_merge["end_hour"] = other_slot["end_hour"]
+            slot_to_merge["end_minute"] = other_slot["end_minute"]
+            slot_to_merge["end"] = other_slot["end"]
+        return False
+
+    def add_or_merge_time_slot(
+        start_hour: int,
+        start_minute: int,
+        start: Text,
+        end_hour: int,
+        end_minute: int,
+        end: Text,
+        slots_list: List,
+    ):
+        slot_to_add = {
+            "start_hour": start_hour,
+            "start_minute": start_minute,
+            "start": start,
+            "end_hour": end_hour,
+            "end_minute": end_minute,
+            "end": end,
+        }
+        new_slots_list = [
+            slot for slot in slots_list if merge_overlapping_slots(slot_to_add, slot)
+        ]
+        new_slots_list.append(slot_to_add)
+        new_slots_list.sort(key=slot_start_value)
+        return new_slots_list
+
     test_str = time_slots_str and time_slots_str.strip()
     if test_str:
-        time_slots = {
-            "mon": [],
-            "tue": [],
-            "wed": [],
-            "thu": [],
-            "fri": [],
-            "sat": [],
-            "sun": [],
-        }
+        time_slots = {}
         lines = test_str.split(";")
         if not len(lines):
             return None
         for l in lines:
             slots = l.split(",")
-            if not len(slots):
-                return None
             weekday = str(slots[0]).strip().lower()
             if not weekday in WEEK_DAYS_SHORT:
                 return None
+
             time_slots[weekday] = []
             for s in slots[1:]:
                 matches = re.search(
@@ -136,16 +177,20 @@ def validate_time_slots(time_slots_str: Text):
                 end_hour = int(matches.group(5))
                 end_minute = int(matches.group(6))
                 # supports midnight 00:00 as the last slot of the day
-                if (end_hour < start_hour and (end_hour != 0 or end_minute != 0)) or (
-                    (end_hour == start_hour) and (end_minute <= start_minute)
-                ):
+                if (
+                    (end_hour < start_hour)
+                    or (end_hour == start_hour and end_minute <= start_minute)
+                ) and (end_hour != 0 or end_minute != 0):
                     return None
-                # overlapping slots are okay
-                time_slots[weekday].append(
-                    {
-                        "start": matches.group(1),
-                        "end": matches.group(4),
-                    }
+
+                time_slots[weekday] = add_or_merge_time_slot(
+                    start_hour,
+                    start_minute,
+                    matches.group(1),
+                    end_hour,
+                    end_minute,
+                    matches.group(4),
+                    time_slots[weekday],
                 )
         return time_slots
     return None

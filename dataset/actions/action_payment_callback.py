@@ -11,17 +11,15 @@ from actions.utils.admin_config import (
     get_meeting_duration_in_minutes,
 )
 from actions.utils.cart import print_cart
+from actions.utils.debug import is_debug_env
 from actions.utils.doctor import get_doctor
 from actions.utils.entity import get_entity
 from actions.utils.json import get_json_key
 from actions.utils.meet import create_meeting
-from actions.utils.order import (
-    get_order,
-    get_order_for_user_id,
-    update_order,
-)
+from actions.utils.order import get_order, get_order_for_user_id, update_order
 from actions.utils.patient import print_patient
 from actions.utils.payment_status import (
+    fetch_payment_details,
     get_order_id_for_payment_status,
     print_payment_status,
 )
@@ -42,32 +40,38 @@ class ActionPaymentCallback(Action):
     ) -> List[Dict[Text, Any]]:
 
         entities = tracker.latest_message.get("entities", [])
-        # #tbdnikhil - set the payment status object in webhook as an entity for intent EXTERNAL_payment_callback.
-        # You can trigger this intent with entity from webhook using /EXTERNAL_payment_callback{"payment_status": "<PAYMENT_STATUS_DATA>"}
-        # Not sure if you can send JSON directly as the value of "payment_status"; if JSON doesn't work you can
-        # send a serialized JSON string and deserialize it here.
+
         payment_status: Dict = get_entity(
             entities,
             "payment_status",
-            {
-                "status": "complete",
-                "amount": 300,
-                "transaction_id": "1234567890",
-                "date": "July 1st, 2021 5:15 PM IST",
-                "mode": "Credit Card",
-                "order_id": "000000000000000000000000",
-            },
+            {},
         )
+
+        if not payment_status:
+            if is_debug_env():
+                payment_status = {
+                    "razorpay_payment_link_reference_id": "000000000000000000000001",
+                    "razorpay_payment_link_status": "paid",
+                }
+            else:
+                return []
 
         order_id = get_order_id_for_payment_status(payment_status)
         order: Dict = get_order(order_id)
-        if not order:
-            # #tbdnikhil - remove this block once payment_status callback is implemented
+        if not order and is_debug_env():
+            logger.warn(
+                "Unable to find order for this payment. Fetching some order for this user for debugging."
+            )
             order = get_order_for_user_id(tracker.sender_id)
             order_id = order.get("_id")
+
+        payment_details = fetch_payment_details(payment_status)
+
+        payment_status["payment_details"] = payment_details
+
         update_order(order_id, payment_status=payment_status)
 
-        if payment_status.get("status") == "complete":
+        if get_json_key(payment_status, "razorpay_payment_link_status") == "paid":
             cart: Dict = order.get("cart")
             patient: Dict = get_json_key(order, "metadata.patient", {})
             cart_item = next(iter(cart.get("items") or []), {})
@@ -76,13 +80,16 @@ class ActionPaymentCallback(Action):
 
             credentials = doctor.get("credentials")
             guest_emails = [patient.get("email")]
+            meet_title = "Appointment with " + patient.get("name")
             start_date = datetime.fromisoformat(cart_item.get("appointment_datetime"))
             end_date = start_date + timedelta(minutes=get_meeting_duration_in_minutes())
             meeting: Dict = create_meeting(
                 credentials=credentials,
                 guest_emails=guest_emails,
+                title=meet_title,
                 start_date=start_date,
                 end_date=end_date,
+                requestId=order_id,
             )
 
             update_order(order_id, meeting=meeting)
@@ -106,7 +113,7 @@ class ActionPaymentCallback(Action):
                 + "\n"
                 + print_payment_status(payment_status)
                 + "\n"
-                + f"Your appointment has been scheduled. Please join this meeting link at the date and time of the appointment:\n{meeting.get('link')}\n\nIf you need any help with this booking, please click /help."
+                + f"Your appointment has been scheduled. Please join this meeting link at the date and time of the appointment:\n{meeting.get('hangoutLink')}\n\nIf you need any help with this booking, please click /help."
             )
 
             json_message = {"text": text, "disable_web_page_preview": True}

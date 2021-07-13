@@ -1,5 +1,7 @@
 import json
 import logging
+import os
+from bson.objectid import ObjectId
 from copy import deepcopy
 from sanic import Blueprint, response
 from sanic.request import Request
@@ -16,11 +18,65 @@ from telebot.types import (
 )
 from typing import Dict, Text, Any, List, Optional, Callable, Awaitable
 
+from google_auth_oauthlib.helpers import credentials_from_session
 from rasa.core.channels.channel import InputChannel, UserMessage, OutputChannel
 from rasa.shared.constants import INTENT_MESSAGE_PREFIX
 from rasa.shared.core.constants import USER_INTENT_RESTART
+from requests_oauthlib import OAuth2Session
 
 logger = logging.getLogger(__name__)
+
+GOOGLE_OAUTH_TOKEN_URL = "https://oauth2.googleapis.com/token"
+
+
+class MongoDataStore:
+    """Stores data in Mongo.
+
+    Property methods:
+        conversations: returns the current conversation
+    """
+
+    def __init__(
+        self,
+        host: Optional[Text] = "mongodb://mongo:27017",
+        db: Optional[Text] = "rappo",
+        username: Optional[Text] = None,
+        password: Optional[Text] = None,
+        auth_source: Optional[Text] = "admin",
+    ) -> None:
+        from pymongo import MongoClient
+        from pymongo.database import Database
+
+        self.client = MongoClient(
+            host,
+            username=username,
+            password=password,
+            authSource=auth_source,
+        )
+
+        self.db = Database(self.client, db)
+
+
+_db_store = MongoDataStore()
+
+db = _db_store.db
+
+
+def get_order(id):
+    return db.order.find_one({"_id": ObjectId(id)})
+
+
+def get_json_key(dict, key, default=None):
+    try:
+        key_split = key.split(".", 1)
+        key_split_len = len(key_split)
+        if key_split_len == 2:
+            return get_json_key(dict[key_split[0]], key_split[1], default)
+        elif key_split_len == 1:
+            return dict[key_split[0]]
+    except:
+        return default
+    return default
 
 
 class TelegramOutput(TeleBot, OutputChannel):
@@ -244,6 +300,45 @@ class TelegramInput(InputChannel):
         async def health(_: Request) -> HTTPResponse:
             return response.json({"status": "ok"})
 
+        @telegram_webhook.route("/oauth", methods=["GET"])
+        async def google_oauth(request: Request) -> Any:
+            if request.method == "GET":
+                try:
+                    args = request.args
+                    client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
+                    client_secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
+                    state = args["state"][0]
+                    redirect_uri = request.url.partition("?")[0]
+
+                    google = OAuth2Session(
+                        client_id, state=state, redirect_uri=redirect_uri
+                    )
+
+                    token = google.fetch_token(
+                        GOOGLE_OAUTH_TOKEN_URL,
+                        client_secret=client_secret,
+                        code=args["code"][0],
+                    )
+
+                    sender_id = state
+                    token_str = json.dumps(token)
+                    message = f'/EXTERNAL_on_google_auth{{"credentials": {token_str}}}'
+                    await on_new_message(
+                        UserMessage(
+                            message,
+                            out_channel,
+                            sender_id,
+                            input_channel=self.name(),
+                            metadata={},
+                        )
+                    )
+                except Exception as e:
+                    logger.error(e)
+
+                user = self.verify
+                bot_link = "https://t.me/" + user
+                return response.redirect(bot_link)
+
         @telegram_webhook.route("/set_webhook", methods=["GET", "POST"])
         async def set_webhook(_: Request) -> HTTPResponse:
             s = out_channel.setWebhook(self.webhook_url)
@@ -253,6 +348,51 @@ class TelegramInput(InputChannel):
             else:
                 logger.warning("Webhook Setup Failed")
                 return response.text("Invalid webhook")
+
+        @telegram_webhook.route("/payment_callback", methods=["GET", "POST"])
+        async def payment_callback(request: Request) -> Any:
+            def get_details(args, key):
+                return next(iter(args[key]), "")
+
+            if request.method == "GET":
+                try:
+                    disable_nlu_bypass = True
+                    payload = request.json
+                    args = request.args
+                    payment_status = {
+                        "razorpay_payment_id": get_details(args, "razorpay_payment_id"),
+                        "razorpay_payment_link_id": get_details(
+                            args, "razorpay_payment_link_id"
+                        ),
+                        "razorpay_payment_link_reference_id": get_details(
+                            args, "razorpay_payment_link_reference_id"
+                        ),
+                        "razorpay_payment_link_status": get_details(
+                            args, "razorpay_payment_link_status"
+                        ),
+                        "razorpay_signature": get_details(args, "razorpay_signature"),
+                    }
+                    order_id = get_details(args, "razorpay_payment_link_reference_id")
+                    order = get_order(order_id)
+                    sender_id = get_json_key(order, "metadata.patient.user_id", "")
+                    payment_status_str = json.dumps(payment_status)
+                    printstat = f'/EXTERNAL_payment_callback{{"payment_status": { payment_status_str } }}'
+
+                    await on_new_message(
+                        UserMessage(
+                            printstat,
+                            out_channel,
+                            sender_id,
+                            input_channel=self.name(),
+                            metadata={},
+                        )
+                    )
+                except Exception as e:
+                    logger.error(e)
+
+                user = self.verify
+                bot_link = "https://t.me/" + user
+                return response.redirect(bot_link)
 
         @telegram_webhook.route("/webhook", methods=["GET", "POST"])
         async def message(request: Request) -> Any:

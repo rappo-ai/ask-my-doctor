@@ -11,7 +11,7 @@ from actions.utils.doctor import (
     add_doctor,
     get_doctor_for_user_id,
     update_doctor,
-    print_doctor_signup_form,
+    print_doctor_profile,
 )
 from actions.utils.sheets import update_doctor_in_spreadsheet
 
@@ -39,7 +39,15 @@ class ActionNewDoctorSignup(Action):
         doctor["photo"] = tracker.get_slot("doctor_signup__photo")
         doctor["speciality"] = tracker.get_slot("doctor_signup__speciality")
         doctor["description"] = tracker.get_slot("doctor_signup__description")
-        doctor["time_slots"] = tracker.get_slot("doctor_signup__time_slots")
+        doctor["weekly_slots"] = {
+            "mon": [],
+            "tue": [],
+            "wed": [],
+            "thu": [],
+            "fri": [],
+            "sat": [],
+            "sun": [],
+        }
         doctor["fee"] = int(tracker.get_slot("doctor_signup__consultation_fee"))
         doctor["bank_account_number"] = tracker.get_slot(
             "doctor_signup__bank_account_number"
@@ -60,7 +68,7 @@ class ActionNewDoctorSignup(Action):
         caption = (
             f"Thank you for your interest in Ask My Doctor. We have received your details and will review it and get back to you within 48 hours.\n"
             + "\n"
-            + print_doctor_signup_form(doctor)
+            + print_doctor_profile(doctor, include_bank_details=True)
         )
 
         json_message = {"photo": doctor.get("photo"), "caption": caption}
