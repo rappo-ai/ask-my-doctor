@@ -23,10 +23,19 @@ class ActionCommandSetGoogleID(Action):
             return []
         dispatcher.utter_message(
             json_message={
-                "chat_id": doctor["user_id"],
-                "text": (
-                    f"Please click this link to connect your Google ID -> {get_google_auth_url(doctor['user_id'])}.\n"
-                ),
+                "chat_id": doctor.get("user_id"),
+                "text": "Please click the button to connect your Google ID.",
+                "reply_markup": {
+                    "keyboard": [
+                        [
+                            {
+                                "title": "Connect Google ID",
+                                "url": f"{get_google_auth_url(doctor.get('user_id'))}",
+                            }
+                        ]
+                    ],
+                    "type": "inline",
+                },
             }
         )
         return []

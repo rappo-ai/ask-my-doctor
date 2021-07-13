@@ -5,6 +5,7 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import get_admin_group_id
+from actions.utils.debug import is_debug_env
 from actions.utils.doctor import (
     get_doctor_for_user_id,
     update_doctor,
@@ -27,9 +28,13 @@ class ActionDoctorSetGoogleAuth(Action):
 
         entities = tracker.latest_message.get("entities", [])
 
-        credentials: Dict = get_entity(
-            entities, "credentials", {"access_token": "dummyaccesstoken"}
-        )
+        credentials: Dict = get_entity(entities, "credentials")
+
+        if not credentials:
+            if is_debug_env():
+                credentials = {"access_token": "debug"}
+            else:
+                return []
 
         user_id = tracker.sender_id
         doctor = get_doctor_for_user_id(user_id)

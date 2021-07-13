@@ -113,22 +113,35 @@ class ActionPaymentCallback(Action):
                 + "\n"
                 + print_payment_status(payment_status)
                 + "\n"
-                + f"Your appointment has been scheduled. Please join this meeting link at the date and time of the appointment:\n{meeting.get('hangoutLink')}\n\nIf you need any help with this booking, please click /help."
+                + f"Your appointment has been scheduled. Please join the meeting at the date and time of the appointment.\n\nIf you need any help with this booking, please contact support."
             )
 
-            json_message = {"text": text, "disable_web_page_preview": True}
-            patient_json_message = deepcopy(json_message)
-            patient_json_message["reply_markup"] = {
-                "keyboard": [
-                    [
-                        {
-                            "title": "Contact Doctor",
-                            "payload": f"/EXT_patient_send_message{{\"o_id\":\"{str(order['_id'])}\"}}",
-                        }
-                    ]
-                ],
-                "type": "inline",
+            json_message = {
+                "text": text,
+                "reply_markup": {
+                    "keyboard": [
+                        [
+                            {
+                                "title": "Join Meeting",
+                                "url": f"{meeting.get('hangoutLink')}",
+                            },
+                            {
+                                "title": "Contact Support",
+                                "payload": "/help",
+                            },
+                        ]
+                    ],
+                    "type": "inline",
+                },
             }
+            patient_json_message = deepcopy(json_message)
+            patient_json_message["reply_markup"]["keyboard"][0].insert(
+                1,
+                {
+                    "title": "Contact Doctor",
+                    "payload": f"/EXT_patient_send_message{{\"o_id\":\"{str(order['_id'])}\"}}",
+                },
+            )
             dispatcher.utter_message(json_message=patient_json_message)
 
             if get_admin_group_id():
@@ -141,17 +154,13 @@ class ActionPaymentCallback(Action):
             if doctor_chat_id:
                 doctor_json_message = deepcopy(json_message)
                 doctor_json_message["chat_id"] = doctor_chat_id
-                doctor_json_message["reply_markup"] = {
-                    "keyboard": [
-                        [
-                            {
-                                "title": "Contact Patient",
-                                "payload": f"/EXT_doctor_send_message{{\"o_id\":\"{str(order['_id'])}\"}}",
-                            }
-                        ]
-                    ],
-                    "type": "inline",
-                }
+                doctor_json_message["reply_markup"]["keyboard"][0].insert(
+                    1,
+                    {
+                        "title": "Contact Patient",
+                        "payload": f"/EXT_doctor_send_message{{\"o_id\":\"{str(order['_id'])}\"}}",
+                    },
+                )
                 dispatcher.utter_message(json_message=doctor_json_message)
             else:
                 logger.warn("Doctor chat id not set.")

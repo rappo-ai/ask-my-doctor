@@ -6,7 +6,12 @@ AskMyDoctor source code repository.
 ## Environment Variables
 
 Copy .env.template to .env and set the Telegram bot token and Telegram bot username.
-Optionally set the Razorpay key id and Razorpay secret key to setup payments.
+
+Optionally set the Razorpay key id and Razorpay secret key to setup payments integration.
+
+Optionally set the Google Oauth client ID and secret to setup Google Meet integration.
+
+Contact repo owner for help with 3rd party credentials.
 
 ## Launch without debugging (Production)
 
