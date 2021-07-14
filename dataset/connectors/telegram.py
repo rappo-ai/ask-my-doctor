@@ -1,7 +1,9 @@
-import json
-import logging
 from bson.objectid import ObjectId
 from copy import deepcopy
+from dotenv import load_dotenv
+import json
+import logging
+import os
 from sanic import Blueprint, response
 from sanic.request import Request
 from sanic.response import HTTPResponse
@@ -16,12 +18,15 @@ from telebot.types import (
     Message,
 )
 from typing import Dict, Text, Any, List, Optional, Callable, Awaitable
+from urllib.parse import urlunparse
 
 from rasa.core.channels.channel import InputChannel, UserMessage, OutputChannel
 from rasa.shared.constants import INTENT_MESSAGE_PREFIX
 from rasa.shared.core.constants import USER_INTENT_RESTART
 
 logger = logging.getLogger(__name__)
+
+load_dotenv()
 
 
 class MongoDataStore:
@@ -162,73 +167,86 @@ class TelegramOutput(TeleBot, OutputChannel):
     async def send_custom_json(
         self, recipient_id: Text, json_message: Dict[Text, Any], **kwargs: Any
     ) -> None:
-        json_message = deepcopy(json_message)
+        try:
+            json_message = deepcopy(json_message)
 
-        recipient_id = json_message.pop("chat_id", recipient_id)
-        reply_markup_json: Dict = json_message.pop("reply_markup", None)
-        reply_markup = ReplyKeyboardRemove()
-        if reply_markup_json:
-            keyboard_type = reply_markup_json.get("type", "reply")
-            if keyboard_type == "reply":
-                reply_markup = ReplyKeyboardMarkup(
-                    resize_keyboard=reply_markup_json.get("resize_keyboard", False),
-                    one_time_keyboard=reply_markup_json.get("one_time_keyboard", True),
-                )
-                [
-                    reply_markup.add(KeyboardButton(col))
-                    for row in reply_markup_json.get("keyboard", [])
-                    for col in row
-                ]
-            elif keyboard_type == "inline":
-                reply_markup = InlineKeyboardMarkup()
-                [
-                    reply_markup.add(
-                        InlineKeyboardButton(col["title"], callback_data=col["payload"])
+            recipient_id = json_message.pop("chat_id", recipient_id)
+            reply_markup_json: Dict = json_message.pop("reply_markup", None)
+            reply_markup = ReplyKeyboardRemove()
+            if reply_markup_json:
+                keyboard_type = reply_markup_json.get("type", "reply")
+                if keyboard_type == "reply":
+                    reply_markup = ReplyKeyboardMarkup(
+                        resize_keyboard=reply_markup_json.get("resize_keyboard", False),
+                        one_time_keyboard=reply_markup_json.get(
+                            "one_time_keyboard", True
+                        ),
+                        row_width=reply_markup_json.get("row_width", 4),
                     )
-                    for row in reply_markup_json.get("keyboard", [])
-                    for col in row
-                ]
+                    [
+                        reply_markup.add(*row)
+                        for row in reply_markup_json.get("keyboard", [])
+                    ]
+                elif keyboard_type == "inline":
+                    reply_markup = InlineKeyboardMarkup(
+                        row_width=reply_markup_json.get("row_width", 4)
+                    )
+                    [
+                        reply_markup.add(
+                            *[
+                                InlineKeyboardButton(
+                                    col.get("title"),
+                                    callback_data=col.get("payload"),
+                                    url=col.get("url"),
+                                )
+                                for col in row
+                            ]
+                        )
+                        for row in reply_markup_json.get("keyboard", [])
+                    ]
 
-        send_functions = {
-            ("text",): "send_message",
-            ("photo",): "send_photo",
-            ("audio",): "send_audio",
-            ("document",): "send_document",
-            ("sticker",): "send_sticker",
-            ("video",): "send_video",
-            ("video_note",): "send_video_note",
-            ("animation",): "send_animation",
-            ("voice",): "send_voice",
-            ("media",): "send_media_group",
-            ("latitude", "longitude", "title", "address"): "send_venue",
-            ("latitude", "longitude"): "send_location",
-            ("phone_number", "first_name"): "send_contact",
-            ("game_short_name",): "send_game",
-            ("action",): "send_chat_action",
-            (
-                "title",
-                "decription",
-                "payload",
-                "provider_token",
-                "start_parameter",
-                "currency",
-                "prices",
-            ): "send_invoice",
-            ("from_chat_id", "message_id"): "copy_message",
-        }
+            send_functions = {
+                ("text",): "send_message",
+                ("photo",): "send_photo",
+                ("audio",): "send_audio",
+                ("document",): "send_document",
+                ("sticker",): "send_sticker",
+                ("video",): "send_video",
+                ("video_note",): "send_video_note",
+                ("animation",): "send_animation",
+                ("voice",): "send_voice",
+                ("media",): "send_media_group",
+                ("latitude", "longitude", "title", "address"): "send_venue",
+                ("latitude", "longitude"): "send_location",
+                ("phone_number", "first_name"): "send_contact",
+                ("game_short_name",): "send_game",
+                ("action",): "send_chat_action",
+                (
+                    "title",
+                    "decription",
+                    "payload",
+                    "provider_token",
+                    "start_parameter",
+                    "currency",
+                    "prices",
+                ): "send_invoice",
+                ("from_chat_id", "message_id"): "copy_message",
+            }
 
-        for params in send_functions.keys():
-            if all(json_message.get(p) is not None for p in params):
-                args = [json_message.pop(p) for p in params]
-                if send_functions[params] not in [
-                    "send_media_group",
-                    "send_game",
-                    "send_chat_action",
-                    "send_invoice",
-                ]:
-                    json_message["reply_markup"] = reply_markup
-                api_call = getattr(self, send_functions[params])
-                api_call(recipient_id, *args, **json_message)
+            for params in send_functions.keys():
+                if all(json_message.get(p) is not None for p in params):
+                    args = [json_message.pop(p) for p in params]
+                    if send_functions[params] not in [
+                        "send_media_group",
+                        "send_game",
+                        "send_chat_action",
+                        "send_invoice",
+                    ]:
+                        json_message["reply_markup"] = reply_markup
+                    api_call = getattr(self, send_functions[params])
+                    api_call(recipient_id, *args, **json_message)
+        except Exception as e:
+            logger.error(e)
 
 
 class TelegramInput(InputChannel):
@@ -295,6 +313,52 @@ class TelegramInput(InputChannel):
         async def health(_: Request) -> HTTPResponse:
             return response.json({"status": "ok"})
 
+        @telegram_webhook.route("/oauth", methods=["GET"])
+        async def google_oauth(request: Request) -> Any:
+            if request.method == "GET":
+                try:
+                    from requests_oauthlib import OAuth2Session
+
+                    GOOGLE_OAUTH_TOKEN_URL = "https://oauth2.googleapis.com/token"
+
+                    args = request.args
+                    client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
+                    client_secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
+                    state = args["state"][0]
+                    scheme = "https" if request.host.find("localhost") == -1 else "http"
+                    redirect_uri = urlunparse(
+                        (scheme, request.host, request.path, None, "", None)
+                    )
+
+                    google = OAuth2Session(
+                        client_id, state=state, redirect_uri=redirect_uri
+                    )
+
+                    token = google.fetch_token(
+                        GOOGLE_OAUTH_TOKEN_URL,
+                        client_secret=client_secret,
+                        code=args["code"][0],
+                    )
+
+                    sender_id = state
+                    token_str = json.dumps(token)
+                    message = f'/EXTERNAL_on_google_auth{{"credentials": {token_str}}}'
+                    await on_new_message(
+                        UserMessage(
+                            message,
+                            out_channel,
+                            sender_id,
+                            input_channel=self.name(),
+                            metadata={},
+                        )
+                    )
+                except Exception as e:
+                    logger.error(e)
+
+                user = self.verify
+                bot_link = "https://t.me/" + user
+                return response.redirect(bot_link)
+
         @telegram_webhook.route("/set_webhook", methods=["GET", "POST"])
         async def set_webhook(_: Request) -> HTTPResponse:
             s = out_channel.setWebhook(self.webhook_url)
@@ -353,38 +417,40 @@ class TelegramInput(InputChannel):
         @telegram_webhook.route("/webhook", methods=["GET", "POST"])
         async def message(request: Request) -> Any:
             if request.method == "POST":
-                disable_nlu_bypass = True
-                request_dict = request.json
-                update = Update.de_json(request_dict)
-                if not out_channel.get_me().username == self.verify:
-                    logger.debug("Invalid access token, check it matches Telegram")
-                    return response.text("failed")
-
-                if self._is_button(update):
-                    out_channel.answer_callback_query(update.callback_query.id)
-                    msg = update.callback_query.message
-                    text = update.callback_query.data
-                    disable_nlu_bypass = False
-                elif self._is_edited_message(update):
-                    # skip edited messages for now
-                    # msg = update.edited_message
-                    # text = update.edited_message.text
-                    return response.text("success")
-                else:
-                    msg = update.message
-                    if self._is_text_message(msg):
-                        text = msg.text.replace("/bot", "")
-                    elif self._is_photo_message(msg):
-                        text = json.dumps(request_dict)
-                    elif self._is_location_message(msg):
-                        text = '{{"lng":{0}, "lat":{1}}}'.format(
-                            msg.location.longitude, msg.location.latitude
-                        )
-                    else:
-                        return response.text("success")
-                sender_id = msg.chat.id
-                metadata = self.get_metadata(request) or {}
                 try:
+                    disable_nlu_bypass = True
+                    request_dict = request.json
+                    update = Update.de_json(request_dict)
+                    if not out_channel.get_me().username == self.verify:
+                        logger.debug("Invalid access token, check it matches Telegram")
+                        return response.text("failed")
+
+                    if self._is_button(update):
+                        out_channel.answer_callback_query(update.callback_query.id)
+                        msg = update.callback_query.message
+                        text = update.callback_query.data
+                        disable_nlu_bypass = False
+                    elif self._is_edited_message(update):
+                        # skip edited messages for now
+                        # msg = update.edited_message
+                        # text = update.edited_message.text
+                        return response.text("success")
+                    else:
+                        msg = update.message
+                        if self._is_text_message(msg):
+                            text = msg.text
+                            if text.startswith("/"):
+                                text = text.replace(f"@{self.verify}", "")
+                        elif self._is_photo_message(msg):
+                            text = json.dumps(request_dict)
+                        elif self._is_location_message(msg):
+                            text = '{{"lng":{0}, "lat":{1}}}'.format(
+                                msg.location.longitude, msg.location.latitude
+                            )
+                        else:
+                            return response.text("success")
+                    sender_id = msg.chat.id
+                    metadata = self.get_metadata(request) or {}
                     if text == (INTENT_MESSAGE_PREFIX + USER_INTENT_RESTART):
                         await on_new_message(
                             UserMessage(

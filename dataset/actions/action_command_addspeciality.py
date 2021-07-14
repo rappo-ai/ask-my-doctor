@@ -7,6 +7,7 @@ from rasa_sdk.executor import CollectingDispatcher
 from actions.utils.admin_config import (
     is_admin_group,
     get_specialities,
+    print_specialities,
     set_specialities,
 )
 
@@ -35,9 +36,9 @@ class ActionCommandAddSpeciality(Action):
                 dispatcher.utter_message(
                     json_message={
                         "text": (
-                            f'"{speciality}" speciality already exists. Current list of specialities:\n'
+                            f'"{speciality}" speciality already exists.\n'
                             + "\n"
-                            + "\n".join(specialities)
+                            + print_specialities(specialities)
                         )
                     }
                 )
@@ -48,9 +49,9 @@ class ActionCommandAddSpeciality(Action):
             dispatcher.utter_message(
                 json_message={
                     "text": (
-                        f'"{speciality}" speciality added. Current list of specialities:\n'
+                        f'"{speciality}" speciality added.\n'
                         + "\n"
-                        + "\n".join(specialities)
+                        + print_specialities(specialities)
                     )
                 }
             )

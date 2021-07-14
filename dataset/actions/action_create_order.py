@@ -63,11 +63,20 @@ class ActionCreateOrder(Action):
             + print_patient(patient)
             + "\n"
             + f"Consultation fee: Rs. {cart_amount}\n"
-            + "\n"
-            + f"Click here to pay -> {payment_link.get('short_url')}\n"
         )
+        reply_markup = {
+            "keyboard": [
+                [
+                    {
+                        "title": f"Pay ₹{cart_amount}",
+                        "url": payment_link.get("short_url"),
+                    }
+                ]
+            ],
+            "type": "inline",
+        }
 
-        json_message = {"text": text}
+        json_message = {"text": text, "reply_markup": reply_markup}
         dispatcher.utter_message(json_message=json_message)
 
         return []

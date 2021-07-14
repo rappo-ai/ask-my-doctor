@@ -3,6 +3,7 @@ from typing import Dict, Text
 
 from actions.db.store import db
 from actions.utils.admin_config import get_advance_appointment_days
+from actions.utils.debug import is_debug_env
 from actions.utils.date import (
     generate_time_slots_for_date,
     get_upcoming_availability,
@@ -11,7 +12,7 @@ from actions.utils.date import (
 
 
 def lazy_init():
-    if not db.doctor.find_one({"listing_status": "active"}):
+    if is_debug_env() and not db.doctor.find_one({"listing_status": "active"}):
         db.doctor.insert_many(
             [
                 {
@@ -20,7 +21,7 @@ def lazy_init():
                     "speciality": "General Surgeon",
                     "fee": 600,
                     "description": "Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum",
-                    "photo": "https://storage.googleapis.com/ask-my-doctor-public/stethoscope.png",
+                    "photo": "https://storage.googleapis.com/ask-my-doctor-public/doctor-profile.png",
                     "weekly_slots": {
                         "mon": [{"start": "17:00", "end": "19:00"}],
                         "tue": [{"start": "17:00", "end": "19:00"}],
@@ -41,7 +42,7 @@ def lazy_init():
                     "speciality": "Paediatrician",
                     "fee": 400,
                     "description": "Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum",
-                    "photo": "https://storage.googleapis.com/ask-my-doctor-public/stethoscope.png",
+                    "photo": "https://storage.googleapis.com/ask-my-doctor-public/doctor-profile.png",
                     "weekly_slots": {
                         "mon": [],
                         "tue": [],
@@ -62,7 +63,7 @@ def lazy_init():
                     "speciality": "Gynaecologist",
                     "fee": 700,
                     "description": "Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum",
-                    "photo": "https://storage.googleapis.com/ask-my-doctor-public/stethoscope.png",
+                    "photo": "https://storage.googleapis.com/ask-my-doctor-public/doctor-profile.png",
                     "weekly_slots": {
                         "mon": [{"start": "17:00", "end": "19:00"}],
                         "tue": [],

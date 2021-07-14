@@ -6,11 +6,6 @@ sudo chmod 600 /swapfile
 sudo mkswap /swapfile
 sudo swapon /swapfile
 
-# Setup Firewall
-sudo ufw allow http
-sudo ufw allow https
-sudo ufw allow 8081
-
 # SSH deploy key setup
 # tbdrenzil - manually create ~/.ssh/id_gitdeploykey
 chmod 600 ~/.ssh/id_gitdeploykey
@@ -26,11 +21,11 @@ ssh-add ~/.ssh/id_gitdeploykey
 cd ~
 ssh -o "StrictHostKeyChecking no" github.com
 git clone git@github.com:rappo-ai/ask-my-doctor.git
+chmod -R g+w ~/ask-my-doctor
 
 # update credentials
 # tbdrenzil - manually create ~/ask-my-doctor/.env
 
 # launch docker
 cd ~/ask-my-doctor
-chmod -R 775 dataset
 docker-compose -f docker-compose.base.yml -f docker-compose.yml up --build --force-recreate -d

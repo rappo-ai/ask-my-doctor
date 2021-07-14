@@ -1,4 +1,4 @@
-from typing import Any, Text, Dict
+from typing import Any, Dict, List, Text
 
 from rasa_sdk import Tracker
 from rasa_sdk.executor import CollectingDispatcher
@@ -11,6 +11,19 @@ from actions.utils.admin_config import get_specialities
 class ValidateSearchForm(FormValidationAction):
     def name(self) -> Text:
         return "validate_search_form"
+
+    async def required_slots(
+        self,
+        slots_mapped_in_domain: List[Text],
+        dispatcher: "CollectingDispatcher",
+        tracker: "Tracker",
+        domain: "DomainDict",
+    ) -> List[Text]:
+
+        specialities = get_specialities()
+        if not specialities:
+            return []
+        return slots_mapped_in_domain
 
     def validate_search__speciality(
         self,

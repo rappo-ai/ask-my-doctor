@@ -14,15 +14,16 @@
 	"service": "rasa",
 	// The optional 'workspaceFolder' property is the path VS Code should open by default when
 	// connected. This is typically a file mount in .devcontainer/docker-compose.yml
-	"workspaceFolder": "/workspace",
+	"workspaceFolder": "/app",
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
 		"terminal.integrated.shell.linux": "/bin/bash",
 		"editor.formatOnSave": true,
 		"git.enabled": true,
 		"git.path": "/usr/bin/git",
-		"python.pythonPath": "/opt/venv/bin/python",
 		"python.languageServer": "Pylance",
+		"python.defaultInterpreterPath": "/opt/venv/bin/python",
+		"python.pythonPath": "/opt/venv/bin/python",
 		"python.formatting.provider": "black",
 		"redhat.telemetry.enabled": false,
 		"yaml.format.enable": true,

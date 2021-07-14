@@ -30,6 +30,11 @@ class ActionCommandListDoctors(Action):
 
         if matches and speciality:
             doctors = get_doctors(speciality=speciality)
+            dispatcher.utter_message(
+                json_message={
+                    "text": f"Found {doctors.count()} doctors for speciality '{speciality}'"
+                }
+            )
             for d in doctors:
                 dispatcher.utter_message(json_message=get_doctor_card(d))
         else:
