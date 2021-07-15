@@ -40,7 +40,7 @@ class ActionCommandReject(Action):
                 json_message={
                     "chat_id": doctor["user_id"],
                     "text": (
-                        f"Your application has been rejected with reason {reject_reason}. Please use /signup to submit a fresh application.\n"
+                        f'Your application has been rejected with reason "{reject_reason}". Please use /signup to submit a fresh application.\n'
                     ),
                 }
             )

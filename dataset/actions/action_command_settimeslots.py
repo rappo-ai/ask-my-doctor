@@ -5,8 +5,9 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import get_admin_group_id, is_admin_group
-from actions.utils.date import print_weekly_slots
+from actions.utils.date import is_empty_weekly_slots, print_weekly_slots
 from actions.utils.doctor import (
+    LISTING_STATUS_DISABLED,
     get_doctor,
     get_doctor_card,
     get_doctor_for_user_id,
@@ -50,6 +51,11 @@ class ActionCommandSetTimeSlots(Action):
             weekly_slots = doctor.get("weekly_slots", {})
             weekly_slots.update(new_weekly_slots)
             doctor["weekly_slots"] = weekly_slots
+
+            do_deactivate = is_empty_weekly_slots(new_weekly_slots)
+            if do_deactivate:
+                doctor["listing_status"] = LISTING_STATUS_DISABLED
+
             update_doctor(doctor)
 
             doctor_card = get_doctor_card(doctor)
@@ -74,6 +80,18 @@ class ActionCommandSetTimeSlots(Action):
                     "text": f'Your time slots have been updated to "{weekly_slots_str}" by {command_user}.',
                 }
             )
+
+            if do_deactivate:
+                [
+                    dispatcher.utter_message(
+                        json_message={
+                            "text": f"{doctor.get('name')} has been deactivated as the timeslots are empty. Add timeslots with /settimeslots and then use /activate to activate the listing again.",
+                            "chat_id": chat_id,
+                        }
+                    )
+                    for chat_id in [doctor.get("user_id"), get_admin_group_id()]
+                ]
+
         else:
             usage = "/settimeslots <TIME SLOTS>"
             clear_slots_example = "/settimeslots Mon"

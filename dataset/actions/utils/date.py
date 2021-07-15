@@ -98,3 +98,7 @@ def format_appointment_date(time: datetime):
 
 def format_appointment_time(time: datetime):
     return time.strftime(APPOINTMENT_TIME_FORMAT)
+
+
+def is_empty_weekly_slots(weekly_slots: Dict):
+    return all(value == [] for value in weekly_slots.values())
