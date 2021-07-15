@@ -1,4 +1,5 @@
 from bson.objectid import ObjectId
+from datetime import datetime
 from typing import Dict, Text
 
 from actions.db.store import db
@@ -6,13 +7,22 @@ from actions.utils.admin_config import get_advance_appointment_days
 from actions.utils.debug import is_debug_env
 from actions.utils.date import (
     generate_time_slots_for_date,
-    get_upcoming_availability,
-    print_time_slots,
+    get_available_dates_for_weekly_slots,
+    print_weekly_slots,
 )
+from actions.utils.timeslot_lock import is_doctor_slot_locked
+
+ONBOARDING_STATUS_APPROVED = "approved"
+ONBOARDING_STATUS_REJECTED = "rejected"
+ONBOARDING_STATUS_SIGNUP = "signup"
+LISTING_STATUS_ENABLED = "enabled"
+LISTING_STATUS_DISABLED = "disabled"
 
 
 def lazy_init():
-    if is_debug_env() and not db.doctor.find_one({"listing_status": "active"}):
+    if is_debug_env() and not db.doctor.find_one(
+        {"listing_status": LISTING_STATUS_ENABLED}
+    ):
         db.doctor.insert_many(
             [
                 {
@@ -23,18 +33,18 @@ def lazy_init():
                     "description": "Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum",
                     "photo": "https://storage.googleapis.com/ask-my-doctor-public/doctor-profile.png",
                     "weekly_slots": {
-                        "mon": [{"start": "17:00", "end": "19:00"}],
-                        "tue": [{"start": "17:00", "end": "19:00"}],
-                        "wed": [{"start": "17:00", "end": "19:00"}],
-                        "thu": [{"start": "17:00", "end": "19:00"}],
-                        "fri": [{"start": "17:00", "end": "19:00"}],
+                        "mon": [],
+                        "tue": [{"start": "17:00", "end": "17:15"}],
+                        "wed": [],
+                        "thu": [],
+                        "fri": [],
                         "sat": [],
                         "sun": [],
                     },
                     "credentials": {},
                     "user_id": "1",
-                    "onboarding_status": "approved",
-                    "listing_status": "active",
+                    "onboarding_status": ONBOARDING_STATUS_APPROVED,
+                    "listing_status": LISTING_STATUS_ENABLED,
                 },
                 {
                     "_id": ObjectId(),
@@ -54,8 +64,8 @@ def lazy_init():
                     },
                     "credentials": {},
                     "user_id": "2",
-                    "onboarding_status": "approved",
-                    "listing_status": "active",
+                    "onboarding_status": ONBOARDING_STATUS_APPROVED,
+                    "listing_status": LISTING_STATUS_ENABLED,
                 },
                 {
                     "_id": ObjectId(),
@@ -75,8 +85,8 @@ def lazy_init():
                     },
                     "credentials": {},
                     "user_id": "3",
-                    "onboarding_status": "approved",
-                    "listing_status": "active",
+                    "onboarding_status": ONBOARDING_STATUS_APPROVED,
+                    "listing_status": LISTING_STATUS_ENABLED,
                 },
             ]
         )
@@ -84,7 +94,21 @@ def lazy_init():
 
 def is_approved_doctor(chat_id: Text):
     return bool(
-        db.doctor.find_one({"user_id": chat_id, "onboarding_status": "approved"})
+        db.doctor.find_one(
+            {"user_id": chat_id, "onboarding_status": ONBOARDING_STATUS_APPROVED}
+        )
+    )
+
+
+def is_approved_and_activated_doctor(doctor_id) -> bool:
+    return bool(
+        db.doctor.find_one(
+            {
+                "_id": ObjectId(doctor_id),
+                "onboarding_status": ONBOARDING_STATUS_APPROVED,
+                "listing_status": LISTING_STATUS_ENABLED,
+            }
+        )
     )
 
 
@@ -95,7 +119,9 @@ def add_doctor(doctor: Dict):
 
 def get_available_time_slots(doctor_id, date: Text):
     doctor_weekly_slots = get_doctor_weekly_slots(doctor_id)
-    return generate_time_slots_for_date(doctor_weekly_slots, date)
+    return generate_time_slots_for_date(
+        doctor_weekly_slots, date, get_time_slot_filter_for_doctor(doctor_id)
+    )
 
 
 def get_doctor(id):
@@ -130,10 +156,19 @@ def get_doctors(
     return db.doctor.find(query)
 
 
-def get_upcoming_appointment_dates(doctor_id):
+def get_time_slot_filter_for_doctor(doctor_id):
+    def filter(slot_dt: datetime):
+        return not is_doctor_slot_locked(doctor_id, slot_dt.isoformat())
+
+    return filter
+
+
+def get_available_appointment_dates(doctor_id):
     doctor_weekly_slots = get_doctor_weekly_slots(doctor_id)
-    return get_upcoming_availability(
-        doctor_weekly_slots, get_advance_appointment_days()
+    return get_available_dates_for_weekly_slots(
+        doctor_weekly_slots,
+        get_advance_appointment_days(),
+        get_time_slot_filter_for_doctor(doctor_id),
     )
 
 
@@ -162,7 +197,7 @@ def print_doctor_profile(
     )
     if include_time_slots:
         profile = profile + (
-            f"Time Slots: {print_time_slots(doctor.get('weekly_slots'))}\n"
+            f"Time Slots: {print_weekly_slots(doctor.get('weekly_slots'))}\n"
         )
     if include_google_id:
         profile = profile + (

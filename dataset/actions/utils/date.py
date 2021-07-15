@@ -1,91 +1,100 @@
-from datetime import datetime as dt, timedelta, timezone
-from typing import Dict, List, Text
+from datetime import datetime, timedelta, timezone
+from typing import Any, Callable, Dict, List, Optional
 
 from actions.utils.admin_config import (
-    get_advance_time_slot_minutes,
+    get_booking_advance_time_minutes,
     get_meeting_duration_in_minutes,
 )
 
-WEEK_DAYS_INDEX = {
-    "Mon": 0,
-    "Tue": 1,
-    "Wed": 2,
-    "Thu": 3,
-    "Fri": 4,
-    "Sat": 5,
-    "Sun": 6,
-}
 WEEK_DAYS_SHORT = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 
-DATE_FORMAT = "%a, %b %d, %Y"
-TIME_FORMAT = "%H:%M"
+APPOINTMENT_DATE_FORMAT = "%a, %b %d, %Y"
+APPOINTMENT_TIME_FORMAT = "%H:%M"
 
 IST_TZINFO = timezone(timedelta(hours=5, minutes=30))
 
 
-def filter_available_time_slots(time_slots: List):
-    now = dt.now(tz=IST_TZINFO)
-    now_datetime = dt.strptime(f"{now.hour}:{now.minute}", "%H:%M")
-    new_time_slots = []
-    for time_slot in time_slots:
-        delta = dt.strptime(time_slot, TIME_FORMAT) - now_datetime
-        delta_seconds = delta.total_seconds()
-        if (delta_seconds / 60) > get_advance_time_slot_minutes():
-            new_time_slots.append(time_slot)
-    return new_time_slots
-
-
-def get_upcoming_availability(weekly_slots: Dict, num_days: int):
-    now = dt.now(tz=IST_TZINFO)
-    weekday = now.weekday()
-    upcoming_week_availability = [
-        weekly_slots[WEEK_DAYS_SHORT[(weekday + i) % 7]] for i in range(num_days)
-    ]
-    if len(upcoming_week_availability) and len(upcoming_week_availability[0]):
-        slot_ranges_for_today: List = upcoming_week_availability[0]
-        time_slots_for_today: List = generate_time_slots_for_range(
-            slot_ranges_for_today
-        )
-        upcoming_week_availability[0] = filter_available_time_slots(
-            time_slots_for_today
-        )
+def get_available_dates_for_weekly_slots(
+    weekly_slots: Dict,
+    num_days: int,
+    filter: Optional[Callable[[datetime], bool]] = None,
+):
+    now = datetime.now(tz=IST_TZINFO)
+    dates = [now + timedelta(days=i) for i in range(num_days)]
     return [
-        (now + timedelta(days=i)).strftime(DATE_FORMAT)
-        for i in range(num_days)
-        if upcoming_week_availability[i]
+        d for d in dates if bool(generate_time_slots_for_date(weekly_slots, d, filter))
     ]
 
 
-def generate_time_slots_for_date(weekly_slots: Dict, date: Text):
-    day = next(iter(date.split(",", 1)), "")
-    week_day = WEEK_DAYS_INDEX.get(day)
+def generate_time_slots_for_date(
+    weekly_slots: Dict,
+    date: Any,
+    filter: Optional[Callable[[datetime], bool]] = None,
+):
+    date_datetime = date
+    if isinstance(date, str):
+        date_datetime = datetime.strptime(date, APPOINTMENT_DATE_FORMAT)
 
-    time_slots = generate_time_slots_for_range(weekly_slots[WEEK_DAYS_SHORT[week_day]])
+    weekday = date_datetime.weekday()
 
-    date_datetime = dt.strptime(date, DATE_FORMAT)
-    if date_datetime.day == dt.now(tz=IST_TZINFO).day:
-        time_slots = filter_available_time_slots(time_slots)
-    return time_slots
+    time_slots = _generate_time_slots_for_ranges(
+        weekly_slots[WEEK_DAYS_SHORT[weekday]], date_datetime
+    )
+    filtered_time_slots = []
+    now = datetime.now(tz=IST_TZINFO)
+    for slot_dt in time_slots:
+        is_booking_advance_time_elapsed = now > (
+            date_datetime.replace(
+                hour=slot_dt.hour, minute=slot_dt.minute, tzinfo=IST_TZINFO
+            )
+            - timedelta(minutes=get_booking_advance_time_minutes())
+        )
+        if is_booking_advance_time_elapsed:
+            continue
+        if filter and not filter(slot_dt):
+            continue
+        filtered_time_slots.append(slot_dt)
+
+    return filtered_time_slots
 
 
-def generate_time_slots_for_range(time_slot_ranges: List):
+def _generate_time_slots_for_ranges(time_slot_ranges: List, date_dt: datetime):
     time_slots = []
     for range in time_slot_ranges:
-        start_dt = dt.strptime(range["start"], TIME_FORMAT)
-        end_dt = dt.strptime(range["end"], TIME_FORMAT)
+        start_dt = datetime.strptime(range["start"], APPOINTMENT_TIME_FORMAT).replace(
+            year=date_dt.year,
+            month=date_dt.month,
+            day=date_dt.day,
+            microsecond=0,
+            tzinfo=IST_TZINFO,
+        )
+        end_dt = datetime.strptime(range["end"], APPOINTMENT_TIME_FORMAT).replace(
+            year=date_dt.year,
+            month=date_dt.month,
+            day=date_dt.day,
+            microsecond=0,
+            tzinfo=IST_TZINFO,
+        )
         if end_dt.hour == 0 and end_dt.minute == 0:
             end_dt += timedelta(days=1)
         while start_dt != end_dt:
-            slot = start_dt.strftime(TIME_FORMAT)
-            if slot not in time_slots:
-                time_slots.append(slot)
+            if start_dt not in time_slots:
+                time_slots.append(start_dt)
             start_dt += timedelta(minutes=get_meeting_duration_in_minutes())
     return time_slots
 
 
-def print_time_slots(weekly_slots: Dict):
+def print_weekly_slots(weekly_slots: Dict):
     time_slots_str = ""
     for key, value in weekly_slots.items():
         if value:
             time_slots_str += f"{str(key).capitalize()}, {', '.join([v['start']+'-'+v['end'] for v in value])}; "
     return time_slots_str
+
+
+def format_appointment_date(time: datetime):
+    return time.strftime(APPOINTMENT_DATE_FORMAT)
+
+
+def format_appointment_time(time: datetime):
+    return time.strftime(APPOINTMENT_TIME_FORMAT)

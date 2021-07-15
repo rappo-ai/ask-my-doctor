@@ -5,7 +5,12 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import is_admin_group
-from actions.utils.doctor import get_doctor, get_doctor_command_help, update_doctor
+from actions.utils.doctor import (
+    ONBOARDING_STATUS_APPROVED,
+    get_doctor,
+    get_doctor_command_help,
+    update_doctor,
+)
 
 
 class ActionCommandApprove(Action):
@@ -28,7 +33,7 @@ class ActionCommandApprove(Action):
         if matches:
             doctor_id = matches.group(2)
             doctor = get_doctor(doctor_id)
-            doctor["onboarding_status"] = "approved"
+            doctor["onboarding_status"] = ONBOARDING_STATUS_APPROVED
             update_doctor(doctor)
             dispatcher.utter_message(
                 json_message={

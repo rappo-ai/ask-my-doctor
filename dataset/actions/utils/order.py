@@ -4,8 +4,10 @@ from typing import Dict, Optional, Text
 from actions.db.store import db
 
 
-def create_order(user_id: Text, cart: Dict):
-    return db.order.insert_one({"user_id": user_id, "cart": cart}).inserted_id
+def create_order(user_id: Text, cart: Dict, timeslot_lock: Dict):
+    return db.order.insert_one(
+        {"user_id": user_id, "cart": cart, "timeslot_lock": timeslot_lock}
+    ).inserted_id
 
 
 def get_order(id):

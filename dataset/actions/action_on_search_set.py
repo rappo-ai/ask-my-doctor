@@ -3,7 +3,12 @@ from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.doctor import get_doctors, print_doctor_summary
+from actions.utils.doctor import (
+    LISTING_STATUS_ENABLED,
+    ONBOARDING_STATUS_APPROVED,
+    get_doctors,
+    print_doctor_summary,
+)
 
 
 class ActionOnSearchSet(Action):
@@ -28,12 +33,14 @@ class ActionOnSearchSet(Action):
             return []
 
         doctors = get_doctors(
-            speciality=speciality, onboarding_status="approved", listing_status="active"
+            speciality=speciality,
+            onboarding_status=ONBOARDING_STATUS_APPROVED,
+            listing_status=LISTING_STATUS_ENABLED,
         )
         if not doctors.count():
             dispatcher.utter_message(
                 json_message={
-                    "text": f"No doctors found for speciality '{speciality}'. Use /help to contact support."
+                    "text": f"Currently there are no doctors available for speciality '{speciality}'."
                 }
             )
             return []

@@ -5,7 +5,7 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import get_admin_group_id, is_admin_group
-from actions.utils.date import print_time_slots
+from actions.utils.date import print_weekly_slots
 from actions.utils.doctor import (
     get_doctor,
     get_doctor_card,
@@ -53,7 +53,7 @@ class ActionCommandSetTimeSlots(Action):
             update_doctor(doctor)
 
             doctor_card = get_doctor_card(doctor)
-            weekly_slots_str = print_time_slots(weekly_slots)
+            weekly_slots_str = print_weekly_slots(weekly_slots)
 
             dispatcher.utter_message(
                 json_message={**doctor_card, "chat_id": get_admin_group_id()}

@@ -24,7 +24,7 @@ def lazy_init():
                 "_id": ObjectId(ADMIN_CONFID_OBJECT_ID),
                 "super_admins": [],
                 "advance_appointment_days": 7,
-                "advance_time_slot_minutes": 60,
+                "booking_advance_time_minutes": 60,
                 "commission_rate": 10,
                 "meeting_duration_minutes": 15,
                 "account_number": "acc_HLeMvH2h0YvRvT",
@@ -95,18 +95,18 @@ def set_advance_appointment_days(days: int):
     )
 
 
-def get_advance_time_slot_minutes():
+def get_booking_advance_time_minutes():
     lazy_init()
     return db.admin_config.find_one({"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}).get(
-        "advance_time_slot_minutes"
+        "booking_advance_time_minutes"
     )
 
 
-def set_advance_time_slot_minutes(minutes: int):
+def set_booking_advance_time_minutes(minutes: int):
     lazy_init()
     db.admin_config.update_one(
         {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)},
-        {"$set": {"advance_time_slot_minutes": minutes}},
+        {"$set": {"booking_advance_time_minutes": minutes}},
     )
 
 
