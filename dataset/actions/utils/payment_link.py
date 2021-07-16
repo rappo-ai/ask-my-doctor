@@ -1,18 +1,16 @@
 import base64
+import calendar
+from datetime import datetime, timedelta
 import json
-import http.client
 import logging
+import os
 from typing import Text
 import requests
 from requests.structures import CaseInsensitiveDict
 
+from actions.utils.admin_config import get_payment_route_config
+from actions.utils.date import IST_TZINFO
 from actions.utils.host import get_host_url
-import os
-
-from actions.utils.admin_config import (
-    get_account_number,
-    set_account_number,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +21,7 @@ def create_payment_link(
     email: Text,
     phone: Text,
     description: Text,
+    expire_by_seconds: None,
     order_id: Text,
 ):
     razorpay_key_id = os.getenv("RAZORPAY_KEY_ID")
@@ -44,13 +43,16 @@ def create_payment_link(
     headers["Content-type"] = "application/json"
     headers["Authorization"] = "basic " + credential
 
-    account_number = get_account_number()
-    amount_paise = amount_rupees * 100
-    amount_transferred = amount_rupees * 0.95 * 100
+    payment_route_config = get_payment_route_config()
+    transfer_account_number = payment_route_config.get("account_number")
+    commission = payment_route_config.get("commission")
+    transfer_rate = (100 - commission) / 100
+    amount_to_bill = amount_rupees * 100
+    amount_to_transfer = amount_rupees * transfer_rate * 100
     url_pay = get_host_url("/webhooks/telegram/payment_callback")
 
-    data1 = {
-        "amount": amount_paise,
+    request_data = {
+        "amount": amount_to_bill,
         "currency": "INR",
         "accept_partial": False,
         "reference_id": str(order_id),
@@ -66,8 +68,8 @@ def create_payment_link(
             "order": {
                 "transfers": [
                     {
-                        "account": account_number,
-                        "amount": amount_transferred,
+                        "account": transfer_account_number,
+                        "amount": amount_to_transfer,
                         "currency": "INR",
                     }
                 ]
@@ -76,8 +78,12 @@ def create_payment_link(
         },
     }
 
-    r = json.dumps(data1)
-    resp = requests.post(url, headers=headers, data=r)
+    if expire_by_seconds:
+        expiry_dt = datetime.now(tz=IST_TZINFO) + timedelta(seconds=expire_by_seconds)
+        request_data["expire_by"] = calendar.timegm(datetime.utctimetuple(expiry_dt))
+
+    request_data_str = json.dumps(request_data)
+    resp = requests.post(url, headers=headers, data=request_data_str)
     payment_link_info = json.loads(resp.text)
 
     return payment_link_info

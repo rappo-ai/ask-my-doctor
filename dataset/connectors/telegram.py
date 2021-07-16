@@ -79,6 +79,10 @@ def get_json_key(dict, key, default=None):
     return default
 
 
+def get_query_param(params, key):
+    return next(iter(params[key]), "")
+
+
 class TelegramOutput(TeleBot, OutputChannel):
     """Output channel for Telegram."""
 
@@ -369,38 +373,39 @@ class TelegramInput(InputChannel):
                 logger.warning("Webhook Setup Failed")
                 return response.text("Invalid webhook")
 
-        @telegram_webhook.route("/payment_callback", methods=["GET", "POST"])
+        @telegram_webhook.route("/payment_callback", methods=["GET"])
         async def payment_callback(request: Request) -> Any:
-            def get_details(args, key):
-                return next(iter(args[key]), "")
-
             if request.method == "GET":
                 try:
-                    disable_nlu_bypass = True
-                    payload = request.json
                     args = request.args
                     payment_status = {
-                        "razorpay_payment_id": get_details(args, "razorpay_payment_id"),
-                        "razorpay_payment_link_id": get_details(
+                        "razorpay_payment_id": get_query_param(
+                            args, "razorpay_payment_id"
+                        ),
+                        "razorpay_payment_link_id": get_query_param(
                             args, "razorpay_payment_link_id"
                         ),
-                        "razorpay_payment_link_reference_id": get_details(
+                        "razorpay_payment_link_reference_id": get_query_param(
                             args, "razorpay_payment_link_reference_id"
                         ),
-                        "razorpay_payment_link_status": get_details(
+                        "razorpay_payment_link_status": get_query_param(
                             args, "razorpay_payment_link_status"
                         ),
-                        "razorpay_signature": get_details(args, "razorpay_signature"),
+                        "razorpay_signature": get_query_param(
+                            args, "razorpay_signature"
+                        ),
                     }
-                    order_id = get_details(args, "razorpay_payment_link_reference_id")
+                    order_id = get_query_param(
+                        args, "razorpay_payment_link_reference_id"
+                    )
                     order = get_order(order_id)
-                    sender_id = get_json_key(order, "metadata.patient.user_id", "")
+                    sender_id = get_json_key(order, "metadata.patient.user_id")
                     payment_status_str = json.dumps(payment_status)
-                    printstat = f'/EXTERNAL_payment_callback{{"payment_status": { payment_status_str } }}'
+                    message = f'/EXTERNAL_payment_callback{{"payment_status": {payment_status_str}}}'
 
                     await on_new_message(
                         UserMessage(
-                            printstat,
+                            message,
                             out_channel,
                             sender_id,
                             input_channel=self.name(),
@@ -413,6 +418,28 @@ class TelegramInput(InputChannel):
                 user = self.verify
                 bot_link = "https://t.me/" + user
                 return response.redirect(bot_link)
+
+        @telegram_webhook.route("/order_unlocked", methods=["POST"])
+        async def order_unlocked(request: Request) -> Any:
+            if request.method == "POST":
+                try:
+                    request_body: Dict = request.json
+                    order_id = request_body.get("order_id")
+                    sender_id = request_body.get("sender_id")
+                    message = f'/EXTERNAL_order_unlocked{{"order_id": {order_id}}}'
+
+                    await on_new_message(
+                        UserMessage(
+                            message,
+                            out_channel,
+                            sender_id,
+                            input_channel=self.name(),
+                            metadata={},
+                        )
+                    )
+                except Exception as e:
+                    logger.error(e)
+                return response.text("success")
 
         @telegram_webhook.route("/webhook", methods=["GET", "POST"])
         async def message(request: Request) -> Any:

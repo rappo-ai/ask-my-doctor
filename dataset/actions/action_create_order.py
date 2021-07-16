@@ -4,11 +4,12 @@ from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
+from actions.utils.admin_config import get_slot_blocking_time_seconds
 from actions.utils.cart import get_cart, get_cart_total, print_cart
 from actions.utils.doctor import get_doctor, is_approved_and_activated_doctor
 from actions.utils.order import create_order, get_order, update_order
-from actions.utils.payment_link import create_payment_link
 from actions.utils.patient import get_patient_for_user_id, print_patient
+from actions.utils.payment_link import create_payment_link
 from actions.utils.sheets import update_order_in_spreadsheet
 from actions.utils.timeslot_lock import create_lock_for_doctor_slot, update_lock_for_id
 
@@ -58,12 +59,13 @@ class ActionCreateOrder(Action):
         patient.pop("_id", None)
 
         payment_link: Dict = create_payment_link(
-            cart_amount,
-            patient["name"],
-            patient["email"],
-            patient["phone"],
-            payment_description,
-            order_id,
+            amount_rupees=cart_amount,
+            name=patient["name"],
+            email=patient["email"],
+            phone=patient["phone"],
+            description=payment_description,
+            expire_by_seconds=get_slot_blocking_time_seconds(),
+            order_id=order_id,
         )
 
         order_metadata = {"patient": patient}

@@ -25,9 +25,13 @@ def lazy_init():
                 "super_admins": [],
                 "advance_appointment_days": 7,
                 "booking_advance_time_minutes": 60,
-                "commission_rate": 10,
+                "slot_blocking_time_seconds": 30,
+                "doctor_commission_rate": 10,
                 "meeting_duration_minutes": 15,
-                "account_number": "acc_HLeMvH2h0YvRvT",
+                "payment_route_config": {
+                    "account_number": "acc_HLeMvH2h0YvRvT",
+                    "commission": 5,
+                },
                 "specialities": specialities,
             },
         )
@@ -39,18 +43,10 @@ def is_super_admin(chat_id: Text):
     return chat_id in get_super_admins()
 
 
-def get_account_number():
+def get_payment_route_config():
     lazy_init()
     return db.admin_config.find_one({"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}).get(
-        "account_number"
-    )
-
-
-def set_account_number(account_number: Text):
-    lazy_init()
-    db.admin_config.update_one(
-        {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)},
-        {"$set": {"account_number": account_number}},
+        "payment_route_config"
     )
 
 
@@ -110,17 +106,33 @@ def set_booking_advance_time_minutes(minutes: int):
     )
 
 
-def get_commission_rate():
+def get_slot_blocking_time_seconds():
     lazy_init()
     return db.admin_config.find_one({"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}).get(
-        "commission_rate"
+        "slot_blocking_time_seconds"
     )
 
 
-def set_commission_rate(rate):
+def set_slot_blocking_time_seconds(seconds: int):
     lazy_init()
     db.admin_config.update_one(
-        {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}, {"$set": {"commission_rate": rate}}
+        {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)},
+        {"$set": {"slot_blocking_time_seconds": seconds}},
+    )
+
+
+def get_doctor_commission_rate():
+    lazy_init()
+    return db.admin_config.find_one({"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}).get(
+        "doctor_commission_rate"
+    )
+
+
+def set_doctor_commission_rate(rate):
+    lazy_init()
+    db.admin_config.update_one(
+        {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)},
+        {"$set": {"doctor_commission_rate": rate}},
     )
 
 
