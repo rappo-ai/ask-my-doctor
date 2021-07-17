@@ -31,6 +31,9 @@ actions:
   - action_confirm_order_details
   - action_payment_callback
 
+  - action_confirm_order_invalid_input
+  - action_confirm_patient_invalid_input
+
   - action_ask_doctor_signup__consultation_fee
   - action_ask_doctor_signup__speciality
   - action_doctor_send_message

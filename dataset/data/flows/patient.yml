@@ -2,6 +2,7 @@ version: "2.0"
 
 actions:
   - action_confirm_patient
+  - action_confirm_patient_invalid_input
   - action_on_patient_set
   - action_patient_send_message
   - action_reset_patient_form
@@ -64,6 +65,15 @@ rules:
       - action: utter_update_patient_start
       - action: patient_form
       - active_loop: patient_form
+  - rule: Confirm existing patient details / nlu fallback
+    condition:
+      - slot_was_set:
+          - chat_type: private
+    steps:
+      - intent: EXTERNAL_confirm_patient
+      - action: action_confirm_patient
+      - intent: nlu_fallback
+      - action: action_confirm_patient_invalid_input
   - rule: Create new patient form
     condition:
       - slot_was_set:
