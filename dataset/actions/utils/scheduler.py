@@ -2,12 +2,14 @@ import asyncio
 from apscheduler.jobstores.mongodb import MongoDBJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from actions.utils.date import IST_TZINFO
+from actions.utils.date import SERVER_TZINFO
 
 __scheduler = None
 
 jobstores = {
-    "default": MongoDBJobStore(),
+    "default": MongoDBJobStore(
+        host="mongodb://mongo:27017", username=None, password=None, authSource="admin"
+    ),
 }
 # from rasa/core/jobs.py
 def scheduler() -> AsyncIOScheduler:
@@ -21,7 +23,7 @@ def scheduler() -> AsyncIOScheduler:
         __scheduler = AsyncIOScheduler(
             event_loop=asyncio.get_event_loop(),
             jobstores=jobstores,
-            timezone=IST_TZINFO,
+            timezone=SERVER_TZINFO,
         )
         __scheduler.start()
         return __scheduler

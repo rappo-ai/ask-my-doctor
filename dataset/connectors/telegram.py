@@ -66,6 +66,10 @@ def get_order(id):
     return db.order.find_one({"_id": ObjectId(id)})
 
 
+def get_lock_for_id(lock_id):
+    return db.timeslot_lock.find_one({"_id": ObjectId(lock_id)})
+
+
 def get_json_key(dict, key, default=None):
     try:
         key_split = key.split(".", 1)
@@ -81,6 +85,10 @@ def get_json_key(dict, key, default=None):
 
 def get_query_param(params, key):
     return next(iter(params[key]), "")
+
+
+def get_bot_link(bot_username):
+    return "https://t.me/" + bot_username
 
 
 class TelegramOutput(TeleBot, OutputChannel):
@@ -359,8 +367,7 @@ class TelegramInput(InputChannel):
                 except Exception as e:
                     logger.error(e)
 
-                user = self.verify
-                bot_link = "https://t.me/" + user
+                bot_link = get_bot_link(self.verify)
                 return response.redirect(bot_link)
 
         @telegram_webhook.route("/set_webhook", methods=["GET", "POST"])
@@ -372,6 +379,30 @@ class TelegramInput(InputChannel):
             else:
                 logger.warning("Webhook Setup Failed")
                 return response.text("Invalid webhook")
+
+        @telegram_webhook.route("/payment_link", methods=["GET"])
+        async def payment_link(request: Request) -> Any:
+            if request.method == "GET":
+                try:
+                    args = request.args
+                    order_id = get_query_param(args, "order_id")
+                    order = get_order(order_id)
+                    timeslot_lock_id = order.get("timeslot_lock_id")
+                    timeslot_lock = get_lock_for_id(timeslot_lock_id)
+                    if timeslot_lock and str(timeslot_lock.get("order_id")) == order_id:
+                        payment_link_url = get_json_key(
+                            order, "payment_link.metadata.short_url"
+                        )
+                        return response.redirect(payment_link_url)
+                    bot_link = get_bot_link(self.verify)
+                    REDIRECT_MS = 10000
+                    return response.html(
+                        f'<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"><style>p{{font-size: large;}}</style></head><body><p>This payment link has expired. Please create a fresh booking.<br><br>You will be redirected back to the bot in {int(REDIRECT_MS/1000)} seconds. If the page does not redirect automatically, please click <a href="{bot_link}">this link</a> to go back to the bot.</p><script type="text/javascript"> setTimeout(function(){{window.location.href="{bot_link}";}}, {REDIRECT_MS});</script></body></html>'
+                    )
+                except Exception as e:
+                    logger.error(e)
+
+                return response.text("Something went wrong.")
 
         @telegram_webhook.route("/payment_callback", methods=["GET"])
         async def payment_callback(request: Request) -> Any:
@@ -415,8 +446,7 @@ class TelegramInput(InputChannel):
                 except Exception as e:
                     logger.error(e)
 
-                user = self.verify
-                bot_link = "https://t.me/" + user
+                bot_link = get_bot_link(self.verify)
                 return response.redirect(bot_link)
 
         @telegram_webhook.route("/order_unlocked", methods=["POST"])
@@ -426,7 +456,7 @@ class TelegramInput(InputChannel):
                     request_body: Dict = request.json
                     order_id = request_body.get("order_id")
                     sender_id = request_body.get("sender_id")
-                    message = f'/EXTERNAL_order_unlocked{{"order_id": {order_id}}}'
+                    message = f'/EXTERNAL_order_unlocked{{"order_id": "{order_id}"}}'
 
                     await on_new_message(
                         UserMessage(

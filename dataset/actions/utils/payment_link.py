@@ -4,12 +4,13 @@ from datetime import datetime, timedelta
 import json
 import logging
 import os
-from typing import Text
+from pytz import timezone
 import requests
 from requests.structures import CaseInsensitiveDict
+from typing import Text
 
 from actions.utils.admin_config import get_payment_route_config
-from actions.utils.date import IST_TZINFO
+from actions.utils.date import SERVER_TZINFO
 from actions.utils.host import get_host_url
 
 logger = logging.getLogger(__name__)
@@ -79,11 +80,23 @@ def create_payment_link(
     }
 
     if expire_by_seconds:
-        expiry_dt = datetime.now(tz=IST_TZINFO) + timedelta(seconds=expire_by_seconds)
+        EXTRA_SECONDS_FOR_REQUEST = 10
+        MIN_RAZORPAY_EXPIRE_BY_MINUTES = 15
+        MIN_RAZORPAY_EXPIRE_BY_SECONDS = (
+            MIN_RAZORPAY_EXPIRE_BY_MINUTES * 60
+        ) + EXTRA_SECONDS_FOR_REQUEST
+        if expire_by_seconds < MIN_RAZORPAY_EXPIRE_BY_SECONDS:
+            expire_by_seconds = MIN_RAZORPAY_EXPIRE_BY_SECONDS
+        expiry_dt = datetime.now(tz=SERVER_TZINFO) + timedelta(
+            seconds=expire_by_seconds
+        )
         request_data["expire_by"] = calendar.timegm(datetime.utctimetuple(expiry_dt))
 
     request_data_str = json.dumps(request_data)
     resp = requests.post(url, headers=headers, data=request_data_str)
     payment_link_info = json.loads(resp.text)
 
-    return payment_link_info
+    payment_link_internal = get_host_url(
+        f"/webhooks/telegram/payment_link?order_id={order_id}"
+    )
+    return {"url": payment_link_internal, "metadata": payment_link_info}

@@ -5,7 +5,7 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.cart import add_cart, get_cart, update_cart
-from actions.utils.date import APPOINTMENT_DATE_FORMAT, IST_TZINFO
+from actions.utils.date import APPOINTMENT_DATE_FORMAT, SERVER_TZINFO
 from actions.utils.doctor import get_doctor
 
 
@@ -29,7 +29,7 @@ class ActionSetAppointment(Action):
         hour = int(next(time_iter, 0))
         minute = int(next(time_iter, 0))
         appointment_datetime = datetime.strptime(date, APPOINTMENT_DATE_FORMAT).replace(
-            hour=hour, minute=minute, tzinfo=IST_TZINFO
+            hour=hour, minute=minute, tzinfo=SERVER_TZINFO
         )
 
         doctor = get_doctor(doctor_id)

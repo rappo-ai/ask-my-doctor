@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
+from pytz import timezone
 from typing import Any, Callable, Dict, List, Optional
 
 from actions.utils.admin_config import (
@@ -11,7 +12,7 @@ WEEK_DAYS_SHORT = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 APPOINTMENT_DATE_FORMAT = "%a, %b %d, %Y"
 APPOINTMENT_TIME_FORMAT = "%H:%M"
 
-IST_TZINFO = timezone(timedelta(hours=5, minutes=30))
+SERVER_TZINFO = timezone("Asia/Kolkata")
 
 
 def get_available_dates_for_weekly_slots(
@@ -19,7 +20,7 @@ def get_available_dates_for_weekly_slots(
     num_days: int,
     filter: Optional[Callable[[datetime], bool]] = None,
 ):
-    now = datetime.now(tz=IST_TZINFO)
+    now = datetime.now(tz=SERVER_TZINFO)
     dates = [now + timedelta(days=i) for i in range(num_days)]
     return [
         d for d in dates if bool(generate_time_slots_for_date(weekly_slots, d, filter))
@@ -41,11 +42,11 @@ def generate_time_slots_for_date(
         weekly_slots[WEEK_DAYS_SHORT[weekday]], date_datetime
     )
     filtered_time_slots = []
-    now = datetime.now(tz=IST_TZINFO)
+    now = datetime.now(tz=SERVER_TZINFO)
     for slot_dt in time_slots:
         is_booking_advance_time_elapsed = now > (
             date_datetime.replace(
-                hour=slot_dt.hour, minute=slot_dt.minute, tzinfo=IST_TZINFO
+                hour=slot_dt.hour, minute=slot_dt.minute, tzinfo=SERVER_TZINFO
             )
             - timedelta(minutes=get_booking_advance_time_minutes())
         )
@@ -66,14 +67,14 @@ def _generate_time_slots_for_ranges(time_slot_ranges: List, date_dt: datetime):
             month=date_dt.month,
             day=date_dt.day,
             microsecond=0,
-            tzinfo=IST_TZINFO,
+            tzinfo=SERVER_TZINFO,
         )
         end_dt = datetime.strptime(range["end"], APPOINTMENT_TIME_FORMAT).replace(
             year=date_dt.year,
             month=date_dt.month,
             day=date_dt.day,
             microsecond=0,
-            tzinfo=IST_TZINFO,
+            tzinfo=SERVER_TZINFO,
         )
         if end_dt.hour == 0 and end_dt.minute == 0:
             end_dt += timedelta(days=1)

@@ -4,7 +4,7 @@ import json
 import logging
 import os
 
-from actions.utils.date import IST_TZINFO
+from actions.utils.date import SERVER_TZINFO
 from actions.utils.json import get_json_key
 
 logger = logging.getLogger(__name__)
@@ -43,7 +43,7 @@ def print_payment_status(payment_status: Dict):
     payment_details = payment_status.get("payment_details", {})
     amount_rupees = payment_details.get("amount", 0) / 100
     date = datetime.datetime.fromtimestamp(
-        payment_details.get("created_at", MOCK_PAYMENT_CREATION_TS), IST_TZINFO
+        payment_details.get("created_at", MOCK_PAYMENT_CREATION_TS), SERVER_TZINFO
     ).strftime("%d-%m-%Y %H:%M:%S")
     mode = payment_details.get("method", "")
     status = payment_status.get("razorpay_payment_link_status")

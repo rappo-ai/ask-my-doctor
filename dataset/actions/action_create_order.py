@@ -1,4 +1,4 @@
-from copy import deepcopy
+import math
 from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
@@ -11,6 +11,7 @@ from actions.utils.order import create_order, get_order, update_order
 from actions.utils.patient import get_patient_for_user_id, print_patient
 from actions.utils.payment_link import create_payment_link
 from actions.utils.sheets import update_order_in_spreadsheet
+from actions.utils.text import format_count
 from actions.utils.timeslot_lock import create_lock_for_doctor_slot, update_lock_for_id
 
 
@@ -40,10 +41,10 @@ class ActionCreateOrder(Action):
                 }
             )
             return []
-        timeslot_lock: Dict = create_lock_for_doctor_slot(
+        timeslot_lock_id: Dict = create_lock_for_doctor_slot(
             doctor_id, appointment_datetime
         )
-        if not timeslot_lock:
+        if not timeslot_lock_id:
             dispatcher.utter_message(
                 json_message={
                     "text": "This slot is no longer available. Please create a new booking with a different slot."
@@ -51,7 +52,10 @@ class ActionCreateOrder(Action):
             )
             return []
 
-        order_id: Text = create_order(user_id, cart=cart, timeslot_lock=timeslot_lock)
+        order_id: Text = create_order(
+            user_id, cart=cart, timeslot_lock_id=timeslot_lock_id
+        )
+        update_lock_for_id(timeslot_lock_id, order_id)
 
         payment_description = f"Consultation fee for {doctor.get('name', '')}"
 
@@ -73,6 +77,8 @@ class ActionCreateOrder(Action):
         update_order(order_id, payment_link=payment_link, metadata=order_metadata)
         update_order_in_spreadsheet(get_order(order_id))
 
+        slot_block_time_minutes = math.ceil(get_slot_blocking_time_seconds() / 60)
+
         text = (
             f"Order #{order_id}\n"
             + "\n"
@@ -85,13 +91,15 @@ class ActionCreateOrder(Action):
             + print_patient(patient)
             + "\n"
             + f"Consultation fee: Rs. {cart_amount}\n"
+            + "\n"
+            + f"The payment link will expire in {slot_block_time_minutes} {format_count('minute', 'minutes', slot_block_time_minutes)}. We have blocked your slot until then. Please complete the payment to book this slot."
         )
         reply_markup = {
             "keyboard": [
                 [
                     {
                         "title": f"Pay ₹{cart_amount}",
-                        "url": payment_link.get("short_url"),
+                        "url": payment_link.get("url"),
                     }
                 ]
             ],
