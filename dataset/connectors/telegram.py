@@ -66,6 +66,10 @@ def get_order(id):
     return db.order.find_one({"_id": ObjectId(id)})
 
 
+def get_lock_for_id(lock_id):
+    return db.timeslot_lock.find_one({"_id": ObjectId(lock_id)})
+
+
 def get_json_key(dict, key, default=None):
     try:
         key_split = key.split(".", 1)
@@ -77,6 +81,14 @@ def get_json_key(dict, key, default=None):
     except:
         return default
     return default
+
+
+def get_query_param(params, key):
+    return next(iter(params[key]), "")
+
+
+def get_bot_link(bot_username):
+    return "https://t.me/" + bot_username
 
 
 class TelegramOutput(TeleBot, OutputChannel):
@@ -284,16 +296,30 @@ class TelegramInput(InputChannel):
         self.debug_mode = debug_mode
 
     @staticmethod
-    def _is_text_message(message: Message) -> bool:
-        return message and (message.text is not None)
-
-    @staticmethod
-    def _is_photo_message(message: Message) -> bool:
-        return message and (message.photo is not None)
-
-    @staticmethod
-    def _is_location_message(message: Message) -> bool:
-        return message and (message.location is not None)
+    def _get_message_type(message: Message) -> Text:
+        if not message:
+            return None
+        MESSAGE_TYPES = [
+            "text",
+            "animation",
+            "audio",
+            "document",
+            "photo",
+            "sticker",
+            "video",
+            "video_note",
+            "voice",
+            "contact",
+            "dice",
+            "game",
+            "poll",
+            "venue",
+            "location",
+        ]
+        for type in MESSAGE_TYPES:
+            if getattr(message, type):
+                return type
+        return None
 
     @staticmethod
     def _is_edited_message(message: Update) -> bool:
@@ -355,8 +381,7 @@ class TelegramInput(InputChannel):
                 except Exception as e:
                     logger.error(e)
 
-                user = self.verify
-                bot_link = "https://t.me/" + user
+                bot_link = get_bot_link(self.verify)
                 return response.redirect(bot_link)
 
         @telegram_webhook.route("/set_webhook", methods=["GET", "POST"])
@@ -369,38 +394,63 @@ class TelegramInput(InputChannel):
                 logger.warning("Webhook Setup Failed")
                 return response.text("Invalid webhook")
 
-        @telegram_webhook.route("/payment_callback", methods=["GET", "POST"])
-        async def payment_callback(request: Request) -> Any:
-            def get_details(args, key):
-                return next(iter(args[key]), "")
-
+        @telegram_webhook.route("/payment_link", methods=["GET"])
+        async def payment_link(request: Request) -> Any:
             if request.method == "GET":
                 try:
-                    disable_nlu_bypass = True
-                    payload = request.json
+                    args = request.args
+                    order_id = get_query_param(args, "order_id")
+                    order = get_order(order_id)
+                    timeslot_lock_id = order.get("timeslot_lock_id")
+                    timeslot_lock = get_lock_for_id(timeslot_lock_id)
+                    if timeslot_lock and str(timeslot_lock.get("order_id")) == order_id:
+                        payment_link_url = get_json_key(
+                            order, "payment_link.metadata.short_url"
+                        )
+                        return response.redirect(payment_link_url)
+                    bot_link = get_bot_link(self.verify)
+                    REDIRECT_MS = 10000
+                    return response.html(
+                        f'<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"><style>p{{font-size: large;}}</style></head><body><p>This payment link has expired. Please create a fresh booking.<br><br>You will be redirected back to the bot in {int(REDIRECT_MS/1000)} seconds. If the page does not redirect automatically, please click <a href="{bot_link}">this link</a> to go back to the bot.</p><script type="text/javascript"> setTimeout(function(){{window.location.href="{bot_link}";}}, {REDIRECT_MS});</script></body></html>'
+                    )
+                except Exception as e:
+                    logger.error(e)
+
+                return response.text("Something went wrong.")
+
+        @telegram_webhook.route("/payment_callback", methods=["GET"])
+        async def payment_callback(request: Request) -> Any:
+            if request.method == "GET":
+                try:
                     args = request.args
                     payment_status = {
-                        "razorpay_payment_id": get_details(args, "razorpay_payment_id"),
-                        "razorpay_payment_link_id": get_details(
+                        "razorpay_payment_id": get_query_param(
+                            args, "razorpay_payment_id"
+                        ),
+                        "razorpay_payment_link_id": get_query_param(
                             args, "razorpay_payment_link_id"
                         ),
-                        "razorpay_payment_link_reference_id": get_details(
+                        "razorpay_payment_link_reference_id": get_query_param(
                             args, "razorpay_payment_link_reference_id"
                         ),
-                        "razorpay_payment_link_status": get_details(
+                        "razorpay_payment_link_status": get_query_param(
                             args, "razorpay_payment_link_status"
                         ),
-                        "razorpay_signature": get_details(args, "razorpay_signature"),
+                        "razorpay_signature": get_query_param(
+                            args, "razorpay_signature"
+                        ),
                     }
-                    order_id = get_details(args, "razorpay_payment_link_reference_id")
+                    order_id = get_query_param(
+                        args, "razorpay_payment_link_reference_id"
+                    )
                     order = get_order(order_id)
-                    sender_id = get_json_key(order, "metadata.patient.user_id", "")
+                    sender_id = get_json_key(order, "metadata.patient.user_id")
                     payment_status_str = json.dumps(payment_status)
-                    printstat = f'/EXTERNAL_payment_callback{{"payment_status": { payment_status_str } }}'
+                    message = f'/EXTERNAL_payment_callback{{"payment_status": {payment_status_str}}}'
 
                     await on_new_message(
                         UserMessage(
-                            printstat,
+                            message,
                             out_channel,
                             sender_id,
                             input_channel=self.name(),
@@ -410,9 +460,30 @@ class TelegramInput(InputChannel):
                 except Exception as e:
                     logger.error(e)
 
-                user = self.verify
-                bot_link = "https://t.me/" + user
+                bot_link = get_bot_link(self.verify)
                 return response.redirect(bot_link)
+
+        @telegram_webhook.route("/order_unlocked", methods=["POST"])
+        async def order_unlocked(request: Request) -> Any:
+            if request.method == "POST":
+                try:
+                    request_body: Dict = request.json
+                    order_id = request_body.get("order_id")
+                    sender_id = request_body.get("sender_id")
+                    message = f'/EXTERNAL_order_unlocked{{"order_id": "{order_id}"}}'
+
+                    await on_new_message(
+                        UserMessage(
+                            message,
+                            out_channel,
+                            sender_id,
+                            input_channel=self.name(),
+                            metadata={},
+                        )
+                    )
+                except Exception as e:
+                    logger.error(e)
+                return response.text("success")
 
         @telegram_webhook.route("/webhook", methods=["GET", "POST"])
         async def message(request: Request) -> Any:
@@ -437,16 +508,13 @@ class TelegramInput(InputChannel):
                         return response.text("success")
                     else:
                         msg = update.message
-                        if self._is_text_message(msg):
+                        message_type = self._get_message_type(msg)
+                        if message_type == "text":
                             text = msg.text
                             if text.startswith("/"):
                                 text = text.replace(f"@{self.verify}", "")
-                        elif self._is_photo_message(msg):
+                        elif message_type:
                             text = json.dumps(request_dict)
-                        elif self._is_location_message(msg):
-                            text = '{{"lng":{0}, "lat":{1}}}'.format(
-                                msg.location.longitude, msg.location.latitude
-                            )
                         else:
                             return response.text("success")
                     sender_id = msg.chat.id

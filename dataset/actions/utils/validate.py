@@ -1,10 +1,14 @@
 import json
+import logging
 import re
-from typing import Any, Dict, List, Text
+from typing import Any, Dict, List, Text, Tuple
 
 from actions.utils.admin_config import get_specialities
 from actions.utils.date import WEEK_DAYS_SHORT
 from actions.utils.json import get_json_key
+from actions.utils.telegram import get_bot_token
+
+logger = logging.getLogger(__name__)
 
 
 def validate_age(age: Text):
@@ -75,7 +79,56 @@ def validate_phone_number(phone_number: Text):
     return None
 
 
-def validate_photo(update: Any, size: Dict = None):
+def resize_photo(photo: Dict, target_size: Tuple[int, int], target_chat_id):
+    original_file_id = photo.get("file_id")
+    if target_size[0] == photo.get("width") and target_size[1] == photo.get("height"):
+        return original_file_id
+
+    from io import BytesIO
+    from PIL import Image
+    from telebot import TeleBot
+
+    def crop_resize(image: Image, size, ratio):
+        # crop to ratio, center
+        w, h = image.size
+        if w > ratio * h:  # width is larger then necessary
+            x, y = (w - ratio * h) // 2, 0
+        else:  # ratio*height >= width (height is larger)
+            x, y = 0, (h - w / ratio) // 2
+        image = image.crop((x, y, w - x, h - y))
+
+        # resize
+        if image.size > size:  # don't stretch smaller images
+            image.thumbnail(size, Image.ANTIALIAS)
+        return image
+
+    bot_token = get_bot_token()
+    telebot = TeleBot(bot_token)
+    file = telebot.get_file(original_file_id)
+    file_content = telebot.download_file(file.file_path)
+    file_content_bytesio = BytesIO(file_content)
+    image = Image.open(file_content_bytesio)
+    resized_image = crop_resize(
+        image,
+        target_size,
+        1.0,
+    )
+    send_photo_response = telebot.send_photo(
+        chat_id=target_chat_id,
+        photo=resized_image,
+        caption=f"The photo has been cropped and resized to {target_size[0]} px by {target_size[1]} px.",
+    )
+    resized_photos = send_photo_response.photo
+    resized_photo = resized_photos[len(resized_photos) - 1]
+    return resized_photo.file_id
+
+
+def validate_photo(
+    update: Any,
+    min_size: Tuple[int, int] = None,
+    target_size: Tuple[int, int] = None,
+    target_chat_id: Text = None,
+):
     update_dict = None
     try:
         if isinstance(update, str):
@@ -88,14 +141,16 @@ def validate_photo(update: Any, size: Dict = None):
             update_dict, "message.reply_to_message.photo"
         )
         original_photo = photo[len(photo) - 1]
-        if size and (
-            original_photo.get("width") != size.get("width")
-            or original_photo.get("height") != size.get("height")
+        if min_size and (
+            original_photo.get("width") < min_size[0]
+            or original_photo.get("height") < min_size[1]
         ):
             return None
-        return original_photo.get("file_id")
-    except Exception:
-        pass
+
+        resized_photo_id = resize_photo(original_photo, target_size, target_chat_id)
+        return resized_photo_id
+    except Exception as e:
+        logger.error(e)
     return None
 
 

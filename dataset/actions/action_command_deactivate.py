@@ -6,6 +6,7 @@ from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import get_admin_group_id, is_admin_group
 from actions.utils.doctor import (
+    LISTING_STATUS_DISABLED,
     get_doctor,
     get_doctor_card,
     get_doctor_for_user_id,
@@ -44,7 +45,7 @@ class ActionCommandDeactivate(Action):
             else:
                 doctor = get_doctor_for_user_id(tracker.sender_id)
                 doctor_id = str(doctor["_id"])
-            doctor["listing_status"] = "disabled"
+            doctor["listing_status"] = LISTING_STATUS_DISABLED
             update_doctor(doctor)
 
             doctor_card = get_doctor_card(doctor)

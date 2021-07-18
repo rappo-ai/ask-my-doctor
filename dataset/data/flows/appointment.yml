@@ -33,6 +33,10 @@ rules:
       - action: action_reset_appointment_form
       - action: utter_appointment_start
       - action: appointment_form
+      - slot_was_set:
+          - appointment__date: null
+          - appointment__time: null
+          - appointment__doctor_id: null
       - active_loop: appointment_form
   - rule: End new appointment request form
     condition:
@@ -44,6 +48,9 @@ rules:
       - active_loop: null
       - slot_was_set:
           - requested_slot: null
+          - appointment__date: "PLACEHOLDER"
+          - appointment__time: "PLACEHOLDER"
+          - appointment__doctor_id: "PLACEHOLDER"
       - action: action_set_appointment
       - action: action_on_appointment_set
 

@@ -5,10 +5,12 @@ actions:
   - action_confirm_order_invalid_input
   - action_confirm_order_details
   - action_create_order
+  - action_on_order_unlocked
   - action_payment_callback
 
 intents:
   - EXTERNAL_confirm_order_details
+  - EXTERNAL_order_unlocked
   - EXTERNAL_payment_callback
 
 rules:
@@ -39,6 +41,13 @@ rules:
       - action: action_confirm_order_details
       - intent: nlu_fallback
       - action: action_confirm_order_invalid_input
+  - rule: Order unlocked
+    condition:
+      - slot_was_set:
+          - chat_type: private
+    steps:
+      - intent: EXTERNAL_order_unlocked
+      - action: action_on_order_unlocked
   - rule: Payment callback
     condition:
       - slot_was_set:

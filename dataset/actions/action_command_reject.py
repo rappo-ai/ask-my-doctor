@@ -5,7 +5,7 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import is_admin_group
-from actions.utils.doctor import get_doctor, update_doctor
+from actions.utils.doctor import ONBOARDING_STATUS_REJECTED, get_doctor, update_doctor
 
 
 class ActionCommandReject(Action):
@@ -29,7 +29,7 @@ class ActionCommandReject(Action):
             doctor_id = matches.group(2)
             reject_reason = matches.group(3)
             doctor = get_doctor(doctor_id)
-            doctor["onboarding_status"] = "rejected"
+            doctor["onboarding_status"] = ONBOARDING_STATUS_REJECTED
             update_doctor(doctor)
             dispatcher.utter_message(
                 json_message={
@@ -40,7 +40,7 @@ class ActionCommandReject(Action):
                 json_message={
                     "chat_id": doctor["user_id"],
                     "text": (
-                        f"Your application has been rejected with reason {reject_reason}. Please use /signup to submit a fresh application.\n"
+                        f'Your application has been rejected with reason "{reject_reason}". Please use /signup to submit a fresh application.\n'
                     ),
                 }
             )

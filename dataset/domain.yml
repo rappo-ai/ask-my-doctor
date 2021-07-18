@@ -17,7 +17,9 @@ actions:
   - action_reset_appointment_form
   - validate_appointment_form
 
+  - action_ask_patient_send_message__message_id
   - action_confirm_patient
+  - action_confirm_patient_invalid_input
   - action_on_patient_set
   - action_patient_send_message
   - action_reset_patient_form
@@ -27,13 +29,13 @@ actions:
   - validate_patient_send_message_form
 
   - action_change_order
-  - action_create_order
   - action_confirm_order_details
+  - action_confirm_order_invalid_input
+  - action_create_order
+  - action_on_order_unlocked
   - action_payment_callback
 
-  - action_confirm_order_invalid_input
-  - action_confirm_patient_invalid_input
-
+  - action_ask_doctor_send_message__message_id
   - action_ask_doctor_signup__consultation_fee
   - action_ask_doctor_signup__speciality
   - action_doctor_send_message

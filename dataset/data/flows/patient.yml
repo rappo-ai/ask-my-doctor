@@ -1,6 +1,7 @@
 version: "2.0"
 
 actions:
+  - action_ask_patient_send_message__message_id
   - action_confirm_patient
   - action_confirm_patient_invalid_input
   - action_on_patient_set
@@ -30,8 +31,6 @@ intents:
   - EXTERNAL_update_patient
 
 responses:
-  utter_ask_patient_send_message__message_id:
-    - text: Please enter the message you want to send to the doctor.
   utter_update_patient_start:
     - text: We need a few details of the patient to proceed.
   utter_ask_patient__name:

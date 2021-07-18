@@ -1,4 +1,3 @@
-import re
 from typing import Any, Text, Dict
 
 from rasa_sdk import Tracker
@@ -63,13 +62,18 @@ class ValidateDoctorSignupForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        photo = validate_photo(slot_value, size={"width": 256, "height": 256})
+        photo = validate_photo(
+            slot_value,
+            min_size=(256, 256),
+            target_size=(256, 256),
+            target_chat_id=tracker.sender_id,
+        )
         if photo:
             return {"doctor_signup__photo": photo}
         else:
             dispatcher.utter_message(
                 json_message={
-                    "text": "The message received is not a photo of size 256 x 256 px."
+                    "text": "The message received is not a photo of minimum size 256 px by 256 px."
                 }
             )
             return {"doctor_signup__photo": None}
