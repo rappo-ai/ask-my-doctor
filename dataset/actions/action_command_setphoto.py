@@ -37,7 +37,12 @@ class ActionCommandSetPhoto(Action):
         if _is_admin_group:
             regex = r"^(/\w+)(\s+#(\w+))$"
         matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
-        photo = validate_photo(metadata)
+        photo = validate_photo(
+            metadata,
+            min_size=(256, 256),
+            target_size=(256, 256),
+            target_chat_id=tracker.sender_id,
+        )
         if matches and photo:
             doctor = {}
             doctor_id = ""
