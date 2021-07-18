@@ -19,8 +19,8 @@ class ActionChangeOrder(Action):
         return [
             ActionExecuted("action_listen"),
             UserUttered(
-                text="/EXTERNAL_create_appointment",
-                parse_data={"intent": {"name": "EXTERNAL_create_appointment"}},
+                text="/menu",
+                parse_data={"intent": {"name": "menu"}},
                 input_channel="telegram",
             ),
         ]

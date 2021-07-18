@@ -2,6 +2,7 @@ version: "2.0"
 
 actions:
   - action_change_order
+  - action_confirm_order_invalid_input
   - action_confirm_order_details
   - action_create_order
   - action_on_order_unlocked
@@ -31,6 +32,15 @@ rules:
       - action: action_confirm_order_details
       - intent: deny
       - action: action_change_order
+  - rule: Confirm order details / nlu_fallback
+    condition:
+      - slot_was_set:
+          - chat_type: private
+    steps:
+      - intent: EXTERNAL_confirm_order_details
+      - action: action_confirm_order_details
+      - intent: nlu_fallback
+      - action: action_confirm_order_invalid_input
   - rule: Order unlocked
     condition:
       - slot_was_set:

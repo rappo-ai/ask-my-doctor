@@ -19,6 +19,7 @@ actions:
 
   - action_ask_patient_send_message__message_id
   - action_confirm_patient
+  - action_confirm_patient_invalid_input
   - action_on_patient_set
   - action_patient_send_message
   - action_reset_patient_form
@@ -29,6 +30,7 @@ actions:
 
   - action_change_order
   - action_confirm_order_details
+  - action_confirm_order_invalid_input
   - action_create_order
   - action_on_order_unlocked
   - action_payment_callback
