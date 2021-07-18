@@ -25,7 +25,6 @@ class ActionConfirmPatientInvalidInput(Action):
         dispatcher.utter_message(json_message=json_message)
 
         return [
-            UserUtteranceReverted(),
             ActionExecuted("action_listen"),
             UserUttered(
                 text="/EXTERNAL_confirm_patient",
