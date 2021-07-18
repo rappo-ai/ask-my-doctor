@@ -44,7 +44,8 @@ class ActionPatientSendMessage(Action):
                 datetime.now(SERVER_TZINFO)
                 + timedelta(hours=get_max_follow_up_seconds())
             ):
-                num_days = ceil(get_max_follow_up_seconds() / (3600 * 24))
+                NUM_SECONDS_PER_DAY = 24 * 3600
+                num_days = ceil(get_max_follow_up_seconds() / NUM_SECONDS_PER_DAY)
                 dispatcher.utter_message(
                     json_message={
                         "text": f"You can only follow up with the doctor within {num_days} {format_count('day','days',num_days)}. Please create a new booking to contact the doctor.",
