@@ -5,9 +5,10 @@ from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.forms import FormValidationAction
 from rasa_sdk.types import DomainDict
 
+from actions.utils.date import format_appointment_date, format_appointment_time
 from actions.utils.doctor import (
     get_available_time_slots,
-    get_upcoming_appointment_dates,
+    get_available_appointment_dates,
 )
 
 
@@ -23,7 +24,10 @@ class ValidateAppointmentForm(FormValidationAction):
         domain: DomainDict,
     ) -> Dict[Text, Any]:
         doctor_id = tracker.get_slot("appointment__doctor_id")
-        upcoming_dates = get_upcoming_appointment_dates(doctor_id)
+        upcoming_dates = [
+            format_appointment_date(d)
+            for d in get_available_appointment_dates(doctor_id)
+        ]
         if slot_value in upcoming_dates:
             return {"appointment__date": slot_value}
         else:
@@ -39,7 +43,10 @@ class ValidateAppointmentForm(FormValidationAction):
     ) -> Dict[Text, Any]:
         doctor_id = tracker.get_slot("appointment__doctor_id")
         appointment_date = tracker.get_slot("appointment__date")
-        availaible_time_slots = get_available_time_slots(doctor_id, appointment_date)
+        availaible_time_slots = [
+            format_appointment_time(s)
+            for s in get_available_time_slots(doctor_id, appointment_date)
+        ]
         if slot_value in availaible_time_slots:
             return {"appointment__time": slot_value}
         else:

@@ -3,7 +3,7 @@ from functools import reduce
 from typing import Any, Dict, List, Text
 
 from actions.db.store import db
-from actions.utils.date import DATE_FORMAT, TIME_FORMAT
+from actions.utils.date import APPOINTMENT_DATE_FORMAT, APPOINTMENT_TIME_FORMAT
 from actions.utils.doctor import get_doctor
 
 
@@ -45,8 +45,8 @@ def print_cart(cart: Dict):
     return (
         f"Doctor: {doctor.get('name', '')}\n"
         + f"Speciality: {doctor.get('speciality', '')}\n"
-        + f"Date: {appointment_datetime.strftime(DATE_FORMAT)}\n"
-        + f"Time: {appointment_datetime.strftime(TIME_FORMAT)}\n"
+        + f"Date: {appointment_datetime.strftime(APPOINTMENT_DATE_FORMAT)}\n"
+        + f"Time: {appointment_datetime.strftime(APPOINTMENT_TIME_FORMAT)}\n"
     )
 
 

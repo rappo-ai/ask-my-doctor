@@ -5,7 +5,9 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import get_admin_group_id, is_admin_group
+from actions.utils.date import is_empty_weekly_slots
 from actions.utils.doctor import (
+    LISTING_STATUS_ENABLED,
     get_doctor,
     get_doctor_card,
     get_doctor_for_user_id,
@@ -58,7 +60,7 @@ class ActionCommandActivate(Action):
                     }
                 )
                 return
-            if all(value == [] for value in doctor.get("weekly_slots", {}).values()):
+            if is_empty_weekly_slots(doctor.get("weekly_slots", {})):
                 dispatcher.utter_message(
                     json_message={
                         "chat_id": get_admin_group_id(),
@@ -72,7 +74,7 @@ class ActionCommandActivate(Action):
                     }
                 )
                 return
-            doctor["listing_status"] = "active"
+            doctor["listing_status"] = LISTING_STATUS_ENABLED
             update_doctor(doctor)
 
             doctor_card = get_doctor_card(doctor)

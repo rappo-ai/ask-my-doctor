@@ -16,7 +16,7 @@ from actions.utils.doctor import get_doctor
 from actions.utils.entity import get_entity
 from actions.utils.json import get_json_key
 from actions.utils.meet import create_meeting
-from actions.utils.order import get_order, get_order_for_user_id, update_order
+from actions.utils.order import get_latest_order_for_user_id, get_order, update_order
 from actions.utils.patient import print_patient
 from actions.utils.payment_status import (
     fetch_payment_details,
@@ -24,6 +24,7 @@ from actions.utils.payment_status import (
     print_payment_status,
 )
 from actions.utils.sheets import update_order_in_spreadsheet
+from actions.utils.timeslot_lock import create_lock_for_doctor_slot, get_lock_for_id
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +64,7 @@ class ActionPaymentCallback(Action):
             logger.warn(
                 "Unable to find order for this payment. Fetching some order for this user for debugging."
             )
-            order = get_order_for_user_id(tracker.sender_id)
+            order = get_latest_order_for_user_id(tracker.sender_id)
             order_id = order.get("_id")
 
         payment_details = fetch_payment_details(payment_status)
@@ -74,15 +75,63 @@ class ActionPaymentCallback(Action):
 
         if get_json_key(payment_status, "razorpay_payment_link_status") == "paid":
             cart: Dict = order.get("cart")
-            patient: Dict = get_json_key(order, "metadata.patient", {})
             cart_item = next(iter(cart.get("items") or []), {})
-            doctor: Dict = get_doctor(cart_item.get("doctor_id"))
+            doctor_id = cart_item.get("doctor_id")
+            appointment_datetime = cart_item.get("appointment_datetime")
+            timeslot_lock_id = order.get("timeslot_lock_id")
+            timeslot_lock = get_lock_for_id(timeslot_lock_id)
+            if timeslot_lock and timeslot_lock.get("order_id") != order_id:
+                conflict_order_id = timeslot_lock.get("order_id")
+                conflict_order = get_order(conflict_order_id)
+                conflict_user_id = conflict_order.get("user_id")
+                is_conflict_order_alread_paid = (
+                    get_json_key(
+                        conflict_order, "payment_status.razorpay_payment_link_status"
+                    )
+                    == "paid"
+                )
+                if is_conflict_order_alread_paid:
+                    dispatcher.utter_message(
+                        json_message={
+                            "text": f"We're really sorry, but the slot for order #{order_id} is no longer available. Please use /help to contact support for a refund.",
+                        }
+                    )
+                    dispatcher.utter_message(
+                        json_message={
+                            "chat_id": admin_group_id,
+                            "text": f"Timeslot #{timeslot_lock_id} has been double booked. First booking order #{conflict_order_id}, second booking order #{order_id}. Second order needs to be refunded.",
+                        }
+                    )
+                    return []
+                else:
+                    dispatcher.utter_message(
+                        json_message={
+                            "chat_id": conflict_user_id,
+                            "text": f"We're really sorry, but the slot for order #{conflict_order_id} is no longer available. Please make a fresh booking.",
+                        }
+                    )
+            if not timeslot_lock or timeslot_lock.get("order_id") != order_id:
+                timeslot_lock_id = create_lock_for_doctor_slot(
+                    doctor_id=doctor_id,
+                    slot_datetime=appointment_datetime,
+                    order_id=order_id,
+                    force=True,
+                )
+                update_order(order_id, timeslot_lock_id=timeslot_lock_id)
+                dispatcher.utter_message(
+                    json_message={
+                        "text": f"The slot for order #{order_id} is still available and has been reserved for you after receiving a successful payment."
+                    }
+                )
+
+            patient: Dict = get_json_key(order, "metadata.patient", {})
+            doctor: Dict = get_doctor(doctor_id)
             doctor_chat_id = doctor.get("user_id")
 
             credentials = doctor.get("credentials")
             guest_emails = [patient.get("email")]
             meet_title = "Appointment with " + patient.get("name")
-            start_date = datetime.fromisoformat(cart_item.get("appointment_datetime"))
+            start_date = datetime.fromisoformat(appointment_datetime)
             end_date = start_date + timedelta(minutes=get_meeting_duration_in_minutes())
             meeting: Dict = create_meeting(
                 credentials=credentials,
