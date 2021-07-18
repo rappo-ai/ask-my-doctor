@@ -1,7 +1,6 @@
 import logging
-from typing import Dict, Optional, Text
-
 from ruamel import yaml
+from typing import Dict, Optional, Text
 
 logger = logging.getLogger(__name__)
 

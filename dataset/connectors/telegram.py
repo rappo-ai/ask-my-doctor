@@ -296,16 +296,30 @@ class TelegramInput(InputChannel):
         self.debug_mode = debug_mode
 
     @staticmethod
-    def _is_text_message(message: Message) -> bool:
-        return message and (message.text is not None)
-
-    @staticmethod
-    def _is_photo_message(message: Message) -> bool:
-        return message and (message.photo is not None)
-
-    @staticmethod
-    def _is_location_message(message: Message) -> bool:
-        return message and (message.location is not None)
+    def _get_message_type(message: Message) -> Text:
+        if not message:
+            return None
+        MESSAGE_TYPES = [
+            "text",
+            "animation",
+            "audio",
+            "document",
+            "photo",
+            "sticker",
+            "video",
+            "video_note",
+            "voice",
+            "contact",
+            "dice",
+            "game",
+            "poll",
+            "venue",
+            "location",
+        ]
+        for type in MESSAGE_TYPES:
+            if getattr(message, type):
+                return type
+        return None
 
     @staticmethod
     def _is_edited_message(message: Update) -> bool:
@@ -494,16 +508,13 @@ class TelegramInput(InputChannel):
                         return response.text("success")
                     else:
                         msg = update.message
-                        if self._is_text_message(msg):
+                        message_type = self._get_message_type(msg)
+                        if message_type == "text":
                             text = msg.text
                             if text.startswith("/"):
                                 text = text.replace(f"@{self.verify}", "")
-                        elif self._is_photo_message(msg):
+                        elif message_type:
                             text = json.dumps(request_dict)
-                        elif self._is_location_message(msg):
-                            text = '{{"lng":{0}, "lat":{1}}}'.format(
-                                msg.location.longitude, msg.location.latitude
-                            )
                         else:
                             return response.text("success")
                     sender_id = msg.chat.id
