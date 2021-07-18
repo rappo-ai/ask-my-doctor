@@ -26,6 +26,7 @@ def lazy_init():
                 "advance_appointment_days": 7,
                 "booking_advance_time_minutes": 60,
                 "slot_blocking_time_seconds": 300,
+                "max_follow_up_seconds": 30,
                 "doctor_commission_rate": 10,
                 "meeting_duration_minutes": 15,
                 "payment_route_config": {
@@ -118,6 +119,13 @@ def set_slot_blocking_time_seconds(seconds: int):
     db.admin_config.update_one(
         {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)},
         {"$set": {"slot_blocking_time_seconds": seconds}},
+    )
+
+
+def get_max_follow_up_seconds():
+    lazy_init()
+    return db.admin_config.find_one({"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}).get(
+        "max_follow_up_seconds"
     )
 
 

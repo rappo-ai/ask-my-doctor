@@ -80,7 +80,7 @@ class ActionPaymentCallback(Action):
             appointment_datetime = cart_item.get("appointment_datetime")
             timeslot_lock_id = order.get("timeslot_lock_id")
             timeslot_lock = get_lock_for_id(timeslot_lock_id)
-            if timeslot_lock and timeslot_lock.get("order_id") != order_id:
+            if timeslot_lock and str(timeslot_lock.get("order_id")) != order_id:
                 conflict_order_id = timeslot_lock.get("order_id")
                 conflict_order = get_order(conflict_order_id)
                 conflict_user_id = conflict_order.get("user_id")
@@ -110,7 +110,7 @@ class ActionPaymentCallback(Action):
                             "text": f"We're really sorry, but the slot for order #{conflict_order_id} is no longer available. Please make a fresh booking.",
                         }
                     )
-            if not timeslot_lock or timeslot_lock.get("order_id") != order_id:
+            if not timeslot_lock or str(timeslot_lock.get("order_id")) != order_id:
                 timeslot_lock_id = create_lock_for_doctor_slot(
                     doctor_id=doctor_id,
                     slot_datetime=appointment_datetime,

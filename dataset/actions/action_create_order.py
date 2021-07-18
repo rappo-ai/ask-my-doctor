@@ -1,4 +1,4 @@
-import math
+from math import ceil
 from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
@@ -77,7 +77,7 @@ class ActionCreateOrder(Action):
         update_order(order_id, payment_link=payment_link, metadata=order_metadata)
         update_order_in_spreadsheet(get_order(order_id))
 
-        slot_block_time_minutes = math.ceil(get_slot_blocking_time_seconds() / 60)
+        slot_block_time_minutes = ceil(get_slot_blocking_time_seconds() / 60)
 
         text = (
             f"Order #{order_id}\n"

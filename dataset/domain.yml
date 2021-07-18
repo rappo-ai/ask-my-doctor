@@ -17,6 +17,7 @@ actions:
   - action_reset_appointment_form
   - validate_appointment_form
 
+  - action_ask_patient_send_message__message_id
   - action_confirm_patient
   - action_on_patient_set
   - action_patient_send_message
@@ -32,6 +33,7 @@ actions:
   - action_on_order_unlocked
   - action_payment_callback
 
+  - action_ask_doctor_send_message__message_id
   - action_ask_doctor_signup__consultation_fee
   - action_ask_doctor_signup__speciality
   - action_doctor_send_message

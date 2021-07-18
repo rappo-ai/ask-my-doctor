@@ -27,14 +27,14 @@ class ActionDoctorSendMessage(Action):
 
         message_id = tracker.get_slot("doctor_send_message__message_id")
         order_id = tracker.get_slot("doctor_send_message__order_id")
-        order = get_order(order_id)
 
         try:
-            cart_items = get_json_key(order, "cart.items", [])
-            cart_item = next(iter(cart_items), {})
+            order = get_order(order_id)
+            cart_items = get_json_key(order, "cart.items")
+            cart_item = next(iter(cart_items))
             doctor_id = cart_item.get("doctor_id")
             doctor: Dict = get_doctor(doctor_id)
-            patient: Dict = get_json_key(order, "metadata.patient", {})
+            patient: Dict = get_json_key(order, "metadata.patient")
             dispatcher.utter_message(
                 json_message={
                     "chat_id": patient.get("user_id"),
@@ -46,6 +46,11 @@ class ActionDoctorSendMessage(Action):
                     "chat_id": patient.get("user_id"),
                     "from_chat_id": doctor.get("user_id"),
                     "message_id": message_id,
+                }
+            )
+            dispatcher.utter_message(
+                json_message={
+                    "text": f"Your message was sent successfully to {patient.get('name')}.",
                 }
             )
         except Exception as e:
