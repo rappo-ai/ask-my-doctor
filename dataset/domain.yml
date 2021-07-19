@@ -10,10 +10,11 @@ actions:
   - action_reset_search_form
   - validate_search_form
 
-  - action_set_appointment
-  - action_on_appointment_set
+  - action_appointment_start
   - action_ask_appointment__date
   - action_ask_appointment__time
+  - action_on_appointment_set
+  - action_set_appointment
   - action_reset_appointment_form
   - validate_appointment_form
 

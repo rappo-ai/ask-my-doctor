@@ -1,6 +1,7 @@
 version: "2.0"
 
 actions:
+  - action_appointment_start
   - action_ask_appointment__date
   - action_ask_appointment__time
   - action_on_appointment_set
@@ -19,10 +20,6 @@ forms:
 intents:
   - EXTERNAL_create_appointment
 
-responses:
-  utter_appointment_start:
-    - text: NEW APPOINTMENT REQUEST
-
 rules:
   - rule: Start new appointment request form
     condition:
@@ -31,7 +28,7 @@ rules:
     steps:
       - intent: EXTERNAL_create_appointment
       - action: action_reset_appointment_form
-      - action: utter_appointment_start
+      - action: action_appointment_start
       - action: appointment_form
       - slot_was_set:
           - appointment__date: null

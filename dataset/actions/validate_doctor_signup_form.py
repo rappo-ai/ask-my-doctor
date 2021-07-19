@@ -65,7 +65,7 @@ class ValidateDoctorSignupForm(FormValidationAction):
         photo = validate_photo(
             slot_value,
             min_size=(256, 256),
-            target_size=(256, 256),
+            target_size=(512, 512),
             target_chat_id=tracker.sender_id,
         )
         if photo:

@@ -40,7 +40,7 @@ class ActionCommandSetPhoto(Action):
         photo = validate_photo(
             metadata,
             min_size=(256, 256),
-            target_size=(256, 256),
+            target_size=(512, 512),
             target_chat_id=tracker.sender_id,
         )
         if matches and photo:

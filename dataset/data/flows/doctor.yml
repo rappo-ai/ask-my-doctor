@@ -45,7 +45,7 @@ responses:
   utter_doctor_signup_start:
     - text: >
         Thank you for your interest in signing up. We need a few details from you
-        before we proceed.
+        before we proceed. You can modify all of these details later before your profile goes live.
   utter_ask_doctor_signup__bank_account_ifsc:
     - text: "What is your bank account IFSC code?"
   utter_ask_doctor_signup__bank_account_number:
@@ -59,7 +59,7 @@ responses:
   utter_ask_doctor_signup__number:
     - text: "What is your phone number?"
   utter_ask_doctor_signup__photo:
-    - text: "Please send a photo to use as your profile picture. It should be 256 px by 256 px."
+    - text: "Please send a photo to use as your profile picture. It should be at least 256 px by 256 px. If the photo is not square it will be cropped. The recommended size is 512 px by 512 px and photos will be resized to this size."
 
 rules:
   - rule: Start new doctor signup form

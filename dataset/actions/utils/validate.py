@@ -99,7 +99,7 @@ def resize_photo(photo: Dict, target_size: Tuple[int, int], target_chat_id):
 
         # resize
         if image.size > size:  # don't stretch smaller images
-            image.thumbnail(size, Image.ANTIALIAS)
+            image.thumbnail(size=size, resample=Image.BICUBIC, reducing_gap=None)
         return image
 
     bot_token = get_bot_token()
