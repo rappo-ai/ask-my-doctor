@@ -45,7 +45,7 @@ responses:
   utter_doctor_signup_start:
     - text: >
         Thank you for your interest in signing up. We need a few details from you
-        before we proceed.
+        before we proceed. You can modify all of these details later before your profile goes live.
   utter_ask_doctor_signup__bank_account_ifsc:
     - text: "What is your bank account IFSC code?"
   utter_ask_doctor_signup__bank_account_number:
