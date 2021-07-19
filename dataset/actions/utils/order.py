@@ -8,7 +8,7 @@ from requests.structures import CaseInsensitiveDict
 from typing import Dict, Optional, Text
 
 from actions.db.store import db
-from actions.utils.admin_config import get_slot_blocking_time_seconds
+from actions.utils.admin_config import get_payment_link_expiry_time_seconds
 from actions.utils.date import SERVER_TZINFO
 from actions.utils.host import get_host_url
 from actions.utils.json import get_json_key
@@ -18,30 +18,31 @@ from actions.utils.timeslot_lock import delete_lock_for_id, get_lock_for_id
 logger = logging.getLogger(__name__)
 
 
-def create_order(user_id: Text, cart: Dict, timeslot_lock_id: ObjectId):
-    order_id = db.order.insert_one(
-        {
-            "creation_ts": datetime.now(tz=SERVER_TZINFO).isoformat(),
-            "user_id": user_id,
-            "cart": cart,
-            "timeslot_lock_id": timeslot_lock_id,
-        }
-    ).inserted_id
-    unlock_order_job: Job = scheduler().add_job(
-        unlock_order,
-        "date",
-        run_date=(
-            datetime.now(tz=SERVER_TZINFO)
-            + timedelta(seconds=get_slot_blocking_time_seconds())
-        ),
-        args=[str(order_id)],
-        id=str(order_id),
-        replace_existing=True,
-        name="Unlock Order",
-    )
-    db.order.update_one(
-        {"_id": order_id}, {"$set": {"unlock_order_job_id": unlock_order_job.id}}
-    )
+def create_order(user_id: Text, cart: Dict, timeslot_lock_id: ObjectId = None):
+    order = {
+        "creation_ts": datetime.now(tz=SERVER_TZINFO).isoformat(),
+        "user_id": user_id,
+        "cart": cart,
+    }
+    if timeslot_lock_id:
+        order["timeslot_lock_id"] = timeslot_lock_id
+    order_id = db.order.insert_one(order).inserted_id
+    if timeslot_lock_id:
+        unlock_order_job: Job = scheduler().add_job(
+            unlock_order,
+            "date",
+            run_date=(
+                datetime.now(tz=SERVER_TZINFO)
+                + timedelta(seconds=get_payment_link_expiry_time_seconds())
+            ),
+            args=[str(order_id)],
+            id=str(order_id),
+            replace_existing=True,
+            name="Unlock Order",
+        )
+        db.order.update_one(
+            {"_id": order_id}, {"$set": {"unlock_order_job_id": unlock_order_job.id}}
+        )
     return order_id
 
 

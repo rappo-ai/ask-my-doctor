@@ -25,7 +25,7 @@ def lazy_init():
                 "super_admins": [],
                 "advance_appointment_days": 7,
                 "booking_advance_time_minutes": 60,
-                "slot_blocking_time_seconds": 300,
+                "payment_link_expiry_time_seconds": 900,
                 "max_follow_up_seconds": 2 * 24 * 3600,
                 "doctor_commission_rate": 10,
                 "meeting_duration_minutes": 15,
@@ -107,18 +107,10 @@ def set_booking_advance_time_minutes(minutes: int):
     )
 
 
-def get_slot_blocking_time_seconds():
+def get_payment_link_expiry_time_seconds():
     lazy_init()
     return db.admin_config.find_one({"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}).get(
-        "slot_blocking_time_seconds"
-    )
-
-
-def set_slot_blocking_time_seconds(seconds: int):
-    lazy_init()
-    db.admin_config.update_one(
-        {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)},
-        {"$set": {"slot_blocking_time_seconds": seconds}},
+        "payment_link_expiry_time_seconds"
     )
 
 
