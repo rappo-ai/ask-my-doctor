@@ -1,4 +1,3 @@
-from bson.objectid import ObjectId
 from copy import deepcopy
 from dotenv import load_dotenv
 import json
@@ -28,59 +27,9 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-
-class MongoDataStore:
-    """Stores data in Mongo.
-
-    Property methods:
-        conversations: returns the current conversation
-    """
-
-    def __init__(
-        self,
-        host: Optional[Text] = "mongodb://mongo:27017",
-        db: Optional[Text] = "rappo",
-        username: Optional[Text] = None,
-        password: Optional[Text] = None,
-        auth_source: Optional[Text] = "admin",
-    ) -> None:
-        from pymongo import MongoClient
-        from pymongo.database import Database
-
-        self.client = MongoClient(
-            host,
-            username=username,
-            password=password,
-            authSource=auth_source,
-        )
-
-        self.db = Database(self.client, db)
-
-
-_db_store = MongoDataStore()
-
-db = _db_store.db
-
-
-def get_order(id):
-    return db.order.find_one({"_id": ObjectId(id)})
-
-
-def get_lock_for_id(lock_id):
-    return db.timeslot_lock.find_one({"_id": ObjectId(lock_id)})
-
-
-def get_json_key(dict, key, default=None):
-    try:
-        key_split = key.split(".", 1)
-        key_split_len = len(key_split)
-        if key_split_len == 2:
-            return get_json_key(dict[key_split[0]], key_split[1], default)
-        elif key_split_len == 1:
-            return dict[key_split[0]]
-    except:
-        return default
-    return default
+from actions.utils.json import get_json_key
+from actions.utils.order import get_order
+from actions.utils.timeslot_lock import is_doctor_slot_locked
 
 
 def get_query_param(params, key):
@@ -400,19 +349,21 @@ class TelegramInput(InputChannel):
                 try:
                     args = request.args
                     order_id = get_query_param(args, "order_id")
-                    order = get_order(order_id)
-                    timeslot_lock_id = order.get("timeslot_lock_id")
-                    timeslot_lock = get_lock_for_id(timeslot_lock_id)
-                    if timeslot_lock and str(timeslot_lock.get("order_id")) == order_id:
-                        payment_link_url = get_json_key(
-                            order, "payment_link.metadata.short_url"
+                    order: Dict = get_order(order_id)
+                    cart: Dict = order.get("cart")
+                    cart_item: Dict = next(iter(cart.get("items")))
+                    doctor_id = cart_item.get("doctor_id")
+                    appointment_datetime = cart_item.get("appointment_datetime")
+                    if is_doctor_slot_locked(doctor_id, appointment_datetime):
+                        bot_link = get_bot_link(self.verify)
+                        REDIRECT_MS = 10000
+                        return response.html(
+                            f'<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"><style>p{{font-size: large;}}</style></head><body><p>We apologize but this slot is no longer available. Please create a fresh booking.<br><br>You will be redirected back to the bot in {int(REDIRECT_MS/1000)} seconds. If the page does not redirect automatically, please click <a href="{bot_link}">this link</a> to go back to the bot.</p><script type="text/javascript"> setTimeout(function(){{window.location.href="{bot_link}";}}, {REDIRECT_MS});</script></body></html>'
                         )
-                        return response.redirect(payment_link_url)
-                    bot_link = get_bot_link(self.verify)
-                    REDIRECT_MS = 10000
-                    return response.html(
-                        f'<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"><style>p{{font-size: large;}}</style></head><body><p>This payment link has expired. Please create a fresh booking.<br><br>You will be redirected back to the bot in {int(REDIRECT_MS/1000)} seconds. If the page does not redirect automatically, please click <a href="{bot_link}">this link</a> to go back to the bot.</p><script type="text/javascript"> setTimeout(function(){{window.location.href="{bot_link}";}}, {REDIRECT_MS});</script></body></html>'
+                    payment_link_url = get_json_key(
+                        order, "payment_link.metadata.short_url"
                     )
+                    return response.redirect(payment_link_url)
                 except Exception as e:
                     logger.error(e)
 

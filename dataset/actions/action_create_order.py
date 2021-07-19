@@ -1,18 +1,16 @@
-from math import ceil
 from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.admin_config import get_slot_blocking_time_seconds
+from actions.utils.admin_config import get_payment_link_expiry_time_seconds
 from actions.utils.cart import get_cart, get_cart_total, print_cart
 from actions.utils.doctor import get_doctor, is_approved_and_activated_doctor
 from actions.utils.order import create_order, get_order, update_order
 from actions.utils.patient import get_patient_for_user_id, print_patient
 from actions.utils.payment_link import create_payment_link
 from actions.utils.sheets import update_order_in_spreadsheet
-from actions.utils.text import format_count
-from actions.utils.timeslot_lock import create_lock_for_doctor_slot, update_lock_for_id
+from actions.utils.timeslot_lock import is_doctor_slot_locked
 
 
 class ActionCreateOrder(Action):
@@ -41,10 +39,8 @@ class ActionCreateOrder(Action):
                 }
             )
             return []
-        timeslot_lock_id: Dict = create_lock_for_doctor_slot(
-            doctor_id, appointment_datetime
-        )
-        if not timeslot_lock_id:
+
+        if is_doctor_slot_locked(doctor_id, appointment_datetime):
             dispatcher.utter_message(
                 json_message={
                     "text": "This slot is no longer available. Please create a new booking with a different slot."
@@ -52,10 +48,7 @@ class ActionCreateOrder(Action):
             )
             return []
 
-        order_id: Text = create_order(
-            user_id, cart=cart, timeslot_lock_id=timeslot_lock_id
-        )
-        update_lock_for_id(timeslot_lock_id, order_id)
+        order_id: Text = create_order(user_id, cart=cart)
 
         payment_description = f"Consultation fee for {doctor.get('name', '')}"
 
@@ -68,7 +61,7 @@ class ActionCreateOrder(Action):
             email=patient["email"],
             phone=patient["phone"],
             description=payment_description,
-            expire_by_seconds=get_slot_blocking_time_seconds(),
+            expire_by_seconds=get_payment_link_expiry_time_seconds(),
             order_id=order_id,
         )
 
@@ -76,8 +69,6 @@ class ActionCreateOrder(Action):
 
         update_order(order_id, payment_link=payment_link, metadata=order_metadata)
         update_order_in_spreadsheet(get_order(order_id))
-
-        slot_block_time_minutes = ceil(get_slot_blocking_time_seconds() / 60)
 
         text = (
             f"Order #{order_id}\n"
@@ -91,8 +82,6 @@ class ActionCreateOrder(Action):
             + print_patient(patient)
             + "\n"
             + f"Consultation fee: Rs. {cart_amount}\n"
-            + "\n"
-            + f"The payment link will expire in {slot_block_time_minutes} {format_count('minute', 'minutes', slot_block_time_minutes)}. We have blocked your slot until then. Please complete the payment to book this slot."
         )
         reply_markup = {
             "keyboard": [

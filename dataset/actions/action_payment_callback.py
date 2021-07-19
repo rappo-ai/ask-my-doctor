@@ -24,7 +24,7 @@ from actions.utils.payment_status import (
     print_payment_status,
 )
 from actions.utils.sheets import update_order_in_spreadsheet
-from actions.utils.timeslot_lock import create_lock_for_doctor_slot, get_lock_for_id
+from actions.utils.timeslot_lock import create_lock_for_doctor_slot, get_lock_for_slot
 
 logger = logging.getLogger(__name__)
 
@@ -78,38 +78,21 @@ class ActionPaymentCallback(Action):
             cart_item = next(iter(cart.get("items") or []), {})
             doctor_id = cart_item.get("doctor_id")
             appointment_datetime = cart_item.get("appointment_datetime")
-            timeslot_lock_id = order.get("timeslot_lock_id")
-            timeslot_lock = get_lock_for_id(timeslot_lock_id)
+            timeslot_lock = get_lock_for_slot(doctor_id, appointment_datetime)
             if timeslot_lock and str(timeslot_lock.get("order_id")) != order_id:
                 conflict_order_id = timeslot_lock.get("order_id")
-                conflict_order = get_order(conflict_order_id)
-                conflict_user_id = conflict_order.get("user_id")
-                is_conflict_order_alread_paid = (
-                    get_json_key(
-                        conflict_order, "payment_status.razorpay_payment_link_status"
-                    )
-                    == "paid"
+                dispatcher.utter_message(
+                    json_message={
+                        "text": f"We're really sorry, but the slot for order #{order_id} is no longer available. Please use /help to contact support for a refund.",
+                    }
                 )
-                if is_conflict_order_alread_paid:
-                    dispatcher.utter_message(
-                        json_message={
-                            "text": f"We're really sorry, but the slot for order #{order_id} is no longer available. Please use /help to contact support for a refund.",
-                        }
-                    )
-                    dispatcher.utter_message(
-                        json_message={
-                            "chat_id": admin_group_id,
-                            "text": f"Timeslot #{timeslot_lock_id} has been double booked. First booking order #{conflict_order_id}, second booking order #{order_id}. Second order needs to be refunded.",
-                        }
-                    )
-                    return []
-                else:
-                    dispatcher.utter_message(
-                        json_message={
-                            "chat_id": conflict_user_id,
-                            "text": f"We're really sorry, but the slot for order #{conflict_order_id} is no longer available. Please make a fresh booking.",
-                        }
-                    )
+                dispatcher.utter_message(
+                    json_message={
+                        "chat_id": admin_group_id,
+                        "text": f"Timeslot #{timeslot_lock.get('_id')} has been booked again. Original booking order #{conflict_order_id}, new booking order #{order_id}. Second order needs to be refunded.",
+                    }
+                )
+                return []
             if not timeslot_lock or str(timeslot_lock.get("order_id")) != order_id:
                 timeslot_lock_id = create_lock_for_doctor_slot(
                     doctor_id=doctor_id,
@@ -118,11 +101,6 @@ class ActionPaymentCallback(Action):
                     force=True,
                 )
                 update_order(order_id, timeslot_lock_id=timeslot_lock_id)
-                dispatcher.utter_message(
-                    json_message={
-                        "text": f"The slot for order #{order_id} is still available and has been reserved for you after receiving a successful payment."
-                    }
-                )
 
             patient: Dict = get_json_key(order, "metadata.patient", {})
             doctor: Dict = get_doctor(doctor_id)
