@@ -11,5 +11,3 @@ services:
       "
     environment: 
       HOME: "/tmp"
-    ports:
-      - 5005:5005
