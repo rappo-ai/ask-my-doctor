@@ -100,7 +100,7 @@ class ActionCommandSetTimeSlots(Action):
                 clear_slots_example = "/settimeslots <DOCTOR ID> Mon"
             dispatcher.utter_message(
                 json_message={
-                    "text": f'The command format is incorrect. Usage:\n\n{usage}\n\n- Time slots must be in the format "Mon, 09:00-13:00".\n- The minutes must be either 00, 15, 30 or 45.\n- You can specify multiple slots by separating them with a comma, and multiple days by separating them with a semicolon. For example "Mon, 10:00-12:00, 14:00-17:00; Tue, 10:00-12:00, 14:00-17:00".\n- This command updates slots only for the days mentioned, leaving the other days as is. To clear the timeslots for a particular day you need to mention the day without any slots. For example "{clear_slots_example}" to clear the slots for Monday.'
+                    "text": f'The command format is incorrect. Usage:\n\n{usage}\n\n- Time slots must be in the format "Mon, 09:00-13:00".\n- The minutes must be either 00, 15, 30 or 45.\n- You can specify multiple slots by separating them with a comma, and multiple days by separating them with a semicolon. For example "/settimeslots Mon, 10:00-12:00, 14:00-17:00; Tue, 10:00-12:00, 14:00-17:00".\n- This command updates slots only for the days mentioned, leaving the other days as is. To clear the timeslots for a particular day you need to mention the day without any slots. For example "{clear_slots_example}" to clear the slots for Monday.'
                 }
             )
 

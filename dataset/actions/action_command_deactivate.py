@@ -67,7 +67,7 @@ class ActionCommandDeactivate(Action):
                 json_message={
                     "chat_id": doctor["user_id"],
                     "text": (
-                        f"Your listing hass been deactivated by {command_user}. You can re-activate your listing with /activate.\n"
+                        f"Your listing has been deactivated by {command_user}. You can re-activate your listing with /activate.\n"
                     ),
                 }
             )
