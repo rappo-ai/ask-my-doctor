@@ -11,3 +11,15 @@ services:
       "
     environment: 
       HOME: "/tmp"
+  mgob:
+    depends_on:
+      - mongo
+    image: stefanprodan/mgob:latest
+    ports:
+      - 8090:8090
+    volumes:
+      - ./.deploy/mgob/config:/config
+      - ./.deploy/mgob/storage:/storage
+      - ./.deploy/mgob/tmp:/tmp
+      - ./.deploy/mgob/data:/data
+      - ./.deploy/mgob/secrets:/secrets

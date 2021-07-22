@@ -1,0 +1,23 @@
+scheduler:
+  # run every hour
+  cron: "0 * * * *"
+  # number of backups to keep locally
+  retention: 5
+  # backup operation timeout in minutes
+  timeout: 60
+target:
+  # mongod IP or host name
+  host: "mongo"
+  # mongodb port
+  port: 27017
+  # mongodb database name, leave blank to backup all databases
+  # database: "test"
+  # leave blank if auth is not enabled
+  # username: "admin"
+  # password: "secret"
+  # add custom params to mongodump (eg. Auth or SSL support), leave blank if not needed
+  # params: "--ssl --authenticationDatabase admin"
+# GCloud upload
+gcloud:
+  bucket: "ask-my-doctor-db-backup"
+  keyFilePath: /secrets/db-backup-credentials.json
