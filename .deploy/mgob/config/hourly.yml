@@ -10,13 +10,6 @@ target:
   host: "mongo"
   # mongodb port
   port: 27017
-  # mongodb database name, leave blank to backup all databases
-  # database: "test"
-  # leave blank if auth is not enabled
-  # username: "admin"
-  # password: "secret"
-  # add custom params to mongodump (eg. Auth or SSL support), leave blank if not needed
-  # params: "--ssl --authenticationDatabase admin"
 # GCloud upload
 gcloud:
   bucket: "ask-my-doctor-db-backup"
