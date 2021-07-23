@@ -74,14 +74,14 @@ class ActionCommandActivate(Action):
                     }
                 )
                 return
-            if doctor.get("listing_status") == "enabled":
+            if doctor.get("listing_status") == LISTING_STATUS_ENABLED:
                 dispatcher.utter_message(
                     json_message={
                         "chat_id": doctor["user_id"],
-                        "text": f"Your listing is already activated, You can deactivate your listing by using /deactivate at any time.\n ",
+                        "text": f"Your listing is already active.",
                     }
                 )
-                return
+                return []
 
             doctor["listing_status"] = LISTING_STATUS_ENABLED
             update_doctor(doctor)
