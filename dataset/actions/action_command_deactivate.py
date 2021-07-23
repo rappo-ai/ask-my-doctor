@@ -49,7 +49,7 @@ class ActionCommandDeactivate(Action):
                 dispatcher.utter_message(
                     json_message={
                         "chat_id": doctor["user_id"],
-                        "text": f"Your listing is already deactivated",
+                        "text": "Your listing is already deactivated",
                     }
                 )
                 return []
