@@ -91,6 +91,8 @@ forms:
   patient_send_message_form:
     required_slots: {}
   doctor_signup_form:
+    ignored_intents:
+      - EXTERNAL_on_google_auth
     required_slots:
       doctor_signup__name:
         - type: from_text
