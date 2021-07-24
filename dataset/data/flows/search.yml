@@ -41,27 +41,6 @@ rules:
       - slot_was_set:
           - requested_slot: null
       - action: action_on_search_set
-  - rule: Cancel search request form / affirm
-    condition:
-      - active_loop: search_form
-      - slot_was_set:
-          - chat_type: private
-    steps:
-      - intent: cancel
-      - action: action_cancel
-      - intent: affirm
-      - action: action_main_menu
-  - rule: Cancel search request form / deny
-    condition:
-      - active_loop: search_form
-      - slot_was_set:
-          - chat_type: private
-    steps:
-      - intent: cancel
-      - action: action_cancel
-      - intent: deny
-      - action: action_reset_search_form
-      - action: search_form
 slots:
   search__speciality:
     type: text
