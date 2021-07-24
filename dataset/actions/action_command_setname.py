@@ -32,9 +32,9 @@ class ActionCommandSetName(Action):
 
         command_user = "ADMIN" if _is_admin_group else "DOCTOR"
         message_text = tracker.latest_message.get("text")
-        regex = r"^(/\w+)(\s+#(\w+))?(.+)$"
+        regex = r"^(/\w+\s+)(#(\w+))?(.+)$"
         if _is_admin_group:
-            regex = r"^(/\w+)(\s+#(\w+))(.+)$"
+            regex = r"^(/\w+\s+)(#(\w+))?(.+)$"
         matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
         name = matches and validate_name(matches.group(4))
         if matches and name:
