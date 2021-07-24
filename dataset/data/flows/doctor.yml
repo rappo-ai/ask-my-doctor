@@ -15,6 +15,11 @@ actions:
 
 forms:
   doctor_signup_form:
+    ignored_intents:
+      - EXTERNAL_payment_callback
+      - EXTERNAL_on_google_auth
+      - EXT_patient_send_message
+      - EXT_doctor_send_message
     required_slots:
       doctor_signup__name:
         - type: from_text
@@ -35,6 +40,10 @@ forms:
       doctor_signup__bank_account_ifsc:
         - type: from_text
   doctor_send_message_form:
+    ignored_intents:
+      - EXTERNAL_payment_callback
+      - EXTERNAL_on_google_auth
+      - EXT_patient_send_message
 
 intents:
   - EXT_doctor_send_message
