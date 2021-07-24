@@ -41,6 +41,7 @@ rules:
       - slot_was_set:
           - requested_slot: null
       - action: action_on_search_set
+
 slots:
   search__speciality:
     type: text
