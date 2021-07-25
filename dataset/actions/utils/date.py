@@ -67,15 +67,15 @@ def _generate_time_slots_for_ranges(time_slot_ranges: List, date_dt: datetime):
             month=date_dt.month,
             day=date_dt.day,
             microsecond=0,
-            tzinfo=SERVER_TZINFO,
         )
+        start_dt = SERVER_TZINFO.localize(start_dt)
         end_dt = datetime.strptime(range["end"], APPOINTMENT_TIME_FORMAT).replace(
             year=date_dt.year,
             month=date_dt.month,
             day=date_dt.day,
             microsecond=0,
-            tzinfo=SERVER_TZINFO,
         )
+        end_dt = SERVER_TZINFO.localize(end_dt)
         if end_dt.hour == 0 and end_dt.minute == 0:
             end_dt += timedelta(days=1)
         while start_dt != end_dt:
