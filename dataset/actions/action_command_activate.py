@@ -74,6 +74,15 @@ class ActionCommandActivate(Action):
                     }
                 )
                 return
+            if doctor.get("listing_status") == LISTING_STATUS_ENABLED:
+                dispatcher.utter_message(
+                    json_message={
+                        "chat_id": doctor["user_id"],
+                        "text": "Your listing is already active.",
+                    }
+                )
+                return []
+
             doctor["listing_status"] = LISTING_STATUS_ENABLED
             update_doctor(doctor)
 

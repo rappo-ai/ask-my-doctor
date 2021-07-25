@@ -45,6 +45,15 @@ class ActionCommandDeactivate(Action):
             else:
                 doctor = get_doctor_for_user_id(tracker.sender_id)
                 doctor_id = str(doctor["_id"])
+            if doctor.get("listing_status") == LISTING_STATUS_DISABLED:
+                dispatcher.utter_message(
+                    json_message={
+                        "chat_id": doctor["user_id"],
+                        "text": "Your listing is already deactivated",
+                    }
+                )
+                return []
+
             doctor["listing_status"] = LISTING_STATUS_DISABLED
             update_doctor(doctor)
 
