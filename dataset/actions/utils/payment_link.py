@@ -10,6 +10,7 @@ from requests.structures import CaseInsensitiveDict
 from typing import Text
 
 from actions.utils.admin_config import get_payment_route_config
+from actions.utils.branding import get_bot_display_name
 from actions.utils.date import SERVER_TZINFO
 from actions.utils.host import get_host_url
 
@@ -75,7 +76,7 @@ def create_payment_link(
                     }
                 ]
             },
-            "checkout": {"name": "AskMyDoctor"},
+            "checkout": {"name": get_bot_display_name()},
         },
     }
 

@@ -7,6 +7,7 @@ from rasa_sdk.executor import CollectingDispatcher
 
 
 from actions.utils.admin_config import get_admin_group_id
+from actions.utils.branding import get_bot_display_name
 from actions.utils.doctor import (
     ONBOARDING_STATUS_SIGNUP,
     add_doctor,
@@ -67,7 +68,7 @@ class ActionNewDoctorSignup(Action):
         update_doctor_in_spreadsheet(doctor)
 
         caption = (
-            f"Thank you for your interest in Ask My Doctor. We have received your details and will review it and get back to you within 48 hours.\n"
+            f"Thank you for your interest in {get_bot_display_name()}. We have received your details and will review it and get back to you within 48 hours.\n"
             + "\n"
             + print_doctor_profile(doctor, include_bank_details=True)
         )
