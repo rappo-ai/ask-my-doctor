@@ -28,10 +28,11 @@ class ActionSetAppointment(Action):
         time_iter = iter(time.split(":", 1))
         hour = int(next(time_iter, 0))
         minute = int(next(time_iter, 0))
-        appointment_datetime = datetime.strptime(date, APPOINTMENT_DATE_FORMAT).replace(
-            hour=hour, minute=minute
+        appointment_datetime = SERVER_TZINFO.localize(
+            datetime.strptime(date, APPOINTMENT_DATE_FORMAT).replace(
+                hour=hour, minute=minute
+            )
         )
-        appointment_datetime = SERVER_TZINFO.localize(appointment_datetime)
         doctor = get_doctor(doctor_id)
         cart_item = {
             "doctor_id": doctor_id,
