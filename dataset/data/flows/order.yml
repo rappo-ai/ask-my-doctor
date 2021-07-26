@@ -39,7 +39,12 @@ rules:
     steps:
       - intent: EXTERNAL_confirm_order_details
       - action: action_confirm_order_details
-      - intent: nlu_fallback
+      - or:
+        - intent: nlu_fallback
+        - intent: EXTERNAL_payment_callback
+        - intent: EXTERNAL_on_google_auth
+        - intent: EXT_patient_send_message
+        - intent: EXT_doctor_send_message
       - action: action_confirm_order_invalid_input
   - rule: Order unlocked
     condition:

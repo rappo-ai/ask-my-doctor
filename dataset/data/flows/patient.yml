@@ -80,7 +80,12 @@ rules:
     steps:
       - intent: EXTERNAL_confirm_patient
       - action: action_confirm_patient
-      - intent: nlu_fallback
+      - or:
+        - intent: nlu_fallback
+        - intent: EXTERNAL_payment_callback
+        - intent: EXTERNAL_on_google_auth
+        - intent: EXT_patient_send_message
+        - intent: EXT_doctor_send_message
       - action: action_confirm_patient_invalid_input
   - rule: Create new patient form
     condition:
