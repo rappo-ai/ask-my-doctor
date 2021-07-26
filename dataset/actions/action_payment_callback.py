@@ -16,7 +16,11 @@ from actions.utils.doctor import get_doctor
 from actions.utils.entity import get_entity
 from actions.utils.json import get_json_key
 from actions.utils.meet import create_meeting
-from actions.utils.order import get_latest_order_for_user_id, get_order, update_order
+from actions.utils.order import (
+    get_latest_open_order_for_user_id,
+    get_order,
+    update_order,
+)
 from actions.utils.patient import print_patient
 from actions.utils.payment_status import (
     fetch_payment_details,
@@ -64,7 +68,14 @@ class ActionPaymentCallback(Action):
             logger.warn(
                 "Unable to find order for this payment. Fetching some order for this user for debugging."
             )
-            order = get_latest_order_for_user_id(tracker.sender_id)
+            order = get_latest_open_order_for_user_id(tracker.sender_id)
+            if not order:
+                dispatcher.utter_message(text="DEBUG: No open order found for /pay")
+                return []
+            else:
+                dispatcher.utter_message(
+                    text=f"DEBUG: Found order #{order.get('_id')} for /pay"
+                )
             order_id = order.get("_id")
 
         payment_details = fetch_payment_details(payment_status)
