@@ -17,6 +17,9 @@ Copy .env.template to .env and set at-least the mandatory environment variables 
 - NGROK_REGION - Ngrok region [OPTIONAL]
 - RAPPO_ENV - Defaults to debug [OPTIONAL]
 - HOST_URL - If set, HOST_URL is used instead of ngrok [OPTIONAL]
+- BOT_DISPLAY_NAME - The display name of the bot in the messages. Defaults to "Doctor Consultation Bot". [OPTIONAL]
+- BOT_HELP_MESSAGE - The help message shown to the patients. Has a default. [OPTIONAL]
+- BOT_SUPPORT_USERNAME - The support username for the bot. Defaults to @doctorconsultationbotsupport. [OPTIONAL]
 
 Contact repo owner for help with 3rd party credentials.
 
