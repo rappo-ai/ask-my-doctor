@@ -29,10 +29,6 @@ def lazy_init():
                 "max_follow_up_seconds": 2 * 24 * 3600,
                 "doctor_commission_rate": 10,
                 "meeting_duration_minutes": 15,
-                "payment_route_config": {
-                    "account_number": "acc_HLeMvH2h0YvRvT",
-                    "commission": 5,
-                },
                 "specialities": specialities,
             },
         )
