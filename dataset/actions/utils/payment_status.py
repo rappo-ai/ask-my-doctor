@@ -1,6 +1,6 @@
+from bson import ObjectId
 from typing import Dict
 import datetime
-import json
 import logging
 import os
 
@@ -13,7 +13,14 @@ MOCK_PAYMENT_CREATION_TS = 1626002365
 
 
 def get_order_id_for_payment_status(payment_status: Dict):
-    return payment_status.get("razorpay_payment_link_reference_id", "")
+    razorpay_payment_link_reference_id = payment_status.get(
+        "razorpay_payment_link_reference_id"
+    )
+    return (
+        ObjectId(razorpay_payment_link_reference_id)
+        if razorpay_payment_link_reference_id
+        else None
+    )
 
 
 def fetch_payment_details(payment_status: Dict):
