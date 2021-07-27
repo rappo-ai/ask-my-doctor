@@ -5,11 +5,18 @@ AskMyDoctor source code repository.
 
 ## Environment Variables
 
-Copy .env.template to .env and set the Telegram bot token and Telegram bot username.
+Copy .env.template to .env and set at-least the mandatory environment variables below.
 
-Optionally set the Razorpay key id and Razorpay secret key to setup payments integration.
-
-Optionally set the Google Oauth client ID and secret to setup Google Meet integration.
+- TELEGRAM_BOT_TOKEN - Telegram bot token [REQUIRED]
+- TELEGRAM_BOT_USERNAME - Telegram bot username [REQUIRED]
+- RAZORPAY_KEY_ID - Razorpay Key ID [OPTIONAL]
+- RAZORPAY_SECRET_KEY - Razorpay Secret Key [OPTIONAL]
+- GOOGLE_OAUTH_CLIENT_ID - Google OAuth Client ID [OPTIONAL]
+- GOOGLE_OAUTH_CLIENT_SECRET - Google OAuth Client Secret [OPTIONAL]
+- NGROK_AUTH_TOKEN - Ngrok auth token [OPTIONAL]
+- NGROK_REGION - Ngrok region [OPTIONAL]
+- RAPPO_ENV - Defaults to debug [OPTIONAL]
+- HOST_URL - If set, HOST_URL is used instead of ngrok [OPTIONAL]
 
 Contact repo owner for help with 3rd party credentials.
 

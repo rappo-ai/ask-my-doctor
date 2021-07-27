@@ -25,6 +25,8 @@ chmod -R g+w ~/ask-my-doctor
 
 # update credentials
 # tbdrenzil - manually create ~/ask-my-doctor/.env
+# tbdrenzil - [OPTIONAL] manually create create ~/ask-my-doctor/.deploy/nginx/.env from ~/ask-my-doctor/.deploy/nginx/.env.template and update the env variables as needed
+# tbdrenzil - [OPTIONAL] manually add GCP service account json credentials to ~/ask-my-doctor/.deploy/mgob/secrets/ and update bucket name in ~/ask-my-doctor/.deploy/mgob/hourly.yml
 
 # launch docker
 cd ~/ask-my-doctor
