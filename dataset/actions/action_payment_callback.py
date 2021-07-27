@@ -1,3 +1,4 @@
+from bson import ObjectId
 from copy import deepcopy
 from datetime import datetime, timedelta
 import logging
@@ -78,6 +79,8 @@ class ActionPaymentCallback(Action):
                 )
             order_id = order.get("_id")
 
+        assert isinstance(order_id, ObjectId)
+
         payment_details = fetch_payment_details(payment_status)
 
         payment_status["payment_details"] = payment_details
@@ -90,7 +93,7 @@ class ActionPaymentCallback(Action):
             doctor_id = cart_item.get("doctor_id")
             appointment_datetime = cart_item.get("appointment_datetime")
             timeslot_lock = get_lock_for_slot(doctor_id, appointment_datetime)
-            if timeslot_lock and str(timeslot_lock.get("order_id")) != order_id:
+            if timeslot_lock and str(timeslot_lock.get("order_id")) != str(order_id):
                 conflict_order_id = timeslot_lock.get("order_id")
                 dispatcher.utter_message(
                     json_message={
@@ -104,7 +107,7 @@ class ActionPaymentCallback(Action):
                     }
                 )
                 return []
-            if not timeslot_lock or str(timeslot_lock.get("order_id")) != order_id:
+            if not timeslot_lock or str(timeslot_lock.get("order_id")) != str(order_id):
                 timeslot_lock_id = create_lock_for_doctor_slot(
                     doctor_id=doctor_id,
                     slot_datetime=appointment_datetime,
@@ -128,7 +131,7 @@ class ActionPaymentCallback(Action):
                 title=meet_title,
                 start_date=start_date,
                 end_date=end_date,
-                requestId=order_id,
+                requestId=str(order_id),
             )
 
             if meeting:
