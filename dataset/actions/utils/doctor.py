@@ -4,6 +4,7 @@ from typing import Dict, Text
 
 from actions.db.store import db
 from actions.utils.admin_config import get_advance_appointment_days
+from actions.utils.branding import get_bot_support_username
 from actions.utils.debug import is_debug_env
 from actions.utils.date import (
     generate_time_slots_for_date,
@@ -253,6 +254,6 @@ def get_doctor_command_help(is_admin: bool = False):
         command_help = command_help + (
             "/setgoogleid - update Google ID for meetings\n"
             + "\n"
-            + "To update your bank account details or for any other queries, please contact the admin @askmydoctorsupport.\n"
+            + f"To update your bank account details or for any other queries, please contact the admin {get_bot_support_username()}.\n"
         )
     return command_help
