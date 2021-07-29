@@ -6,7 +6,7 @@ from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import is_admin_group
 from actions.utils.doctor import ONBOARDING_STATUS_REJECTED, get_doctor, update_doctor
-from actions.utils.regex import match_command
+from actions.utils.command import match_command
 
 
 class ActionCommandReject(Action):
@@ -24,11 +24,11 @@ class ActionCommandReject(Action):
             return []
 
         message_text = tracker.latest_message.get("text")
-        command_breakup = match_command(message_text)
-        specialities_list = command_breakup["string"]
-        if command_breakup:
-            doctor_id = command_breakup["id"]
-            reject_reason = command_breakup["string"]
+        command = match_command(message_text)
+        specialities_list = command["args"]
+        if command:
+            doctor_id = command["doctor_id"]
+            reject_reason = command["args"]
             doctor = get_doctor(doctor_id)
             doctor["onboarding_status"] = ONBOARDING_STATUS_REJECTED
             update_doctor(doctor)

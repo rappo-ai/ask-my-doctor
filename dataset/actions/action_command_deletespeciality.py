@@ -10,7 +10,7 @@ from actions.utils.admin_config import (
     print_specialities,
     set_specialities,
 )
-from actions.utils.regex import match_command
+from actions.utils.command import match_command
 
 
 class ActionCommandDeleteSpeciality(Action):
@@ -28,9 +28,9 @@ class ActionCommandDeleteSpeciality(Action):
             return []
 
         message_text: Text = tracker.latest_message.get("text")
-        command_breakup = match_command(message_text)
-        specialities_list = command_breakup["string"]
-        if command_breakup:
+        command = match_command(message_text)
+        specialities_list = command["args"]
+        if command:
             speciality = specialities_list.strip()
             specialities: list = get_specialities()
             if not speciality in specialities:
