@@ -79,8 +79,19 @@ def get_order(id) -> Dict:
     return db.order.find_one({"_id": ObjectId(id)})
 
 
-def get_latest_order_for_user_id(user_id):
-    cursor = db.order.find({"user_id": user_id}).sort({"_id": 1}).limit(1)
+def get_latest_open_order_for_user_id(user_id):
+    cursor = (
+        db.order.find(
+            {
+                "$and": [
+                    {"user_id": user_id},
+                    {"payment_status.razorpay_payment_link_status": {"$ne": "paid"}},
+                ]
+            }
+        )
+        .sort("_id", 1)
+        .limit(1)
+    )
     for doc in cursor:
         return doc
     return None

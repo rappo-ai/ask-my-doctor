@@ -4,6 +4,7 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import is_admin_group
+from actions.utils.branding import get_bot_help_message
 from actions.utils.doctor import get_doctor_command_help, is_approved_doctor
 
 
@@ -45,15 +46,7 @@ class ActionHelp(Action):
             json_message = {"text": text}
             dispatcher.utter_message(json_message=json_message)
 
-        text = (
-            "You can reach out to us for help in any of the following ways:\n"
-            + "\n"
-            + "- Message us @askmydoctorsupport\n"
-            + "- Email us at support@askmydoctor.com\n"
-            + "- Call us at 9876543210 (Mon-Fri 9 AM-6PM)\n"
-            + "\n"
-            + "Click /menu to view the main menu.\n"
-        )
+        text = get_bot_help_message() + "\n" + "Click /menu to view the main menu.\n"
         json_message = {"text": text}
         dispatcher.utter_message(json_message=json_message)
 
