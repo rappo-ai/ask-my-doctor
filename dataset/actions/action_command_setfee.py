@@ -12,6 +12,7 @@ from actions.utils.doctor import (
     is_approved_doctor,
     update_doctor,
 )
+from actions.utils.regex import match_command
 from actions.utils.validate import validate_consulation_fee
 
 
@@ -32,16 +33,13 @@ class ActionCommandSetFee(Action):
 
         command_user = "ADMIN" if _is_admin_group else "DOCTOR"
         message_text = tracker.latest_message.get("text")
-        regex = r"^(/\w+)(\s+#(\w+))?(.+)$"
-        if _is_admin_group:
-            regex = r"^(/\w+)(\s+#(\w+))(.+)$"
-        matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
-        fee = matches and validate_consulation_fee(matches.group(4))
-        if matches and fee:
+        command_breakup = match_command(message_text, _is_admin_group)
+        fee = command_breakup["string"]
+        if fee:
             doctor = {}
             doctor_id = ""
             if _is_admin_group:
-                doctor_id = matches.group(3)
+                doctor_id = command_breakup["id"]
                 doctor = get_doctor(doctor_id)
             else:
                 doctor = get_doctor_for_user_id(tracker.sender_id)

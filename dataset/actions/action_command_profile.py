@@ -14,6 +14,7 @@ from actions.utils.doctor import (
     get_doctor_for_user_id,
     is_approved_doctor,
 )
+from actions.utils.regex import match_command
 
 logger = logging.getLogger(__name__)
 
@@ -34,15 +35,13 @@ class ActionCommandProfile(Action):
             return []
 
         message_text = tracker.latest_message.get("text")
-        regex = r"^(/\w+)(\s+#(\w+))?$"
-        if _is_admin_group:
-            regex = r"^(/\w+)(\s+#(\w+))$"
-        matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
-        if matches:
+        command_breakup = match_command(message_text)
+        specialities_list = command_breakup["string"]
+        if command_breakup:
             doctor: Dict = {}
             doctor_id = ""
             if _is_admin_group:
-                doctor_id = matches.group(3)
+                doctor_id = command_breakup["id"]
                 doctor = get_doctor(doctor_id)
             else:
                 doctor = get_doctor_for_user_id(tracker.sender_id)

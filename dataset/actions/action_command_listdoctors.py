@@ -8,6 +8,8 @@ from actions.utils.admin_config import is_admin_group, get_specialities
 from actions.utils.doctor import get_doctors, get_doctor_card
 from actions.utils.validate import validate_speciality
 
+from actions.utils.regex import match_command
+
 
 class ActionCommandListDoctors(Action):
     def name(self) -> Text:
@@ -24,11 +26,10 @@ class ActionCommandListDoctors(Action):
             return []
 
         message_text = tracker.latest_message.get("text")
-        regex = r"^(/\w+)\s+(.+)$"
-        matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
-        speciality = matches and validate_speciality(matches.group(2))
+        command_breakup = match_command(message_text)
+        speciality = validate_speciality(command_breakup["string"])
 
-        if matches and speciality:
+        if command_breakup and speciality:
             doctors = get_doctors(speciality=speciality)
             dispatcher.utter_message(
                 json_message={

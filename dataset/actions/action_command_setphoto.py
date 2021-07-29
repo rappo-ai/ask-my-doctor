@@ -12,6 +12,7 @@ from actions.utils.doctor import (
     is_approved_doctor,
     update_doctor,
 )
+from actions.utils.regex import match_command
 from actions.utils.validate import validate_photo
 
 
@@ -33,21 +34,18 @@ class ActionCommandSetPhoto(Action):
         command_user = "ADMIN" if _is_admin_group else "DOCTOR"
         message_text = tracker.latest_message.get("text")
         metadata = tracker.latest_message.get("metadata")
-        regex = r"^(/\w+)(\s+#(\w+))?$"
-        if _is_admin_group:
-            regex = r"^(/\w+)(\s+#(\w+))$"
-        matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
+        command_breakup = match_command(message_text, _is_admin_group)
         photo = validate_photo(
             metadata,
             min_size=(256, 256),
             target_size=(512, 512),
             target_chat_id=tracker.sender_id,
         )
-        if matches and photo:
+        if photo:
             doctor = {}
             doctor_id = ""
             if _is_admin_group:
-                doctor_id = matches.group(3)
+                doctor_id = command_breakup["id"]
                 doctor = get_doctor(doctor_id)
             else:
                 doctor = get_doctor_for_user_id(tracker.sender_id)

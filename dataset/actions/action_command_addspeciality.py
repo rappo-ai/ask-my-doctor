@@ -10,6 +10,7 @@ from actions.utils.admin_config import (
     print_specialities,
     set_specialities,
 )
+from actions.utils.regex import match_command
 
 
 class ActionCommandAddSpeciality(Action):
@@ -27,10 +28,11 @@ class ActionCommandAddSpeciality(Action):
             return []
 
         message_text = tracker.latest_message.get("text")
-        regex = r"^(/\w+)\s+([\w -]+)$"
-        matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
-        if matches:
-            speciality = matches.group(2).strip()
+        message_text = tracker.latest_message.get("text")
+        command_breakup = match_command(message_text)
+        specialities_list = command_breakup["string"]
+        if command_breakup:
+            speciality = specialities_list.strip()
             specialities: list = get_specialities()
             if speciality in specialities:
                 dispatcher.utter_message(
