@@ -23,6 +23,7 @@ def lazy_init():
             {
                 "_id": ObjectId(ADMIN_CONFID_OBJECT_ID),
                 "super_admins": [],
+                "admin_group_id": "",
                 "advance_appointment_days": 7,
                 "booking_advance_time_minutes": 60,
                 "payment_link_expiry_time_seconds": 900,
