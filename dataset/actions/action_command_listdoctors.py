@@ -6,6 +6,7 @@ from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import is_admin_group, get_specialities
 from actions.utils.doctor import get_doctors, get_doctor_card
+from actions.utils.text import format_count
 from actions.utils.validate import validate_speciality
 
 
@@ -24,25 +25,28 @@ class ActionCommandListDoctors(Action):
             return []
 
         message_text = tracker.latest_message.get("text")
-        regex = r"^(/\w+)\s+(.+)$"
+        regex = r"^(/\w+)(\s+(.+))?$"
         matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
-        speciality = matches and validate_speciality(matches.group(2))
+        speciality = matches and matches.group(3)
+        is_valid_speciality = speciality and validate_speciality(matches.group(3))
 
-        if matches and speciality:
+        if matches and (not speciality or is_valid_speciality):
             doctors = get_doctors(speciality=speciality)
+            num_doctors = doctors.count()
             dispatcher.utter_message(
                 json_message={
-                    "text": f"Found {doctors.count()} doctors for speciality '{speciality}'"
+                    "text": f"Found {num_doctors} {format_count('doctor', 'doctors', num_doctors)}"
+                    + (f" for speciality '{speciality}'" if speciality else "")
                 }
             )
             for d in doctors:
                 dispatcher.utter_message(json_message=get_doctor_card(d))
         else:
-            usage = "/listdoctors <SPECIALITY>"
+            usage = "/listdoctors <SPECIALITY>[OPTIONAL]"
             specialities = "\n".join(get_specialities())
             dispatcher.utter_message(
                 json_message={
-                    "text": f"The command format is incorrect. Usage:\n\n{usage}\n\nSpeciality must be from this list:\n\n{specialities}"
+                    "text": f"The command format is incorrect. Usage:\n\n{usage}\n\nSpeciality is optional. If specified it must be from this list:\n\n{specialities}"
                 }
             )
         return []
