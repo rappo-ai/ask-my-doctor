@@ -14,7 +14,7 @@ from actions.utils.doctor import (
     get_doctor_for_user_id,
     is_approved_doctor,
 )
-from actions.utils.command import match_command
+from actions.utils.command import extract_command
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +35,7 @@ class ActionCommandProfile(Action):
             return []
 
         message_text = tracker.latest_message.get("text")
-        command = match_command(message_text)
-        specialities_list = command["args"]
+        command = extract_command(message_text, _is_admin_group)
         if command:
             doctor: Dict = {}
             doctor_id = ""

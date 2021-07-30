@@ -10,7 +10,7 @@ from actions.utils.admin_config import (
     print_specialities,
     set_specialities,
 )
-from actions.utils.command import match_command
+from actions.utils.command import extract_command
 
 
 class ActionCommandAddSpeciality(Action):
@@ -29,9 +29,9 @@ class ActionCommandAddSpeciality(Action):
 
         message_text = tracker.latest_message.get("text")
         message_text = tracker.latest_message.get("text")
-        command = match_command(message_text)
+        command = extract_command(message_text, False)
         specialities_list = command["args"]
-        if command:
+        if specialities_list:
             speciality = specialities_list.strip()
             specialities: list = get_specialities()
             if speciality in specialities:

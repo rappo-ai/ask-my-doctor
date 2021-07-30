@@ -11,7 +11,7 @@ from actions.utils.doctor import (
     get_doctor_command_help,
     update_doctor,
 )
-from actions.utils.command import match_command
+from actions.utils.command import extract_command
 
 
 class ActionCommandApprove(Action):
@@ -29,7 +29,7 @@ class ActionCommandApprove(Action):
             return []
 
         message_text = tracker.latest_message.get("text")
-        command = match_command(message_text)
+        command = extract_command(message_text)
         if command:
             doctor_id = command["doctor_id"]
             doctor = get_doctor(doctor_id)

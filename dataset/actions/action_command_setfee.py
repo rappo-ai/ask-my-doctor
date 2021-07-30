@@ -12,7 +12,7 @@ from actions.utils.doctor import (
     is_approved_doctor,
     update_doctor,
 )
-from actions.utils.command import match_command
+from actions.utils.command import extract_command
 from actions.utils.validate import validate_consulation_fee
 
 
@@ -33,9 +33,9 @@ class ActionCommandSetFee(Action):
 
         command_user = "ADMIN" if _is_admin_group else "DOCTOR"
         message_text = tracker.latest_message.get("text")
-        command = match_command(message_text, _is_admin_group)
+        command = extract_command(message_text, _is_admin_group)
         fee = command["args"]
-        if fee:
+        if command and fee:
             doctor = {}
             doctor_id = ""
             if _is_admin_group:

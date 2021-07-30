@@ -14,7 +14,7 @@ from actions.utils.doctor import (
     is_approved_doctor,
     update_doctor,
 )
-from actions.utils.command import match_command
+from actions.utils.command import extract_command
 from actions.utils.validate import validate_time_slots
 
 
@@ -35,8 +35,8 @@ class ActionCommandSetTimeSlots(Action):
 
         command_user = "ADMIN" if _is_admin_group else "DOCTOR"
         message_text = tracker.latest_message.get("text")
-        command = match_command(message_text, _is_admin_group)
-        new_weekly_slots = validate_time_slots(command["args"])
+        command = extract_command(message_text, _is_admin_group)
+        new_weekly_slots = command and validate_time_slots(command["args"])
         if new_weekly_slots:
             doctor: Dict = {}
             doctor_id = ""

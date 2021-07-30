@@ -8,7 +8,7 @@ from actions.utils.admin_config import is_admin_group, get_specialities
 from actions.utils.doctor import get_doctors, get_doctor_card
 from actions.utils.validate import validate_speciality
 
-from actions.utils.command import match_command
+from actions.utils.command import extract_command
 
 
 class ActionCommandListDoctors(Action):
@@ -26,8 +26,8 @@ class ActionCommandListDoctors(Action):
             return []
 
         message_text = tracker.latest_message.get("text")
-        command = match_command(message_text)
-        speciality = validate_speciality(command["args"])
+        command = extract_command(message_text, False)
+        speciality = command and validate_speciality(command["args"])
 
         if command and speciality:
             doctors = get_doctors(speciality=speciality)

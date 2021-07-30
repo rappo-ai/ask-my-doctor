@@ -12,7 +12,7 @@ from actions.utils.doctor import (
     is_approved_doctor,
     update_doctor,
 )
-from actions.utils.command import match_command
+from actions.utils.command import extract_command
 from actions.utils.validate import validate_photo
 
 
@@ -34,14 +34,14 @@ class ActionCommandSetPhoto(Action):
         command_user = "ADMIN" if _is_admin_group else "DOCTOR"
         message_text = tracker.latest_message.get("text")
         metadata = tracker.latest_message.get("metadata")
-        command = match_command(message_text, _is_admin_group)
+        command = extract_command(message_text, _is_admin_group)
         photo = validate_photo(
             metadata,
             min_size=(256, 256),
             target_size=(512, 512),
             target_chat_id=tracker.sender_id,
         )
-        if photo:
+        if command and photo:
             doctor = {}
             doctor_id = ""
             if _is_admin_group:
