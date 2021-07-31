@@ -3,6 +3,7 @@ from bson.objectid import ObjectId
 from datetime import datetime, timedelta
 import json
 import logging
+from pymongo import DESCENDING
 import requests
 from requests.structures import CaseInsensitiveDict
 from typing import Dict, Optional, Text
@@ -19,8 +20,12 @@ logger = logging.getLogger(__name__)
 
 
 def create_order(user_id: Text, cart: Dict, timeslot_lock_id: ObjectId = None):
+    current_date = datetime.now(tz=SERVER_TZINFO)
     order = {
-        "creation_ts": datetime.now(tz=SERVER_TZINFO).isoformat(),
+        "creation_ts": current_date.timestamp(),
+        "creation_date": current_date.isoformat(),
+        "last_update_ts": current_date.timestamp(),
+        "last_update_date": current_date.isoformat(),
         "user_id": user_id,
         "cart": cart,
     }
@@ -89,7 +94,7 @@ def get_latest_open_order_for_user_id(user_id):
                 ]
             }
         )
-        .sort("_id", 1)
+        .sort("_id", DESCENDING)
         .limit(1)
     )
     for doc in cursor:
@@ -106,7 +111,11 @@ def update_order(
     metadata: Optional[Dict] = None,
     timeslot_lock_id: Optional[ObjectId] = None,
 ):
-    order = {}
+    current_date = datetime.now(tz=SERVER_TZINFO)
+    order = {
+        "last_update_ts": current_date.timestamp(),
+        "last_update_date": current_date.isoformat(),
+    }
 
     if cart:
         order["cart"] = cart

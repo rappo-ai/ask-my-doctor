@@ -1,11 +1,20 @@
 from bson.objectid import ObjectId
+from copy import deepcopy
+from datetime import datetime
 from typing import Dict, Text
 
 from actions.db.store import db
+from actions.utils.date import SERVER_TZINFO
 
 
 def add_patient(patient: Dict):
-    return db.patient.insert_one(patient).inserted_id
+    current_date = datetime.now(tz=SERVER_TZINFO)
+    patient_copy = deepcopy(patient)
+    patient_copy["creation_ts"] = current_date.timestamp()
+    patient_copy["creation_date"] = current_date.isoformat()
+    patient_copy["last_update_ts"] = current_date.timestamp()
+    patient_copy["last_update_date"] = current_date.isoformat()
+    return db.patient.insert_one(patient_copy).inserted_id
 
 
 def get_patient(id: Text):
@@ -26,4 +35,8 @@ def print_patient(patient: Dict):
 
 
 def update_patient(patient: Dict):
-    db.patient.update_one({"_id": patient.get("_id")}, {"$set": patient})
+    current_date = datetime.now(tz=SERVER_TZINFO)
+    patient_copy = deepcopy(patient)
+    patient_copy["last_update_ts"] = current_date.timestamp()
+    patient_copy["last_update_date"] = current_date.isoformat()
+    db.patient.update_one({"_id": patient_copy.get("_id")}, {"$set": patient_copy})
