@@ -10,7 +10,6 @@ from actions.utils.admin_config import (
     print_specialities,
     set_specialities,
 )
-from actions.utils.command import extract_command
 
 
 class ActionCommandDeleteSpeciality(Action):
@@ -28,10 +27,10 @@ class ActionCommandDeleteSpeciality(Action):
             return []
 
         message_text: Text = tracker.latest_message.get("text")
-        command = extract_command(message_text, False)
-        specialities_list = command["args"]
-        if specialities_list:
-            speciality = specialities_list.strip()
+        regex = r"^(/\w+)\s+([\w -]+)$"
+        matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
+        if matches:
+            speciality = matches.group(2).strip()
             specialities: list = get_specialities()
             if not speciality in specialities:
                 dispatcher.utter_message(
