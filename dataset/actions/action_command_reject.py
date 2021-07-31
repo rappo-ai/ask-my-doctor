@@ -1,12 +1,11 @@
-import re
-from typing import Any, AnyStr, Match, Text, Dict, List
+from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import is_admin_group
-from actions.utils.doctor import ONBOARDING_STATUS_REJECTED, get_doctor, update_doctor
 from actions.utils.command import extract_command
+from actions.utils.doctor import ONBOARDING_STATUS_REJECTED, get_doctor, update_doctor
 
 
 class ActionCommandReject(Action):

@@ -1,10 +1,10 @@
-import re
-from typing import Any, AnyStr, Match, Text, Dict, List
+from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import get_admin_group_id, is_admin_group
+from actions.utils.command import extract_command
 from actions.utils.date import is_empty_weekly_slots, print_weekly_slots
 from actions.utils.doctor import (
     LISTING_STATUS_DISABLED,
@@ -14,7 +14,6 @@ from actions.utils.doctor import (
     is_approved_doctor,
     update_doctor,
 )
-from actions.utils.command import extract_command
 from actions.utils.validate import validate_time_slots
 
 

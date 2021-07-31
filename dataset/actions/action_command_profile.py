@@ -1,20 +1,17 @@
-from copy import deepcopy
 import logging
-import re
-from typing import Any, AnyStr, Match, Text, Dict, List
+from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
-
 from actions.utils.admin_config import is_admin_group
+from actions.utils.command import extract_command
 from actions.utils.doctor import (
     get_doctor,
     get_doctor_card,
     get_doctor_for_user_id,
     is_approved_doctor,
 )
-from actions.utils.command import extract_command
 
 logger = logging.getLogger(__name__)
 

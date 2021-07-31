@@ -1,10 +1,10 @@
-import re
-from typing import Any, AnyStr, Match, Text, Dict, List
+from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import get_admin_group_id, is_admin_group
+from actions.utils.command import extract_command
 from actions.utils.doctor import (
     get_doctor,
     get_doctor_card,
@@ -12,7 +12,6 @@ from actions.utils.doctor import (
     is_approved_doctor,
     update_doctor,
 )
-from actions.utils.command import extract_command
 from actions.utils.validate import validate_phone_number
 
 

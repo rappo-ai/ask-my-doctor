@@ -1,10 +1,10 @@
-import re
-from typing import Any, AnyStr, Match, Text, Dict, List
+from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import get_admin_group_id, is_admin_group
+from actions.utils.command import extract_command
 from actions.utils.doctor import (
     get_doctor,
     get_doctor_card,
@@ -12,7 +12,6 @@ from actions.utils.doctor import (
     is_approved_doctor,
     update_doctor,
 )
-from actions.utils.command import extract_command
 from actions.utils.validate import validate_photo
 
 
@@ -35,13 +34,13 @@ class ActionCommandSetPhoto(Action):
         message_text = tracker.latest_message.get("text")
         metadata = tracker.latest_message.get("metadata")
         command = extract_command(message_text, _is_admin_group)
-        photo = validate_photo(
+        photo = command and validate_photo(
             metadata,
             min_size=(256, 256),
             target_size=(512, 512),
             target_chat_id=tracker.sender_id,
         )
-        if command and photo:
+        if photo:
             doctor = {}
             doctor_id = ""
             if _is_admin_group:

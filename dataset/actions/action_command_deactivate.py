@@ -1,10 +1,10 @@
-import re
-from typing import Any, AnyStr, Match, Text, Dict, List
+from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import get_admin_group_id, is_admin_group
+from actions.utils.command import extract_command
 from actions.utils.doctor import (
     LISTING_STATUS_DISABLED,
     get_doctor,
@@ -13,7 +13,6 @@ from actions.utils.doctor import (
     is_approved_doctor,
     update_doctor,
 )
-from actions.utils.command import extract_command
 
 
 class ActionCommandDeactivate(Action):
@@ -32,7 +31,6 @@ class ActionCommandDeactivate(Action):
             return []
 
         command_user = "ADMIN" if _is_admin_group else "DOCTOR"
-        message_text = tracker.latest_message.get("text")
         message_text = tracker.latest_message.get("text")
         command = extract_command(message_text, _is_admin_group)
         if command:
