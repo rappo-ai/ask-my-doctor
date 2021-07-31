@@ -1,11 +1,10 @@
 from bson import ObjectId
 from typing import Dict
-import datetime
+from datetime import datetime
 import logging
 import os
 
 from actions.utils.date import SERVER_TZINFO
-from actions.utils.json import get_json_key
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +50,7 @@ def fetch_payment_details(payment_status: Dict):
 def print_payment_status(payment_status: Dict):
     payment_details = payment_status.get("payment_details", {})
     amount_rupees = payment_details.get("amount", 0) / 100
-    date = datetime.datetime.fromtimestamp(
+    date = datetime.fromtimestamp(
         payment_details.get("created_at", get_mock_payment_creation_ts()), SERVER_TZINFO
     ).strftime("%d-%m-%Y %H:%M:%S")
     mode = payment_details.get("method", "")

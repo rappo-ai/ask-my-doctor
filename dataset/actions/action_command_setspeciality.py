@@ -8,7 +8,7 @@ from actions.utils.admin_config import (
     get_specialities,
     is_admin_group,
 )
-from actions.utils.command import extract_command
+from actions.utils.command import extract_doctor_command
 from actions.utils.doctor import (
     get_doctor,
     get_doctor_card,
@@ -36,7 +36,7 @@ class ActionCommandSetSpeciality(Action):
 
         command_user = "ADMIN" if _is_admin_group else "DOCTOR"
         message_text = tracker.latest_message.get("text")
-        command = extract_command(message_text, _is_admin_group)
+        command = extract_doctor_command(message_text, _is_admin_group)
         speciality = command and validate_speciality(command["args"])
         if speciality:
             doctor = {}

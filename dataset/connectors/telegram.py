@@ -1,3 +1,4 @@
+import base64
 from copy import deepcopy
 from dotenv import load_dotenv
 import json
@@ -171,6 +172,7 @@ class TelegramOutput(TeleBot, OutputChannel):
                 ("photo",): "send_photo",
                 ("audio",): "send_audio",
                 ("document",): "send_document",
+                ("zip",): "send_document",
                 ("sticker",): "send_sticker",
                 ("video",): "send_video",
                 ("video_note",): "send_video_note",
@@ -196,6 +198,18 @@ class TelegramOutput(TeleBot, OutputChannel):
 
             for params in send_functions.keys():
                 if all(json_message.get(p) is not None for p in params):
+                    zip_base64 = json_message.pop("zip", None)
+                    zip_bytes = (
+                        base64.standard_b64decode(zip_base64) if zip_base64 else None
+                    )
+                    if zip_bytes:
+                        zip_file_name = json_message.pop("zip_file_name", "file.zip")
+                        json_message["document"] = (
+                            zip_file_name,
+                            zip_bytes,
+                            "application/zip",
+                        )
+                        params = ("document",)
                     args = [json_message.pop(p) for p in params]
                     if send_functions[params] not in [
                         "send_media_group",

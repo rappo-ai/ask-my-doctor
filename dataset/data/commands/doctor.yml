@@ -3,6 +3,7 @@ version: "2.0"
 actions:
   - action_command_activate
   - action_command_deactivate
+  - action_command_listorders
   - action_command_setdescription
   - action_command_setfee
   - action_command_setgoogleid
@@ -16,6 +17,7 @@ actions:
 intents:
   - activate
   - deactivate
+  - listorders
   - setfee
   - setgoogleid
   - setname
@@ -39,6 +41,12 @@ nlu:
       match_condition: "start"
     examples: |
       - /deactivate
+  - intent: listorders
+    metadata:
+      keyword_intent: true
+      match_condition: "start"
+    examples: |
+      - /listorders
   - intent: setname
     metadata:
       keyword_intent: true
@@ -103,6 +111,10 @@ rules:
     steps:
       - intent: deactivate
       - action: action_command_deactivate
+  - rule: list order
+    steps:
+      - intent: listorders
+      - action: action_command_listorders
   - rule: update doctor description
     steps:
       - intent: setdescription

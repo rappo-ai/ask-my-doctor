@@ -4,7 +4,7 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import get_admin_group_id, is_admin_group
-from actions.utils.command import extract_command
+from actions.utils.command import extract_doctor_command
 from actions.utils.doctor import (
     get_doctor,
     get_doctor_card,
@@ -33,7 +33,7 @@ class ActionCommandSetPhoto(Action):
         command_user = "ADMIN" if _is_admin_group else "DOCTOR"
         message_text = tracker.latest_message.get("text")
         metadata = tracker.latest_message.get("metadata")
-        command = extract_command(message_text, _is_admin_group)
+        command = extract_doctor_command(message_text, _is_admin_group)
         photo = command and validate_photo(
             metadata,
             min_size=(256, 256),
