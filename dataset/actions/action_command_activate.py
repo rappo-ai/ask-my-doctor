@@ -1,10 +1,10 @@
-import re
-from typing import Any, AnyStr, Match, Text, Dict, List
+from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import get_admin_group_id, is_admin_group
+from actions.utils.command import extract_command
 from actions.utils.date import is_empty_weekly_slots
 from actions.utils.doctor import (
     LISTING_STATUS_ENABLED,
@@ -33,15 +33,12 @@ class ActionCommandActivate(Action):
 
         command_user = "ADMIN" if _is_admin_group else "DOCTOR"
         message_text = tracker.latest_message.get("text")
-        regex = r"^(/\w+)(\s+#(\w+))?$"
-        if _is_admin_group:
-            regex = r"^(/\w+)(\s+#(\w+))$"
-        matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
-        if matches:
+        command = extract_command(message_text, _is_admin_group)
+        if command:
             doctor: Dict = {}
             doctor_id = ""
             if _is_admin_group:
-                doctor_id = matches.group(3)
+                doctor_id = command["doctor_id"]
                 doctor = get_doctor(doctor_id)
             else:
                 doctor = get_doctor_for_user_id(tracker.sender_id)
