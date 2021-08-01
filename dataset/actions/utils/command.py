@@ -2,8 +2,8 @@ import re
 from typing import AnyStr, Match, Text
 
 
-def extract_command(message_text: Text, is_admin_group: bool):
-    if is_admin_group:
+def extract_doctor_command(message_text: Text, assert_doctor_id: bool):
+    if assert_doctor_id:
         regex = r"^(/\w+)(\s+#(\w+))(\s(.+))?$"
     else:
         regex = r"^(/\w+)(\s+#(\w+))?(\s(.+))?$"

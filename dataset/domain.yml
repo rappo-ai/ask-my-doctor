@@ -57,6 +57,7 @@ actions:
 
   - action_command_activate
   - action_command_deactivate
+  - action_command_listorders
   - action_command_setdescription
   - action_command_setfee
   - action_command_setgoogleid

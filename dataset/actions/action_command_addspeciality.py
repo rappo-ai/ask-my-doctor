@@ -27,7 +27,7 @@ class ActionCommandAddSpeciality(Action):
             return []
 
         message_text = tracker.latest_message.get("text")
-        regex = r"^(/\w+)\s+([\w -]+)$"
+        regex = r"^(/\w+)\s+([^\n\t]+)$"
         matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
         if matches:
             speciality = matches.group(2).strip()

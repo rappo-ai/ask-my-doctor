@@ -9,6 +9,7 @@ from rasa_sdk.executor import CollectingDispatcher
 from actions.utils.admin_config import get_admin_group_id
 from actions.utils.branding import get_bot_display_name
 from actions.utils.doctor import (
+    LISTING_STATUS_DISABLED,
     ONBOARDING_STATUS_SIGNUP,
     add_doctor,
     get_doctor_for_user_id,
@@ -36,6 +37,7 @@ class ActionNewDoctorSignup(Action):
         doctor = get_doctor_for_user_id(user_id) or {}
         doctor["user_id"] = user_id
         doctor["onboarding_status"] = ONBOARDING_STATUS_SIGNUP
+        doctor["listing_status"] = LISTING_STATUS_DISABLED
         doctor["name"] = tracker.get_slot("doctor_signup__name")
         doctor["phone_number"] = tracker.get_slot("doctor_signup__number")
         doctor["photo"] = tracker.get_slot("doctor_signup__photo")

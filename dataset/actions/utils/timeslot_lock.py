@@ -20,11 +20,15 @@ def create_lock_for_doctor_slot(
     force: Optional[bool] = False,
 ) -> ObjectId:
     lock_id = compute_hased_id(doctor_id, slot_datetime)
+    current_date = datetime.now(tz=SERVER_TZINFO)
     lock = {
         "_id": ObjectId(lock_id),
         "doctor_id": doctor_id,
         "slot": slot_datetime,
-        "creation_ts": datetime.now(tz=SERVER_TZINFO).isoformat(),
+        "creation_ts": current_date.timestamp(),
+        "creation_date": current_date.isoformat(),
+        "last_update_ts": current_date.timestamp(),
+        "last_update_ts": current_date.isoformat(),
     }
     if order_id:
         lock["order_id"] = order_id
@@ -51,8 +55,16 @@ def get_lock_for_id(lock_id) -> Dict:
 
 
 def update_lock_for_id(lock_id, order_id: ObjectId):
+    current_date = datetime.now(tz=SERVER_TZINFO)
     return db.timeslot_lock.update_one(
-        {"_id": ObjectId(lock_id)}, {"$set": {"order_id": order_id}}
+        {"_id": ObjectId(lock_id)},
+        {
+            "$set": {
+                "order_id": order_id,
+                "last_update_ts": current_date.timestamp(),
+                "last_update_ts": current_date.isoformat(),
+            }
+        },
     )
 
 

@@ -4,7 +4,7 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import get_admin_group_id, is_admin_group
-from actions.utils.command import extract_command
+from actions.utils.command import extract_doctor_command
 from actions.utils.doctor import (
     get_doctor,
     get_doctor_card,
@@ -32,7 +32,7 @@ class ActionCommandSetPhoneNumber(Action):
 
         command_user = "ADMIN" if _is_admin_group else "DOCTOR"
         message_text = tracker.latest_message.get("text")
-        command = extract_command(message_text, _is_admin_group)
+        command = extract_doctor_command(message_text, _is_admin_group)
         phone_number = command and validate_phone_number(command["args"])
         if phone_number:
             doctor = {}

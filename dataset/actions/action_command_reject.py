@@ -4,7 +4,7 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import is_admin_group
-from actions.utils.command import extract_command
+from actions.utils.command import extract_doctor_command
 from actions.utils.doctor import ONBOARDING_STATUS_REJECTED, get_doctor, update_doctor
 
 
@@ -23,7 +23,7 @@ class ActionCommandReject(Action):
             return []
 
         message_text = tracker.latest_message.get("text")
-        command = extract_command(message_text, True)
+        command = extract_doctor_command(message_text, True)
         if command:
             doctor_id = command["doctor_id"]
             reject_reason = command["args"]
