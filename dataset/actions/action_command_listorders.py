@@ -1,8 +1,5 @@
-import base64
 from datetime import datetime
-from io import BytesIO
 from typing import Any, Dict, List, Text
-from zipfile import ZipFile, ZIP_DEFLATED
 
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
@@ -57,30 +54,23 @@ class ActionCommandListOrders(Action):
                 }
             )
             if num_orders:
-                current_date_str = datetime.now(tz=SERVER_TZINFO).strftime(
-                    "%d-%m-%y_%H-%M%p"
-                )
+                current_date = datetime.now(tz=SERVER_TZINFO)
+                current_date_str = current_date.strftime("%d.%m.%y_%H.%M_%p")
                 optional_doctor_id = (
                     f"_{doctor_id}" if (_is_admin_group and doctor_id) else ""
                 )
                 file_name_base = f"orders{optional_doctor_id}_{current_date_str}"
                 file_name_csv = f"{file_name_base}.csv"
-                file_name_zip = f"{file_name_base}.zip"
                 orders_csv_list = [format_order_header_for_csv()]
                 for o in orders:
                     orders_csv_list.append(format_order_for_csv(o))
                 orders_csv = "\n".join(orders_csv_list)
-                f = BytesIO()
-                z = ZipFile(f, mode="w", compression=ZIP_DEFLATED)
-                z.writestr(file_name_csv, str.encode(orders_csv, "utf-8"))
-                z.close()
-                bytes = f.getvalue()
-                base64_str = base64.b64encode(bytes).decode("ascii")
                 dispatcher.utter_message(
                     json_message={
-                        "zip": base64_str,
-                        "zip_file_name": file_name_zip,
-                        "caption": "List of orders",
+                        "document": orders_csv,
+                        "document_file_type": "text/csv",
+                        "document_file_name": file_name_csv,
+                        "caption": f"Orders{(' for ' + optional_doctor_id) if optional_doctor_id else ''} on {current_date_str}.",
                     }
                 )
         else:
