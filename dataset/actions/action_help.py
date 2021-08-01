@@ -27,7 +27,7 @@ class ActionHelp(Action):
                 + "/deletespeciality <SPECIALITY> - delete a speciality\n"
                 + "/approve <DOCTOR ID> - approve a doctor\n"
                 + "/reject <DOCTOR ID> <REASON> - reject a doctor\n"
-                + "/listdoctors <SPECIALITY> - list all doctors for a speciality\n"
+                + "/listdoctors <SPECIALITY>[OPTIONAL] <LISTING STATUS>[OPTIONAL] <ONBOARDING STATUS>[OPTIONAL] - list all doctors based on speciality, listing status or onboarding status (any one filter)\n"
                 + "\n"
                 + "Additional commands to update doctor profiles:\n"
                 + "\n"
