@@ -67,6 +67,7 @@ class ActionCreateOrder(Action):
         order_metadata = {
             "patient": patient,
             "doctor": doctor,
+            "appointment_datetime": appointment_datetime,
         }
 
         update_order(order_id, payment_link=payment_link, metadata=order_metadata)
