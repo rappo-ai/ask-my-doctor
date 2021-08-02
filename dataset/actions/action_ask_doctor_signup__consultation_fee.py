@@ -19,12 +19,13 @@ class ActionAskDoctorSignupConsultationFee(Action):
 
         doctor_commission_rate = get_doctor_commission_rate()
         text = (
-            f"What is your consultation fee in Rupees?\n"
+            "What is your consultation fee in Rupees?\n"
             + "\n"
-            + f"Please note the following:\n"
+            + "Please note the following:\n"
             + "\n"
-            + f"- enter a number in multiples of 50 (for example 350 for Rs. 350)\n"
-            + f"- we charge a {doctor_commission_rate}% commission on the consultation fee you provide\n"
+            + "- enter a number in multiples of 50 (for example 350 for Rs. 350)\n"
+            + "- Thedal doesn't charge any commission on the consultation fee you provide\n"
+            + "- Thedal bears the cost of payment gateway to the tune of 2-3%\n"
         )
         json_message = {"text": text}
         dispatcher.utter_message(json_message=json_message)
