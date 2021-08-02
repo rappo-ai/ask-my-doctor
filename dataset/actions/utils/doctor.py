@@ -1,4 +1,3 @@
-from copy import deepcopy
 from bson.objectid import ObjectId
 from datetime import datetime
 from pymongo import ASCENDING, DESCENDING
@@ -140,15 +139,14 @@ def is_approved_and_activated_doctor(doctor_id) -> bool:
 
 def add_doctor(doctor: Dict):
     lazy_init()
-    doctor_copy = deepcopy(doctor)
     current_date = datetime.now(tz=SERVER_TZINFO)
-    doctor_copy["creation_ts"] = current_date.timestamp()
-    doctor_copy["creation_date"] = current_date.isoformat()
-    doctor_copy["last_update_ts"] = current_date.timestamp()
-    doctor_copy["last_update_date"] = current_date.isoformat()
-    doctor_copy["rank"] = MAX_DOCTOR_RANK
-    doctor_copy["rank_last_updated_ts"] = current_date.timestamp()
-    return db.doctor.insert_one(doctor_copy).inserted_id
+    doctor["creation_ts"] = current_date.timestamp()
+    doctor["creation_date"] = current_date.isoformat()
+    doctor["last_update_ts"] = current_date.timestamp()
+    doctor["last_update_date"] = current_date.isoformat()
+    doctor["rank"] = MAX_DOCTOR_RANK
+    doctor["rank_last_updated_ts"] = current_date.timestamp()
+    return db.doctor.insert_one(doctor).inserted_id
 
 
 def get_available_time_slots(doctor_id, date: Text):
@@ -268,11 +266,10 @@ def print_doctor_summary(doctor: Dict):
 
 def update_doctor(doctor: Dict):
     lazy_init()
-    doctor_copy = deepcopy(doctor)
     current_date = datetime.now(tz=SERVER_TZINFO)
-    doctor_copy["last_update_ts"] = current_date.timestamp()
-    doctor_copy["last_update_date"] = current_date.isoformat()
-    db.doctor.update_one({"_id": doctor_copy.get("_id")}, {"$set": doctor_copy})
+    doctor["last_update_ts"] = current_date.timestamp()
+    doctor["last_update_date"] = current_date.isoformat()
+    db.doctor.update_one({"_id": doctor.get("_id")}, {"$set": doctor})
 
 
 def get_doctor_command_help(is_admin: bool = False):
