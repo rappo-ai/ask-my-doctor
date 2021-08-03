@@ -19,6 +19,7 @@ class ActionResetDoctorSignupForm(Action):
         return [
             SlotSet("doctor_signup__name", None),
             SlotSet("doctor_signup__number", None),
+            SlotSet("doctor_signup__gmail_id", None),
             SlotSet("doctor_signup__photo", None),
             SlotSet("doctor_signup__speciality", None),
             SlotSet("doctor_signup__description", None),
