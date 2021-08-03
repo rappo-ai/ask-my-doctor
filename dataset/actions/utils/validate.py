@@ -55,12 +55,17 @@ def validate_description(description: Text):
     return None
 
 
-def validate_email(email: Text):
+def validate_email(email: Text, domain: Text = None):
     test_str = email and email.strip()
     if test_str and re.search(
         r"^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$",
         test_str,
     ):
+        if domain:
+            email_components = test_str.split("@", 2)
+            email_domain = len(email_components) == 2 and email_components[1]
+            if email_domain != domain:
+                return None
         return test_str
     return None
 

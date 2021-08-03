@@ -1,11 +1,14 @@
 from bson.objectid import ObjectId
 from datetime import datetime
+from pymongo import ASCENDING, DESCENDING
 from typing import Dict, Text
 
 from actions.db.store import db
 from actions.utils.admin_config import get_advance_appointment_days
+from actions.utils.branding import get_bot_support_username
 from actions.utils.debug import is_debug_env
 from actions.utils.date import (
+    SERVER_TZINFO,
     generate_time_slots_for_date,
     get_available_dates_for_weekly_slots,
     print_weekly_slots,
@@ -17,16 +20,24 @@ ONBOARDING_STATUS_REJECTED = "rejected"
 ONBOARDING_STATUS_SIGNUP = "signup"
 LISTING_STATUS_ENABLED = "enabled"
 LISTING_STATUS_DISABLED = "disabled"
+MAX_DOCTOR_RANK = 9999999
+
+db.doctor.create_index([("rank_last_updated_ts", DESCENDING), ("rank", ASCENDING)])
 
 
 def lazy_init():
     if is_debug_env() and not db.doctor.find_one(
         {"listing_status": LISTING_STATUS_ENABLED}
     ):
+        current_date = datetime.now(tz=SERVER_TZINFO)
         db.doctor.insert_many(
             [
                 {
                     "_id": ObjectId(),
+                    "creation_ts": current_date.timestamp(),
+                    "creation_date": current_date.isoformat(),
+                    "last_update_ts": current_date.timestamp(),
+                    "last_update_date": current_date.isoformat(),
                     "name": "Dr. Murali",
                     "speciality": "General Surgeon",
                     "fee": 600,
@@ -45,9 +56,15 @@ def lazy_init():
                     "user_id": "1",
                     "onboarding_status": ONBOARDING_STATUS_APPROVED,
                     "listing_status": LISTING_STATUS_ENABLED,
+                    "rank": MAX_DOCTOR_RANK,
+                    "rank_last_updated_ts": current_date.timestamp(),
                 },
                 {
                     "_id": ObjectId(),
+                    "creation_ts": current_date.timestamp(),
+                    "creation_date": current_date.isoformat(),
+                    "last_update_ts": current_date.timestamp(),
+                    "last_update_date": current_date.isoformat(),
                     "name": "Dr. Lata",
                     "speciality": "Paediatrician",
                     "fee": 400,
@@ -66,9 +83,15 @@ def lazy_init():
                     "user_id": "2",
                     "onboarding_status": ONBOARDING_STATUS_APPROVED,
                     "listing_status": LISTING_STATUS_ENABLED,
+                    "rank": MAX_DOCTOR_RANK,
+                    "rank_last_updated_ts": current_date.timestamp(),
                 },
                 {
                     "_id": ObjectId(),
+                    "creation_ts": current_date.timestamp(),
+                    "creation_date": current_date.isoformat(),
+                    "last_update_ts": current_date.timestamp(),
+                    "last_update_date": current_date.isoformat(),
                     "name": "Dr. Asha",
                     "speciality": "Gynaecologist",
                     "fee": 700,
@@ -87,6 +110,8 @@ def lazy_init():
                     "user_id": "3",
                     "onboarding_status": ONBOARDING_STATUS_APPROVED,
                     "listing_status": LISTING_STATUS_ENABLED,
+                    "rank": MAX_DOCTOR_RANK,
+                    "rank_last_updated_ts": current_date.timestamp(),
                 },
             ]
         )
@@ -114,6 +139,13 @@ def is_approved_and_activated_doctor(doctor_id) -> bool:
 
 def add_doctor(doctor: Dict):
     lazy_init()
+    current_date = datetime.now(tz=SERVER_TZINFO)
+    doctor["creation_ts"] = current_date.timestamp()
+    doctor["creation_date"] = current_date.isoformat()
+    doctor["last_update_ts"] = current_date.timestamp()
+    doctor["last_update_date"] = current_date.isoformat()
+    doctor["rank"] = MAX_DOCTOR_RANK
+    doctor["rank_last_updated_ts"] = current_date.timestamp()
     return db.doctor.insert_one(doctor).inserted_id
 
 
@@ -153,7 +185,9 @@ def get_doctors(
         query.update({"onboarding_status": onboarding_status})
     if listing_status:
         query.update({"listing_status": listing_status})
-    return db.doctor.find(query)
+    return db.doctor.find(query).sort(
+        [("rank_last_updated_ts", DESCENDING), ("rank", ASCENDING)]
+    )
 
 
 def get_time_slot_filter_for_doctor(doctor_id):
@@ -191,6 +225,7 @@ def print_doctor_profile(
         "\n"
         + f"Name: {doctor.get('name')}\n"
         + f"Phone Number: {doctor.get('phone_number')}\n"
+        + f"Gmail ID: {doctor.get('gmail_id')}\n"
         + f"Speciality: {doctor.get('speciality')}\n"
         + f"Description: {doctor.get('description')}\n"
         + f"Consultation Fee: {doctor.get('fee')}\n"
@@ -232,27 +267,31 @@ def print_doctor_summary(doctor: Dict):
 
 def update_doctor(doctor: Dict):
     lazy_init()
+    current_date = datetime.now(tz=SERVER_TZINFO)
+    doctor["last_update_ts"] = current_date.timestamp()
+    doctor["last_update_date"] = current_date.isoformat()
     db.doctor.update_one({"_id": doctor.get("_id")}, {"$set": doctor})
 
 
 def get_doctor_command_help(is_admin: bool = False):
-    doctor_id_arg = (is_admin and "<DOCTOR ID> ") or ""
+    doctor_id_arg = (is_admin and " <DOCTOR ID>") or ""
     command_help = (
-        f"/profile {doctor_id_arg}- view profile\n"
-        + f"/activate {doctor_id_arg}- activate listing\n"
-        + f"/deactivate {doctor_id_arg}- deactivate listing\n"
-        + f"/setname {doctor_id_arg}<NAME> - update name\n"
-        + f"/setphoto {doctor_id_arg}- update profile photo by replying to image message\n"
-        + f"/setphonenumber {doctor_id_arg}<PHONE NUMBER>- update phone number\n"
-        + f"/setspeciality {doctor_id_arg}<SPECIALITY> - update speciality\n"
-        + f"/setdescription {doctor_id_arg}<DESCRIPTION> - update description\n"
-        + f"/settimeslots {doctor_id_arg}<TIME SLOT LIST> - update available time slots for the upcoming week\n"
-        + f"/setfee {doctor_id_arg}<CONSULTATION FEE> - update consultation fee\n"
+        f"/profile{doctor_id_arg} - view profile\n"
+        + f"/activate{doctor_id_arg} - activate listing\n"
+        + f"/deactivate{doctor_id_arg} - deactivate listing\n"
+        + f"/listorders{(doctor_id_arg + '[OPTIONAL]') if doctor_id_arg else ''} - list all orders as csv file\n"
+        + f"/setname{doctor_id_arg} <NAME> - update name\n"
+        + f"/setphoto{doctor_id_arg} - update profile photo by replying to image message\n"
+        + f"/setphonenumber{doctor_id_arg} <PHONE NUMBER> - update phone number\n"
+        + f"/setspeciality{doctor_id_arg} <SPECIALITY> - update speciality\n"
+        + f"/setdescription{doctor_id_arg} <DESCRIPTION> - update description\n"
+        + f"/settimeslots{doctor_id_arg} <TIME SLOT LIST> - update available time slots for the upcoming week\n"
+        + f"/setfee{doctor_id_arg} <CONSULTATION FEE> - update consultation fee\n"
     )
     if not is_admin:
         command_help = command_help + (
             "/setgoogleid - update Google ID for meetings\n"
             + "\n"
-            + "To update your bank account details or for any other queries, please contact the admin @askmydoctorsupport.\n"
+            + f"To update your bank account details or Gmail id, or for any other queries, please contact the admin {get_bot_support_username()}.\n"
         )
     return command_help

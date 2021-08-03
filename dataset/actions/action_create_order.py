@@ -53,7 +53,6 @@ class ActionCreateOrder(Action):
         payment_description = f"Consultation fee for {doctor.get('name', '')}"
 
         patient: Dict = get_patient_for_user_id(user_id)
-        patient.pop("_id", None)
 
         payment_link: Dict = create_payment_link(
             amount_rupees=cart_amount,
@@ -65,7 +64,11 @@ class ActionCreateOrder(Action):
             order_id=order_id,
         )
 
-        order_metadata = {"patient": patient}
+        order_metadata = {
+            "patient": patient,
+            "doctor": doctor,
+            "appointment_datetime": appointment_datetime,
+        }
 
         update_order(order_id, payment_link=payment_link, metadata=order_metadata)
         update_order_in_spreadsheet(get_order(order_id))

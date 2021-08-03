@@ -3,6 +3,7 @@ from bson.objectid import ObjectId
 from datetime import datetime, timedelta
 import json
 import logging
+from pymongo import DESCENDING
 import requests
 from requests.structures import CaseInsensitiveDict
 from typing import Dict, Optional, Text
@@ -19,8 +20,12 @@ logger = logging.getLogger(__name__)
 
 
 def create_order(user_id: Text, cart: Dict, timeslot_lock_id: ObjectId = None):
+    current_date = datetime.now(tz=SERVER_TZINFO)
     order = {
-        "creation_ts": datetime.now(tz=SERVER_TZINFO).isoformat(),
+        "creation_ts": current_date.timestamp(),
+        "creation_date": current_date.isoformat(),
+        "last_update_ts": current_date.timestamp(),
+        "last_update_date": current_date.isoformat(),
         "user_id": user_id,
         "cart": cart,
     }
@@ -79,8 +84,26 @@ def get_order(id) -> Dict:
     return db.order.find_one({"_id": ObjectId(id)})
 
 
-def get_latest_order_for_user_id(user_id):
-    cursor = db.order.find({"user_id": user_id}).sort({"_id": 1}).limit(1)
+def get_orders(doctor_id) -> Dict:
+    query = {}
+    if doctor_id:
+        query["metadata.doctor._id"] = ObjectId(doctor_id)
+    return db.order.find(query).sort("_id", DESCENDING)
+
+
+def get_latest_open_order_for_user_id(user_id):
+    cursor = (
+        db.order.find(
+            {
+                "$and": [
+                    {"user_id": user_id},
+                    {"payment_status.razorpay_payment_link_status": {"$ne": "paid"}},
+                ]
+            }
+        )
+        .sort("_id", DESCENDING)
+        .limit(1)
+    )
     for doc in cursor:
         return doc
     return None
@@ -95,7 +118,11 @@ def update_order(
     metadata: Optional[Dict] = None,
     timeslot_lock_id: Optional[ObjectId] = None,
 ):
-    order = {}
+    current_date = datetime.now(tz=SERVER_TZINFO)
+    order = {
+        "last_update_ts": current_date.timestamp(),
+        "last_update_date": current_date.isoformat(),
+    }
 
     if cart:
         order["cart"] = cart
@@ -116,3 +143,69 @@ def update_order(
         order["timeslot_lock_id"] = timeslot_lock_id
 
     db.order.update_one({"_id": ObjectId(id)}, {"$set": order})
+
+
+def format_order_header_for_csv() -> Text:
+    header_cols = [
+        "Order ID",
+        "Creation Timestamp",
+        "Creation Date",
+        "Last Update Timestamp",
+        "Last Update Date",
+        "Patient ID",
+        "Patient Name",
+        "Patient Age",
+        "Patient Phone",
+        "Patient Email",
+        "Patient User ID",
+        "Doctor ID",
+        "Doctor Name",
+        "Doctor Phone Number",
+        "Doctor Speciality",
+        "Doctor User ID",
+        "Appointment Date",
+        "Meeting ID",
+        "Meeting Link Url",
+        "Payment Link ID",
+        "Payment Link Url",
+        "Payment ID",
+        "Payment Link Status",
+        "Payment Amount",
+        "Payment Creation Timestamp",
+        "Payment Method",
+        "Payment Status",
+    ]
+    return ",".join(header_cols)
+
+
+def format_order_for_csv(order: Dict) -> Text:
+    order_cols = [
+        f"{get_json_key(order, '_id')}",
+        f"{get_json_key(order, 'creation_ts')}",
+        f"{get_json_key(order, 'creation_date')}",
+        f"{get_json_key(order, 'last_update_ts')}",
+        f"{get_json_key(order, 'last_update_date')}",
+        f"{get_json_key(order, 'metadata.patient._id')}",
+        f"{get_json_key(order, 'metadata.patient.name')}",
+        f"{get_json_key(order, 'metadata.patient.age')}",
+        f"{get_json_key(order, 'metadata.patient.phone')}",
+        f"{get_json_key(order, 'metadata.patient.email')}",
+        f"{get_json_key(order, 'metadata.patient.user_id')}",
+        f"{get_json_key(order, 'metadata.doctor._id')}",
+        f"{get_json_key(order, 'metadata.doctor.name')}",
+        f"{get_json_key(order, 'metadata.doctor.phone_number')}",
+        f"{get_json_key(order, 'metadata.doctor.speciality')}",
+        f"{get_json_key(order, 'metadata.doctor.user_id')}",
+        f"{get_json_key(order, 'metadata.appointment_datetime')}",
+        f"{get_json_key(order, 'meeting.id')}",
+        f"{get_json_key(order, 'meeting.hangoutLink')}",
+        f"{get_json_key(order, 'payment_link.metadata.id')}",
+        f"{get_json_key(order, 'payment_link.metadata.short_url')}",
+        f"{get_json_key(order, 'payment_status.razorpay_payment_id')}",
+        f"{get_json_key(order, 'payment_status.razorpay_payment_link_status')}",
+        f"{get_json_key(order, 'payment_status.payment_details.amount')}",
+        f"{get_json_key(order, 'payment_status.payment_details.created_at')}",
+        f"{get_json_key(order, 'payment_status.payment_details.method')}",
+        f"{get_json_key(order, 'payment_status.payment_details.status')}",
+    ]
+    return ",".join(order_cols)

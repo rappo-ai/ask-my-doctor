@@ -23,16 +23,13 @@ def lazy_init():
             {
                 "_id": ObjectId(ADMIN_CONFID_OBJECT_ID),
                 "super_admins": [],
+                "admin_group_id": "",
                 "advance_appointment_days": 7,
                 "booking_advance_time_minutes": 60,
                 "payment_link_expiry_time_seconds": 900,
                 "max_follow_up_seconds": 2 * 24 * 3600,
                 "doctor_commission_rate": 10,
                 "meeting_duration_minutes": 15,
-                "payment_route_config": {
-                    "account_number": "acc_HLeMvH2h0YvRvT",
-                    "commission": 5,
-                },
                 "specialities": specialities,
             },
         )

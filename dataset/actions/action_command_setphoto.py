@@ -1,10 +1,10 @@
-import re
-from typing import Any, AnyStr, Match, Text, Dict, List
+from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import get_admin_group_id, is_admin_group
+from actions.utils.command import extract_doctor_command
 from actions.utils.doctor import (
     get_doctor,
     get_doctor_card,
@@ -33,21 +33,18 @@ class ActionCommandSetPhoto(Action):
         command_user = "ADMIN" if _is_admin_group else "DOCTOR"
         message_text = tracker.latest_message.get("text")
         metadata = tracker.latest_message.get("metadata")
-        regex = r"^(/\w+)(\s+#(\w+))?$"
-        if _is_admin_group:
-            regex = r"^(/\w+)(\s+#(\w+))$"
-        matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
-        photo = validate_photo(
+        command = extract_doctor_command(message_text, _is_admin_group)
+        photo = command and validate_photo(
             metadata,
             min_size=(256, 256),
             target_size=(512, 512),
             target_chat_id=tracker.sender_id,
         )
-        if matches and photo:
+        if photo:
             doctor = {}
             doctor_id = ""
             if _is_admin_group:
-                doctor_id = matches.group(3)
+                doctor_id = command["doctor_id"]
                 doctor = get_doctor(doctor_id)
             else:
                 doctor = get_doctor_for_user_id(tracker.sender_id)

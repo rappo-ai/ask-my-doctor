@@ -1,19 +1,27 @@
+from bson import ObjectId
 from typing import Dict
-import datetime
-import json
+from datetime import datetime
 import logging
 import os
 
 from actions.utils.date import SERVER_TZINFO
-from actions.utils.json import get_json_key
 
 logger = logging.getLogger(__name__)
 
-MOCK_PAYMENT_CREATION_TS = 1626002365
+
+def get_mock_payment_creation_ts():
+    return datetime.now(tz=SERVER_TZINFO).timestamp()
 
 
 def get_order_id_for_payment_status(payment_status: Dict):
-    return payment_status.get("razorpay_payment_link_reference_id", "")
+    razorpay_payment_link_reference_id = payment_status.get(
+        "razorpay_payment_link_reference_id"
+    )
+    return (
+        ObjectId(razorpay_payment_link_reference_id)
+        if razorpay_payment_link_reference_id
+        else None
+    )
 
 
 def fetch_payment_details(payment_status: Dict):
@@ -26,7 +34,7 @@ def fetch_payment_details(payment_status: Dict):
         )
         return {
             "amount": 1000,
-            "created_at": MOCK_PAYMENT_CREATION_TS,
+            "created_at": get_mock_payment_creation_ts(),
             "method": "Credit Card",
             "status": "paid",
         }
@@ -42,8 +50,8 @@ def fetch_payment_details(payment_status: Dict):
 def print_payment_status(payment_status: Dict):
     payment_details = payment_status.get("payment_details", {})
     amount_rupees = payment_details.get("amount", 0) / 100
-    date = datetime.datetime.fromtimestamp(
-        payment_details.get("created_at", MOCK_PAYMENT_CREATION_TS), SERVER_TZINFO
+    date = datetime.fromtimestamp(
+        payment_details.get("created_at", get_mock_payment_creation_ts()), SERVER_TZINFO
     ).strftime("%d-%m-%Y %H:%M:%S")
     mode = payment_details.get("method", "")
     status = payment_status.get("razorpay_payment_link_status")

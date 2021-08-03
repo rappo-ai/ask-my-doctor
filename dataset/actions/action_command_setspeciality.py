@@ -1,5 +1,4 @@
-import re
-from typing import Any, AnyStr, Match, Text, Dict, List
+from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
@@ -9,6 +8,7 @@ from actions.utils.admin_config import (
     get_specialities,
     is_admin_group,
 )
+from actions.utils.command import extract_doctor_command
 from actions.utils.doctor import (
     get_doctor,
     get_doctor_card,
@@ -36,16 +36,13 @@ class ActionCommandSetSpeciality(Action):
 
         command_user = "ADMIN" if _is_admin_group else "DOCTOR"
         message_text = tracker.latest_message.get("text")
-        regex = r"^(/\w+)(\s+#(\w+))?(.+)$"
-        if _is_admin_group:
-            regex = r"^(/\w+)(\s+#(\w+))(.+)$"
-        matches: Match[AnyStr @ re.search] = re.search(regex, message_text)
-        speciality = matches and validate_speciality(matches.group(4))
-        if matches and speciality:
+        command = extract_doctor_command(message_text, _is_admin_group)
+        speciality = command and validate_speciality(command["args"])
+        if speciality:
             doctor = {}
             doctor_id = ""
             if _is_admin_group:
-                doctor_id = matches.group(3)
+                doctor_id = command["doctor_id"]
                 doctor = get_doctor(doctor_id)
             else:
                 doctor = get_doctor_for_user_id(tracker.sender_id)

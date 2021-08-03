@@ -4,12 +4,12 @@ from datetime import datetime, timedelta
 import json
 import logging
 import os
-from pytz import timezone
 import requests
 from requests.structures import CaseInsensitiveDict
 from typing import Text
 
 from actions.utils.admin_config import get_payment_route_config
+from actions.utils.branding import get_bot_display_name
 from actions.utils.date import SERVER_TZINFO
 from actions.utils.host import get_host_url
 
@@ -44,12 +44,7 @@ def create_payment_link(
     headers["Content-type"] = "application/json"
     headers["Authorization"] = "basic " + credential
 
-    payment_route_config = get_payment_route_config()
-    transfer_account_number = payment_route_config.get("account_number")
-    commission = payment_route_config.get("commission")
-    transfer_rate = (100 - commission) / 100
     amount_to_bill = amount_rupees * 100
-    amount_to_transfer = amount_rupees * transfer_rate * 100
     url_pay = get_host_url("/webhooks/telegram/payment_callback")
 
     request_data = {
@@ -66,18 +61,25 @@ def create_payment_link(
             "email": email,
         },
         "options": {
-            "order": {
-                "transfers": [
-                    {
-                        "account": transfer_account_number,
-                        "amount": amount_to_transfer,
-                        "currency": "INR",
-                    }
-                ]
-            },
-            "checkout": {"name": "AskMyDoctor"},
+            "checkout": {"name": get_bot_display_name()},
         },
     }
+
+    payment_route_config = get_payment_route_config()
+    if payment_route_config:
+        transfer_account_number = payment_route_config.get("account_number")
+        commission = payment_route_config.get("commission")
+        transfer_rate = (100 - commission) / 100
+        amount_to_transfer = amount_rupees * transfer_rate * 100
+        request_data["options"]["order"] = {
+            "transfers": [
+                {
+                    "account": transfer_account_number,
+                    "amount": amount_to_transfer,
+                    "currency": "INR",
+                }
+            ]
+        }
 
     if expire_by_seconds:
         EXTRA_SECONDS_FOR_REQUEST = 10

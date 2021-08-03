@@ -34,7 +34,9 @@ def generate_time_slots_for_date(
 ):
     date_datetime = date
     if isinstance(date, str):
-        date_datetime = datetime.strptime(date, APPOINTMENT_DATE_FORMAT)
+        date_datetime = SERVER_TZINFO.localize(
+            datetime.strptime(date, APPOINTMENT_DATE_FORMAT)
+        )
 
     weekday = date_datetime.weekday()
 
@@ -45,9 +47,7 @@ def generate_time_slots_for_date(
     now = datetime.now(tz=SERVER_TZINFO)
     for slot_dt in time_slots:
         is_booking_advance_time_elapsed = now > (
-            date_datetime.replace(
-                hour=slot_dt.hour, minute=slot_dt.minute, tzinfo=SERVER_TZINFO
-            )
+            date_datetime.replace(hour=slot_dt.hour, minute=slot_dt.minute)
             - timedelta(minutes=get_booking_advance_time_minutes())
         )
         if is_booking_advance_time_elapsed:
@@ -62,19 +62,21 @@ def generate_time_slots_for_date(
 def _generate_time_slots_for_ranges(time_slot_ranges: List, date_dt: datetime):
     time_slots = []
     for range in time_slot_ranges:
-        start_dt = datetime.strptime(range["start"], APPOINTMENT_TIME_FORMAT).replace(
-            year=date_dt.year,
-            month=date_dt.month,
-            day=date_dt.day,
-            microsecond=0,
-            tzinfo=SERVER_TZINFO,
+        start_dt = SERVER_TZINFO.localize(
+            datetime.strptime(range["start"], APPOINTMENT_TIME_FORMAT).replace(
+                year=date_dt.year,
+                month=date_dt.month,
+                day=date_dt.day,
+                microsecond=0,
+            )
         )
-        end_dt = datetime.strptime(range["end"], APPOINTMENT_TIME_FORMAT).replace(
-            year=date_dt.year,
-            month=date_dt.month,
-            day=date_dt.day,
-            microsecond=0,
-            tzinfo=SERVER_TZINFO,
+        end_dt = SERVER_TZINFO.localize(
+            datetime.strptime(range["end"], APPOINTMENT_TIME_FORMAT).replace(
+                year=date_dt.year,
+                month=date_dt.month,
+                day=date_dt.day,
+                microsecond=0,
+            )
         )
         if end_dt.hour == 0 and end_dt.minute == 0:
             end_dt += timedelta(days=1)
