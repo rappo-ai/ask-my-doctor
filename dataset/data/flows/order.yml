@@ -2,50 +2,31 @@ version: "2.0"
 
 actions:
   - action_change_order
-  - action_confirm_order_invalid_input
   - action_confirm_order_details
   - action_create_order
+  - action_on_confirm_set
   - action_on_order_unlocked
   - action_payment_callback
+  - action_reset_confirm_form
 
 intents:
+  - EXTERNAL_change_order
+  - EXTERNAL_create_order
   - EXTERNAL_confirm_order_details
   - EXTERNAL_order_unlocked
   - EXTERNAL_payment_callback
 
 rules:
-  - rule: Confirm order details / affirm
+  - rule: Create new confirm order form
     condition:
       - slot_was_set:
           - chat_type: private
     steps:
       - intent: EXTERNAL_confirm_order_details
       - action: action_confirm_order_details
-      - intent: affirm
-      - action: action_create_order
-  - rule: Confirm order details / deny
-    condition:
-      - slot_was_set:
-          - chat_type: private
-    steps:
-      - intent: EXTERNAL_confirm_order_details
-      - action: action_confirm_order_details
-      - intent: deny
-      - action: action_change_order
-  - rule: Confirm order details / nlu_fallback
-    condition:
-      - slot_was_set:
-          - chat_type: private
-    steps:
-      - intent: EXTERNAL_confirm_order_details
-      - action: action_confirm_order_details
-      - or:
-        - intent: nlu_fallback
-        - intent: EXTERNAL_payment_callback
-        - intent: EXTERNAL_on_google_auth
-        - intent: EXT_patient_send_message
-        - intent: EXT_doctor_send_message
-      - action: action_confirm_order_invalid_input
+      - action: action_reset_confirm_form
+      - action: confirm_form
+      - active_loop: confirm_form
   - rule: Order unlocked
     condition:
       - slot_was_set:
@@ -60,3 +41,17 @@ rules:
     steps:
       - intent: EXTERNAL_payment_callback
       - action: action_payment_callback
+  - rule: Create order
+    condition:
+      - slot_was_set:
+          - chat_type: private
+    steps:
+      - intent: EXTERNAL_create_order
+      - action: action_create_order
+  - rule: Change order
+    condition:
+      - slot_was_set:
+          - chat_type: private
+    steps:
+      - intent: EXTERNAL_change_order
+      - action: action_change_order

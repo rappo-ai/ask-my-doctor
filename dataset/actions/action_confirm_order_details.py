@@ -1,6 +1,7 @@
 from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
+from rasa_sdk.events import SlotSet
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.cart import get_cart, print_cart
@@ -28,13 +29,9 @@ class ActionConfirmOrderDetails(Action):
             + f"Patient Details\n\n"
             + print_patient(patient)
             + "\n\n"
-            + f"Is this correct?"
         )
-        reply_markup = {
-            "keyboard": [["Yes", "No"]],
-            "resize_keyboard": True,
-        }
-        json_message = {"text": text, "reply_markup": reply_markup}
+        json_message = {"text": text}
         dispatcher.utter_message(json_message=json_message)
 
-        return []
+        events = [SlotSet("confirm_intent", "EXTERNAL_confirm_order_details")]
+        return events
