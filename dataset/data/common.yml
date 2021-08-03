@@ -18,7 +18,7 @@ forms:
         - type: from_text
 
 rules:
-  - rule: End new confirm patient form
+  - rule: End new confirm patient/order form
     condition:
       - active_loop: confirm_form
       - slot_was_set:
