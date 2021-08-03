@@ -38,6 +38,7 @@ actions:
 
   - action_ask_doctor_send_message__message_id
   - action_ask_doctor_signup__consultation_fee
+  - action_ask_doctor_signup__gmail_id
   - action_ask_doctor_signup__speciality
   - action_doctor_send_message
   - action_doctor_setgoogleauth
@@ -96,6 +97,8 @@ forms:
       doctor_signup__name:
         - type: from_text
       doctor_signup__number:
+        - type: from_text
+      doctor_signup__gmail_id:
         - type: from_text
       doctor_signup__photo:
         - type: from_text
@@ -160,6 +163,8 @@ slots:
   doctor_signup__consultation_fee:
     type: text
   doctor_signup__description:
+    type: text
+  doctor_signup__gmail_id:
     type: text
   doctor_signup__name:
     type: text

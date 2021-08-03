@@ -40,6 +40,7 @@ class ActionNewDoctorSignup(Action):
         doctor["listing_status"] = LISTING_STATUS_DISABLED
         doctor["name"] = tracker.get_slot("doctor_signup__name")
         doctor["phone_number"] = tracker.get_slot("doctor_signup__number")
+        doctor["gmail_id"] = tracker.get_slot("doctor_signup__gmail_id")
         doctor["photo"] = tracker.get_slot("doctor_signup__photo")
         doctor["speciality"] = tracker.get_slot("doctor_signup__speciality")
         doctor["description"] = tracker.get_slot("doctor_signup__description")

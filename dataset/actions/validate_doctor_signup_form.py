@@ -10,6 +10,7 @@ from actions.utils.validate import (
     validate_bank_account_number,
     validate_consulation_fee,
     validate_description,
+    validate_email,
     validate_name,
     validate_phone_number,
     validate_photo,
@@ -54,6 +55,24 @@ class ValidateDoctorSignupForm(FormValidationAction):
                 json_message={"text": "Phone number must be a 10-digit mobile number."}
             )
             return {"doctor_signup__number": None}
+
+    def validate_doctor_signup__gmail_id(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        gmail_id = validate_email(slot_value, "gmail.com")
+        if gmail_id:
+            return {"doctor_signup__gmail_id": gmail_id}
+        else:
+            dispatcher.utter_message(
+                json_message={
+                    "text": f"This email id is not a valid format or is not a gmail id. The email id must end in 'gmail.com'."
+                }
+            )
+            return {"doctor_signup__gmail_id": None}
 
     def validate_doctor_signup__photo(
         self,

@@ -225,6 +225,7 @@ def print_doctor_profile(
         "\n"
         + f"Name: {doctor.get('name')}\n"
         + f"Phone Number: {doctor.get('phone_number')}\n"
+        + f"Gmail ID: {doctor.get('gmail_id')}\n"
         + f"Speciality: {doctor.get('speciality')}\n"
         + f"Description: {doctor.get('description')}\n"
         + f"Consultation Fee: {doctor.get('fee')}\n"
@@ -291,6 +292,6 @@ def get_doctor_command_help(is_admin: bool = False):
         command_help = command_help + (
             "/setgoogleid - update Google ID for meetings\n"
             + "\n"
-            + f"To update your bank account details or for any other queries, please contact the admin {get_bot_support_username()}.\n"
+            + f"To update your bank account details or Gmail id, or for any other queries, please contact the admin {get_bot_support_username()}.\n"
         )
     return command_help
