@@ -40,7 +40,7 @@ class ActionAskAppointmentDate(Action):
         if not upcoming_dates:
             dispatcher.utter_message(
                 json_message={
-                    "text": f"There are no slots available for {doctor.get('name')}. Please check again tomorrow."
+                    "text": f"There are no slots available for {doctor.get('name')}. Please check again tomorrow.\n\nClick /menu to make a new booking."
                 }
             )
             return [ActiveLoop(None)]
