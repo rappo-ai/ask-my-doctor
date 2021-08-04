@@ -29,7 +29,7 @@ class ActionAskAppointmentTime(Action):
         if not is_approved_and_activated_doctor(doctor_id):
             dispatcher.utter_message(
                 json_message={
-                    "text": f"{doctor.get('name')} is currently unavailable. Please create a new booking with a different doctor."
+                    "text": f"{doctor.get('name')} is currently unavailable. Please create a new booking with a different doctor.\n\nClick /menu to make a new booking."
                 }
             )
             return [ActiveLoop(None)]
@@ -41,7 +41,7 @@ class ActionAskAppointmentTime(Action):
         if not availaible_time_slots:
             dispatcher.utter_message(
                 json_message={
-                    "text": f"There are no slots available for {doctor.get('name')}. Please check again tomorrow."
+                    "text": f"There are no slots available for {doctor.get('name')}. Please check again tomorrow.\n\nClick /menu to make a new booking."
                 }
             )
             return [ActiveLoop(None)]
