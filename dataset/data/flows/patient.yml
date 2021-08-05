@@ -3,10 +3,10 @@ version: "2.0"
 actions:
   - action_ask_patient_send_message__message_id
   - action_confirm_patient
-  - action_on_confirm_set
+  - action_on_yes_no_confirm_set
   - action_on_patient_set
   - action_patient_send_message
-  - action_reset_confirm_form
+  - action_reset_yes_no_confirm_form
   - action_reset_patient_form
   - action_reset_patient_send_message_form
   - action_set_patient
@@ -60,9 +60,9 @@ rules:
     steps:
       - intent: EXTERNAL_confirm_patient
       - action: action_confirm_patient
-      - action: action_reset_confirm_form
-      - action: confirm_form
-      - active_loop: confirm_form
+      - action: action_reset_yes_no_confirm_form
+      - action: yes_no_confirm_form
+      - active_loop: yes_no_confirm_form
   - rule: Create new patient form
     condition:
       - slot_was_set:

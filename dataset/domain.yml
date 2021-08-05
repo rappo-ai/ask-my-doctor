@@ -18,10 +18,10 @@ actions:
   - action_reset_appointment_form
   - validate_appointment_form
 
-  - action_ask_confirm__slot
-  - action_on_confirm_set
-  - action_reset_confirm_form
-  - validate_confirm_form
+  - action_ask_yes_no_confirm__user_input
+  - action_on_yes_no_confirm_set
+  - action_reset_yes_no_confirm_form
+  - validate_yes_no_confirm_form
 
   - action_ask_patient_send_message__message_id
   - action_confirm_patient
@@ -143,14 +143,14 @@ forms:
       - EXTERNAL_on_google_auth
       - EXT_patient_send_message
     required_slots: {}
-  confirm_form:
+  yes_no_confirm_form:
     ignored_intents:
       - EXTERNAL_payment_callback
       - EXTERNAL_on_google_auth
       - EXT_patient_send_message
       - EXT_doctor_send_message
     required_slots:
-      confirm__slot:
+      yes_no_confirm__user_input:
         - type: from_text
 
 session_config:
@@ -208,7 +208,11 @@ slots:
     type: text
   doctor_signup__speciality:
     type: text
-  confirm__slot:
+  yes_no_confirm__message:
     type: text
-  confirm_intent:
+  yes_no_confirm__no_intent:
+    type: text
+  yes_no_confirm__user_input:
+    type: text
+  yes_no_confirm__yes_intent:
     type: text

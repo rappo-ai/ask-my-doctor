@@ -7,11 +7,11 @@ from rasa_sdk.forms import FormValidationAction
 from rasa_sdk.types import DomainDict
 
 
-class ValidateConfirmForm(FormValidationAction):
+class ValidateYesNoConfirmForm(FormValidationAction):
     def name(self) -> Text:
-        return "validate_confirm_form"
+        return "validate_yes_no_confirm_form"
 
-    def validate_confirm__slot(
+    def validate_yes_no_confirm__user_input(
         self,
         slot_value: Any,
         dispatcher: CollectingDispatcher,
@@ -21,7 +21,7 @@ class ValidateConfirmForm(FormValidationAction):
 
         values = ["Yes", "No"]
         if slot_value in values:
-            return {"confirm__slot": slot_value}
+            return {"yes_no_confirm__user_input": slot_value}
         else:
             dispatcher.utter_message(json_message={"text": "Invalid input."})
-            return {"confirm__slot": None}
+            return {"yes_no_confirm__user_input": None}

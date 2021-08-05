@@ -5,9 +5,9 @@ from rasa_sdk.events import SlotSet
 from rasa_sdk.executor import CollectingDispatcher
 
 
-class ActionResetConfirmForm(Action):
+class ActionResetYesNoConfirmForm(Action):
     def name(self) -> Text:
-        return "action_reset_confirm_form"
+        return "action_reset_yes_no_confirm_form"
 
     def run(
         self,
@@ -16,4 +16,4 @@ class ActionResetConfirmForm(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
-        return [SlotSet("confirm__slot", None)]
+        return [SlotSet("yes_no_confirm__user_input", None)]

@@ -4,10 +4,10 @@ actions:
   - action_change_order
   - action_confirm_order_details
   - action_create_order
-  - action_on_confirm_set
+  - action_on_yes_no_confirm_set
   - action_on_order_unlocked
   - action_payment_callback
-  - action_reset_confirm_form
+  - action_reset_yes_no_confirm_form
 
 intents:
   - EXTERNAL_change_order
@@ -24,9 +24,9 @@ rules:
     steps:
       - intent: EXTERNAL_confirm_order_details
       - action: action_confirm_order_details
-      - action: action_reset_confirm_form
-      - action: confirm_form
-      - active_loop: confirm_form
+      - action: action_reset_yes_no_confirm_form
+      - action: yes_no_confirm_form
+      - active_loop: yes_no_confirm_form
   - rule: Order unlocked
     condition:
       - slot_was_set:
