@@ -289,6 +289,10 @@ class TelegramInput(InputChannel):
         return None
 
     @staticmethod
+    def _get_chat_type(message: Message) -> Text:
+        return message and message.chat and message.chat.type
+
+    @staticmethod
     def _is_edited_message(message: Update) -> bool:
         return message and (message.edited_message is not None)
 
@@ -478,6 +482,15 @@ class TelegramInput(InputChannel):
                     else:
                         msg = update.message
                         message_type = self._get_message_type(msg)
+                        chat_type = self._get_chat_type(msg)
+                        # skip channels
+                        if chat_type not in ["private", "group", "supergroup"]:
+                            return response.text("success")
+                        # ignore non-command messages in a group
+                        if chat_type in ["group", "supergroup"] and not getattr(
+                            msg, "text", ""
+                        ).startswith("/"):
+                            return response.text("success")
                         if message_type == "text":
                             text = msg.text
                             if text.startswith("/"):
