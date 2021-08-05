@@ -21,12 +21,19 @@ class ActionConfirmPatient(Action):
         events: List[Dict[Text, Any]] = []
 
         user_id = tracker.sender_id
+
         patient: Dict = get_patient_for_user_id(user_id)
         if patient:
+            events = [
+                SlotSet("yes_no_confirm__yes_intent", "EXTERNAL_confirm_order_details"),
+                SlotSet("yes_no_confirm__no_intent", "EXTERNAL_update_patient"),
+                SlotSet("yes_no_confirm__message", "Is this correct ?"),
+            ]
+
             text = f"Patient Details\n\n" + print_patient(patient) + "\n\n"
             json_message = {"text": text}
             dispatcher.utter_message(json_message=json_message)
-            events = [SlotSet("confirm_intent", "EXTERNAL_confirm_patient")]
+
         else:
             events = [
                 ActionExecuted("action_listen"),

@@ -33,5 +33,9 @@ class ActionConfirmOrderDetails(Action):
         json_message = {"text": text}
         dispatcher.utter_message(json_message=json_message)
 
-        events = [SlotSet("confirm_intent", "EXTERNAL_confirm_order_details")]
+        events = [
+            SlotSet("yes_no_confirm__yes_intent", "EXTERNAL_create_order"),
+            SlotSet("yes_no_confirm__no_intent", "EXTERNAL_change_order"),
+            SlotSet("yes_no_confirm__message", "Is this correct ?"),
+        ]
         return events
