@@ -16,11 +16,13 @@ class ActionOnPatientSet(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
-        return [
+        events = [
             ActionExecuted("action_listen"),
             UserUttered(
-                text="/EXTERNAL_confirm_order_details",
-                parse_data={"intent": {"name": "EXTERNAL_confirm_order_details"}},
+                text="/EXTERNAL_confirm_patient",
+                parse_data={"intent": {"name": "EXTERNAL_confirm_patient"}},
                 input_channel="telegram",
             ),
         ]
+
+        return events

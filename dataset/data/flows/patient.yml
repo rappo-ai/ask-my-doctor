@@ -3,7 +3,6 @@ version: "2.0"
 actions:
   - action_ask_patient_send_message__message_id
   - action_confirm_patient
-  - action_confirm_patient_invalid_input
   - action_on_patient_set
   - action_patient_send_message
   - action_reset_patient_form
@@ -14,6 +13,11 @@ actions:
 
 forms:
   patient_form:
+    ignored_intents:
+      - EXTERNAL_payment_callback
+      - EXTERNAL_on_google_auth
+      - EXT_patient_send_message
+      - EXT_doctor_send_message
     required_slots:
       patient__name:
         - type: from_text
@@ -24,6 +28,10 @@ forms:
       patient__email:
         - type: from_text
   patient_send_message_form:
+    ignored_intents:
+      - EXTERNAL_payment_callback
+      - EXTERNAL_on_google_auth
+      - EXT_doctor_send_message
 
 intents:
   - EXTERNAL_confirm_patient
@@ -43,36 +51,16 @@ responses:
     - text: Please enter the patient's email id.
 
 rules:
-  - rule: Confirm existing patient details / affirm
+  - rule: Create new confirm patient form
     condition:
       - slot_was_set:
           - chat_type: private
     steps:
       - intent: EXTERNAL_confirm_patient
+      - action: action_reset_yes_no_confirm_form
       - action: action_confirm_patient
-      - intent: affirm
-      - action: action_on_patient_set
-  - rule: Confirm existing patient details / deny
-    condition:
-      - slot_was_set:
-          - chat_type: private
-    steps:
-      - intent: EXTERNAL_confirm_patient
-      - action: action_confirm_patient
-      - intent: deny
-      - action: action_reset_patient_form
-      - action: utter_update_patient_start
-      - action: patient_form
-      - active_loop: patient_form
-  - rule: Confirm existing patient details / nlu fallback
-    condition:
-      - slot_was_set:
-          - chat_type: private
-    steps:
-      - intent: EXTERNAL_confirm_patient
-      - action: action_confirm_patient
-      - intent: nlu_fallback
-      - action: action_confirm_patient_invalid_input
+      - action: yes_no_confirm_form
+      - active_loop: yes_no_confirm_form
   - rule: Create new patient form
     condition:
       - slot_was_set:
