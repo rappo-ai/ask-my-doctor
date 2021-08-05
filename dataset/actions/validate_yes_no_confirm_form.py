@@ -23,5 +23,7 @@ class ValidateYesNoConfirmForm(FormValidationAction):
         if slot_value in values:
             return {"yes_no_confirm__user_input": slot_value}
         else:
-            dispatcher.utter_message(json_message={"text": "Invalid input."})
+            dispatcher.utter_message(
+                json_message={"text": "Invalid input. Please enter Yes or No."}
+            )
             return {"yes_no_confirm__user_input": None}
