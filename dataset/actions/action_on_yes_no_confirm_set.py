@@ -17,25 +17,17 @@ class ActionOnYesNoConfirmSet(Action):
     ) -> List[Dict[Text, Any]]:
 
         user_input = tracker.get_slot("yes_no_confirm__user_input")
-        yes_intent = tracker.get_slot("yes_no_confirm__yes_intent")
-        no_intent = tracker.get_slot("yes_no_confirm__no_intent")
         if user_input == "Yes":
-            events = [
-                ActionExecuted("action_listen"),
-                UserUttered(
-                    text=f"/{yes_intent}",
-                    parse_data={"intent": {"name": yes_intent}},
-                    input_channel="telegram",
-                ),
-            ]
-        elif user_input == "No":
-            events = [
-                ActionExecuted("action_listen"),
-                UserUttered(
-                    text=f"/{no_intent}",
-                    parse_data={"intent": {"name": no_intent}},
-                    input_channel="telegram",
-                ),
-            ]
+            intent = tracker.get_slot("yes_no_confirm__yes_intent")
+        else:
+            intent = tracker.get_slot("yes_no_confirm__no_intent")
 
+        events = [
+            ActionExecuted("action_listen"),
+            UserUttered(
+                text=f"/{intent}",
+                parse_data={"intent": {"name": intent}},
+                input_channel="telegram",
+            ),
+        ]
         return events

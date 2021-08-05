@@ -16,4 +16,7 @@ class ActionResetYesNoConfirmForm(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
-        return [SlotSet("yes_no_confirm__user_input", None)]
+        return [
+            SlotSet("yes_no_confirm__user_input", None),
+            SlotSet("yes_no_confirm__message", None),
+        ]

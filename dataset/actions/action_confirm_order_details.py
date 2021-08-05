@@ -36,5 +36,6 @@ class ActionConfirmOrderDetails(Action):
         events = [
             SlotSet("yes_no_confirm__yes_intent", "EXTERNAL_create_order"),
             SlotSet("yes_no_confirm__no_intent", "EXTERNAL_change_order"),
+            SlotSet("yes_no_confirm__message", "Is this correct ?"),
         ]
         return events

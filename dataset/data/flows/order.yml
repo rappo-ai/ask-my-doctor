@@ -4,10 +4,8 @@ actions:
   - action_change_order
   - action_confirm_order_details
   - action_create_order
-  - action_on_yes_no_confirm_set
   - action_on_order_unlocked
   - action_payment_callback
-  - action_reset_yes_no_confirm_form
 
 intents:
   - EXTERNAL_change_order
