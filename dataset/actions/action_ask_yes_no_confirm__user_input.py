@@ -17,7 +17,7 @@ class ActionAskYesNoConfirmUserInput(Action):
 
         text = tracker.get_slot("yes_no_confirm__message")
         if not text:
-            text = "Is this correct ?"
+            text = "Is this correct?"
 
         reply_markup = {
             "keyboard": [["Yes", "No"]],
