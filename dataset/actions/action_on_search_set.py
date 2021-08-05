@@ -40,7 +40,7 @@ class ActionOnSearchSet(Action):
         if not doctors.count():
             dispatcher.utter_message(
                 json_message={
-                    "text": f"Currently there are no doctors available for speciality '{speciality}'."
+                    "text": f"Currently there are no doctors available for speciality '{speciality}'.\n\nClick /menu to make a new booking."
                 }
             )
             return []

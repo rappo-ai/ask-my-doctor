@@ -35,7 +35,7 @@ class ActionCreateOrder(Action):
         if not is_approved_and_activated_doctor(doctor_id):
             dispatcher.utter_message(
                 json_message={
-                    "text": f"{doctor.get('name')} is currently unavailable. Please create a new booking with a different doctor."
+                    "text": f"{doctor.get('name')} is currently unavailable. Please create a new booking with a different doctor.\n\nClick /menu to make a new booking."
                 }
             )
             return []
@@ -72,6 +72,24 @@ class ActionCreateOrder(Action):
 
         update_order(order_id, payment_link=payment_link, metadata=order_metadata)
         update_order_in_spreadsheet(get_order(order_id))
+
+        disclaimer_text = (
+            "‼️ Disclaimer ‼️\n"
+            + "\n"
+            + "1. Tele-consult has been initiated at your request. You have voluntarily approached for availing the service.\n"
+            + "\n"
+            + "2. Doctor’s advice is given on your request and is based on the symptoms, medical condition and allergies that you have provided over the tele-consult. It is not a legal advice.\n"
+            + "\n"
+            + "3. Tele-consult is not intended to substitute a physical examination by a Doctor at his/her clinic/hospital. If you do not notice any improvement, for further management kindly visit the doctor at Clinic/Hospital.\n"
+            + "\n"
+            + "4. All reasonable care is taken while rendering tele consult based on information provided by you. Doctor and or our Telegram group owners/admins will not be liable or responsible based on Tele Consult for any negligence, act or omission for reason of any false of fraudulent misstatement, misrepresentation, incomplete or in appropriate profile disclosures or otherwise.\n"
+            + "\n"
+            + "5. The consultation will be one on one. The identity & discussion will be kept highly confidential\n"
+            + "\n"
+            + "Regards,\n"
+            + "DoctorBot\n"
+        )
+        dispatcher.utter_message(json_message={"text": disclaimer_text})
 
         text = (
             f"Order #{order_id}\n"
