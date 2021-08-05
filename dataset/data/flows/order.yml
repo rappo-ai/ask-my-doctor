@@ -21,8 +21,8 @@ rules:
           - chat_type: private
     steps:
       - intent: EXTERNAL_confirm_order_details
-      - action: action_confirm_order_details
       - action: action_reset_yes_no_confirm_form
+      - action: action_confirm_order_details
       - action: yes_no_confirm_form
       - active_loop: yes_no_confirm_form
   - rule: Order unlocked

@@ -19,4 +19,6 @@ class ActionResetYesNoConfirmForm(Action):
         return [
             SlotSet("yes_no_confirm__user_input", None),
             SlotSet("yes_no_confirm__message", None),
+            SlotSet("yes_no_confirm__yes_intent", None),
+            SlotSet("yes_no_confirm__no_intent", None),
         ]

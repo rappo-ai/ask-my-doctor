@@ -57,8 +57,8 @@ rules:
           - chat_type: private
     steps:
       - intent: EXTERNAL_confirm_patient
-      - action: action_confirm_patient
       - action: action_reset_yes_no_confirm_form
+      - action: action_confirm_patient
       - action: yes_no_confirm_form
       - active_loop: yes_no_confirm_form
   - rule: Create new patient form
