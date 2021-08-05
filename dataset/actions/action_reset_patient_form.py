@@ -21,7 +21,4 @@ class ActionResetPatientForm(Action):
             SlotSet("patient__age", None),
             SlotSet("patient__phone_number", None),
             SlotSet("patient__email", None),
-            SlotSet("yes_no_confirm__user_input", None),
-            SlotSet("yes_no_confirm__yes_intent", None),
-            SlotSet("yes_no_confirm__no_intent", None),
         ]
