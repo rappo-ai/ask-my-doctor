@@ -11,6 +11,11 @@ actions:
 
 forms:
   appointment_form:
+    ignored_intents:
+      - EXTERNAL_payment_callback
+      - EXTERNAL_on_google_auth
+      - EXT_patient_send_message
+      - EXT_doctor_send_message
     required_slots:
       appointment__date:
         - type: from_text

@@ -1,7 +1,7 @@
 from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
-from rasa_sdk.events import ActionExecuted, UserUttered
+from rasa_sdk.events import ActionExecuted, UserUttered, SlotSet
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.patient import get_patient_for_user_id, print_patient
@@ -21,20 +21,19 @@ class ActionConfirmPatient(Action):
         events: List[Dict[Text, Any]] = []
 
         user_id = tracker.sender_id
+
         patient: Dict = get_patient_for_user_id(user_id)
         if patient:
-            text = (
-                f"Patient Details\n\n"
-                + print_patient(patient)
-                + "\n"
-                + f"Is this correct?"
-            )
-            reply_markup = {
-                "keyboard": [["Yes", "No"]],
-                "resize_keyboard": True,
-            }
-            json_message = {"text": text, "reply_markup": reply_markup}
+            events = [
+                SlotSet("yes_no_confirm__yes_intent", "EXTERNAL_confirm_order_details"),
+                SlotSet("yes_no_confirm__no_intent", "EXTERNAL_update_patient"),
+                SlotSet("yes_no_confirm__message", "Are the patient details correct?"),
+            ]
+
+            text = f"Patient Details\n\n" + print_patient(patient) + "\n\n"
+            json_message = {"text": text}
             dispatcher.utter_message(json_message=json_message)
+
         else:
             events = [
                 ActionExecuted("action_listen"),

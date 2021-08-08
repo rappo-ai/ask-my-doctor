@@ -18,9 +18,13 @@ actions:
   - action_reset_appointment_form
   - validate_appointment_form
 
+  - action_ask_yes_no_confirm__user_input
+  - action_on_yes_no_confirm_set
+  - action_reset_yes_no_confirm_form
+  - validate_yes_no_confirm_form
+
   - action_ask_patient_send_message__message_id
   - action_confirm_patient
-  - action_confirm_patient_invalid_input
   - action_on_patient_set
   - action_patient_send_message
   - action_reset_patient_form
@@ -31,7 +35,6 @@ actions:
 
   - action_change_order
   - action_confirm_order_details
-  - action_confirm_order_invalid_input
   - action_create_order
   - action_on_order_unlocked
   - action_payment_callback
@@ -71,16 +74,31 @@ actions:
 
 forms:
   search_form:
+    ignored_intents:
+      - EXTERNAL_payment_callback
+      - EXTERNAL_on_google_auth
+      - EXT_patient_send_message
+      - EXT_doctor_send_message
     required_slots:
       search__speciality:
         - type: from_text
   appointment_form:
+    ignored_intents:
+      - EXTERNAL_payment_callback
+      - EXTERNAL_on_google_auth
+      - EXT_patient_send_message
+      - EXT_doctor_send_message
     required_slots:
       appointment__date:
         - type: from_text
       appointment__time:
         - type: from_text
   patient_form:
+    ignored_intents:
+      - EXTERNAL_payment_callback
+      - EXTERNAL_on_google_auth
+      - EXT_patient_send_message
+      - EXT_doctor_send_message
     required_slots:
       patient__name:
         - type: from_text
@@ -91,8 +109,17 @@ forms:
       patient__email:
         - type: from_text
   patient_send_message_form:
+    ignored_intents:
+      - EXTERNAL_payment_callback
+      - EXTERNAL_on_google_auth
+      - EXT_doctor_send_message
     required_slots: {}
   doctor_signup_form:
+    ignored_intents:
+      - EXTERNAL_payment_callback
+      - EXTERNAL_on_google_auth
+      - EXT_patient_send_message
+      - EXT_doctor_send_message
     required_slots:
       doctor_signup__name:
         - type: from_text
@@ -115,7 +142,20 @@ forms:
       doctor_signup__bank_account_ifsc:
         - type: from_text
   doctor_send_message_form:
+    ignored_intents:
+      - EXTERNAL_payment_callback
+      - EXTERNAL_on_google_auth
+      - EXT_patient_send_message
     required_slots: {}
+  yes_no_confirm_form:
+    ignored_intents:
+      - EXTERNAL_payment_callback
+      - EXTERNAL_on_google_auth
+      - EXT_patient_send_message
+      - EXT_doctor_send_message
+    required_slots:
+      yes_no_confirm__user_input:
+        - type: from_text
 
 session_config:
   session_expiration_time: 60
@@ -173,4 +213,12 @@ slots:
   doctor_signup__photo:
     type: text
   doctor_signup__speciality:
+    type: text
+  yes_no_confirm__message:
+    type: text
+  yes_no_confirm__no_intent:
+    type: text
+  yes_no_confirm__user_input:
+    type: text
+  yes_no_confirm__yes_intent:
     type: text

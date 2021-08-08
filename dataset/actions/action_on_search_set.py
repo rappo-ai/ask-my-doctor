@@ -67,4 +67,8 @@ class ActionOnSearchSet(Action):
             }
             dispatcher.utter_message(json_message=json_message)
 
+        dispatcher.utter_message(
+            text=f"Please click the Book button on the doctor's card to book an appointment with the doctor.\n\nClick /menu to go to the main menu or /help for help."
+        )
+
         return []

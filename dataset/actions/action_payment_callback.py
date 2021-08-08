@@ -11,6 +11,7 @@ from actions.utils.admin_config import (
     get_admin_group_id,
     get_meeting_duration_in_minutes,
 )
+from actions.utils.branding import get_bot_support_username
 from actions.utils.cart import print_cart
 from actions.utils.debug import is_debug_env
 from actions.utils.doctor import get_doctor
@@ -156,7 +157,7 @@ class ActionPaymentCallback(Action):
                 + "\n"
                 + print_payment_status(payment_status)
                 + "\n"
-                + f"Your appointment has been scheduled. Please join the meeting at the date and time of the appointment.\n\nIf you need any help with this booking, please contact support."
+                + f"Your appointment has been scheduled. Please join the meeting at the date and time of the appointment."
             )
 
             keyboard = [[]]
@@ -192,6 +193,9 @@ class ActionPaymentCallback(Action):
                 },
             )
             dispatcher.utter_message(json_message=patient_json_message)
+            dispatcher.utter_message(
+                text=f"Please contact {get_bot_support_username()} for any help with this order.\n\nClick /menu to view the main menu."
+            )
 
             if admin_group_id:
                 admin_json_message = deepcopy(json_message)
