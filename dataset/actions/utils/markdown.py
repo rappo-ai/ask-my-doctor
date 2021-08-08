@@ -1,7 +1,8 @@
 import re
+from typing import Text
 
 # from https://github.com/python-telegram-bot/python-telegram-bot/blob/master/telegram/utils/helpers.py
-def escape_markdown2(text: str, version: int = 1, entity_type: str = None) -> str:
+def escape_markdown(text: str, version: int = 2, entity_type: str = None) -> str:
     """
     Helper function to escape telegram markup symbols.
     Args:
@@ -26,3 +27,7 @@ def escape_markdown2(text: str, version: int = 1, entity_type: str = None) -> st
         raise ValueError("Markdown version must be either 1 or 2!")
 
     return re.sub(f"([{re.escape(escape_chars)}])", r"\\\1", text)
+
+
+def get_user_link(user_id: Text, mention_text: Text):
+    return f"[{mention_text}](tg://user?id={user_id})"
