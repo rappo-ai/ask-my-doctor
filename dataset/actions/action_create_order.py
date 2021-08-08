@@ -118,5 +118,8 @@ class ActionCreateOrder(Action):
 
         json_message = {"text": text, "reply_markup": reply_markup}
         dispatcher.utter_message(json_message=json_message)
+        dispatcher.utter_message(
+            text=f"Please go through the disclaimer and then click the Pay button. You will be redirected to our secure payment provider. You will get an appointment confirmation message with a link to meet the doctor after completing the payment.\n\nClick /menu to go to the main menu or /help for help."
+        )
 
         return []
