@@ -81,7 +81,7 @@ class ActionCommandListDoctors(Action):
                 }
             )
             for d in doctors:
-                dispatcher.utter_message(json_message=get_doctor_card(d))
+                dispatcher.utter_message(json_message=get_doctor_card(d, True))
         else:
             usage = "/listdoctors <SPECIALITY>[OPTIONAL] <LISTING STATUS>[OPTIONAL] <ONBOARDING STATUS>[OPTIONAL]"
             specialities = "\n".join(get_specialities())

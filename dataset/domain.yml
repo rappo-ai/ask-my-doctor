@@ -170,6 +170,8 @@ slots:
       - channel
   first_name:
     type: text
+  telegram_user_id:
+    type: text
   search__speciality:
     type: text
   appointment__date:

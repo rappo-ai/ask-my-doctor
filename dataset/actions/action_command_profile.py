@@ -39,11 +39,13 @@ class ActionCommandProfile(Action):
             if _is_admin_group:
                 doctor_id = command["doctor_id"]
                 doctor = get_doctor(doctor_id)
+                admin_doctor_card = get_doctor_card(doctor, True)
+                dispatcher.utter_message(json_message=admin_doctor_card)
             else:
                 doctor = get_doctor_for_user_id(tracker.sender_id)
                 doctor_id = str(doctor["_id"])
-
-            dispatcher.utter_message(json_message=get_doctor_card(doctor))
+                doctor_card = get_doctor_card(doctor)
+                dispatcher.utter_message(json_message=doctor_card)
         else:
             usage = "/profile"
             if _is_admin_group:

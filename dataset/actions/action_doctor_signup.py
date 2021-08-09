@@ -1,10 +1,8 @@
-from copy import deepcopy
 import logging
 from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
-
 
 from actions.utils.admin_config import get_admin_group_id
 from actions.utils.branding import get_bot_display_name
@@ -16,6 +14,8 @@ from actions.utils.doctor import (
     update_doctor,
     print_doctor_profile,
 )
+from actions.utils.json import get_json_key
+from actions.utils.markdown import escape_markdown
 from actions.utils.sheets import update_doctor_in_spreadsheet
 
 logger = logging.getLogger(__name__)
@@ -33,9 +33,11 @@ class ActionNewDoctorSignup(Action):
     ) -> List[Dict[Text, Any]]:
 
         user_id = tracker.sender_id
+        telegram_user_id = tracker.get_slot("telegram_user_id") or ""
 
         doctor = get_doctor_for_user_id(user_id) or {}
         doctor["user_id"] = user_id
+        doctor["telegram_user_id"] = telegram_user_id
         doctor["onboarding_status"] = ONBOARDING_STATUS_SIGNUP
         doctor["listing_status"] = LISTING_STATUS_DISABLED
         doctor["name"] = tracker.get_slot("doctor_signup__name")
@@ -80,8 +82,22 @@ class ActionNewDoctorSignup(Action):
         dispatcher.utter_message(json_message=json_message)
 
         if get_admin_group_id():
-            admin_json_message = deepcopy(json_message)
-            admin_json_message["chat_id"] = get_admin_group_id()
+            admin_caption = (
+                escape_markdown("NEW DOCTOR SIGNUP!\n")
+                + "\n"
+                + print_doctor_profile(
+                    doctor,
+                    include_bank_details=True,
+                    include_user_link=True,
+                    use_markdown=True,
+                )
+            )
+            admin_json_message = {
+                "chat_id": get_admin_group_id(),
+                "photo": doctor.get("photo"),
+                "caption": admin_caption,
+                "parse_mode": "MarkdownV2",
+            }
             dispatcher.utter_message(json_message=admin_json_message)
         else:
             logger.warn("Admin group id not set. Use /admin or /groupid.")
