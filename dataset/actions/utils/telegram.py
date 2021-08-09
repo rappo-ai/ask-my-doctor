@@ -18,6 +18,10 @@ def get_first_name(metadata):
         metadata, "callback_query.from.first_name"
     )
 
+def get_user_id(metadata):
+    return get_json_key(metadata, "message.from.id") or get_json_key(
+        metadata, "callback_query.from.id"
+    )
 
 def get_bot_token():
     with open("credentials.yml", "r") as stream:

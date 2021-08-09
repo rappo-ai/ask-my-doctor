@@ -55,9 +55,10 @@ class ActionCommandDeactivate(Action):
             update_doctor(doctor)
 
             doctor_card = get_doctor_card(doctor)
+            admin_doctor_card = get_doctor_card(doctor, True)
 
             dispatcher.utter_message(
-                json_message={**doctor_card, "chat_id": get_admin_group_id()}
+                json_message={**admin_doctor_card, "chat_id": get_admin_group_id()}
             )
             dispatcher.utter_message(
                 json_message={

@@ -22,8 +22,8 @@ def create_payment_link(
     email: Text,
     phone: Text,
     description: Text,
-    expire_by_seconds: None,
     order_id: Text,
+    expire_by_seconds:int = 0,
 ):
     razorpay_key_id = os.getenv("RAZORPAY_KEY_ID")
     razorpay_secret_key = os.getenv("RAZORPAY_SECRET_KEY")

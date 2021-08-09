@@ -26,7 +26,7 @@ def lazy_init():
                 "admin_group_id": "",
                 "advance_appointment_days": 7,
                 "booking_advance_time_minutes": 60,
-                "payment_link_expiry_time_seconds": 900,
+                "payment_link_expiry_time_seconds": 0,
                 "max_follow_up_seconds": 2 * 24 * 3600,
                 "doctor_commission_rate": 10,
                 "meeting_duration_minutes": 15,

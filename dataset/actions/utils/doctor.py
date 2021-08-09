@@ -13,6 +13,7 @@ from actions.utils.date import (
     get_available_dates_for_weekly_slots,
     print_weekly_slots,
 )
+from actions.utils.markdown import escape_markdown, get_user_link
 from actions.utils.timeslot_lock import is_doctor_slot_locked
 
 ONBOARDING_STATUS_APPROVED = "approved"
@@ -212,7 +213,11 @@ def print_doctor_profile(
     include_time_slots: bool = False,
     include_google_id: bool = False,
     include_bank_details: bool = False,
+    include_user_link: bool = False,
+    use_markdown: bool = False,
 ):
+    assert include_user_link == False or use_markdown == True
+
     profile = f"ID: #{doctor.get('_id')}\n"
 
     if include_status:
@@ -246,14 +251,36 @@ def print_doctor_profile(
             + f"Account name: {doctor.get('bank_account_name')}\n"
             + f"Account IFSC: {doctor.get('bank_account_ifsc')}\n"
         )
+
+    if use_markdown:
+        profile = escape_markdown(profile)
+
+    if include_user_link:
+        profile = (
+            escape_markdown("User Link: ")
+            + get_user_link(
+                doctor.get("telegram_user_id"), escape_markdown(doctor.get("name"))
+            )
+            + "\n"
+            + profile
+        )
+
     return profile
 
 
-def get_doctor_card(doctor: Dict) -> Dict:
+def get_doctor_card(doctor: Dict, is_for_admin: bool = False) -> Dict:
     caption = print_doctor_profile(
-        doctor, include_status=True, include_time_slots=True, include_google_id=True
+        doctor,
+        include_status=True,
+        include_time_slots=True,
+        include_google_id=True,
+        include_user_link=is_for_admin,
+        use_markdown=is_for_admin,
     )
-    return {"photo": doctor.get("photo"), "caption": caption}
+    card = {"photo": doctor.get("photo"), "caption": caption}
+    if is_for_admin:
+        card.update({"parse_mode": "MarkdownV2"})
+    return card
 
 
 def print_doctor_summary(doctor: Dict):

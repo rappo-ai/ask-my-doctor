@@ -1,9 +1,13 @@
 from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.events import SlotSet, SessionStarted, ActionExecuted, EventType
+from rasa_sdk.executor import CollectingDispatcher
 
+from actions.utils.admin_config import get_admin_group_id
+from actions.utils.analytics import is_new_user, log_new_user, total_users
 from actions.utils.json import get_json_key
-from actions.utils.telegram import get_chat_type, get_first_name
+from actions.utils.markdown import escape_markdown, get_user_link
+from actions.utils.telegram import get_chat_type, get_first_name, get_user_id
 
 
 class ActionSessionStart(Action):
@@ -37,12 +41,37 @@ class ActionSessionStart(Action):
         if first_name is not None:
             slots.append(SlotSet(key="first_name", value=first_name))
 
+        telegram_user_id = get_user_id(metadata)
+        if telegram_user_id is not None:
+            slots.append(SlotSet(key="telegram_user_id", value=str(telegram_user_id)))
+
         return slots
 
     async def run(
-        self, dispatcher, tracker: Tracker, domain: Dict[Text, Any]
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
+        metadata = tracker.get_slot("session_started_metadata") or {}
+        telegram_user_id = get_user_id(metadata)
+        if telegram_user_id and is_new_user(telegram_user_id):
+            log_new_user(telegram_user_id, get_json_key(metadata, "message.from", {}))
+            user_count = total_users()
+            user_name = get_json_key(
+                metadata, "message.from.first_name", "Not Available"
+            )
+            dispatcher.utter_message(
+                json_message={
+                    "chat_id": get_admin_group_id(),
+                    "text": escape_markdown(
+                        f"🆕 New User!\nTotal: [{user_count}]\nName: "
+                    )
+                    + get_user_link(telegram_user_id, escape_markdown(user_name)),
+                    "parse_mode": "MarkdownV2",
+                }
+            )
         # the session should begin with a `session_started` event
         events = [SessionStarted()]
 
