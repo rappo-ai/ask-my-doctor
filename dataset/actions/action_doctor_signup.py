@@ -14,9 +14,7 @@ from actions.utils.doctor import (
     update_doctor,
     print_doctor_profile,
 )
-from actions.utils.json import get_json_key
 from actions.utils.markdown import escape_markdown
-from actions.utils.sheets import update_doctor_in_spreadsheet
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +68,6 @@ class ActionNewDoctorSignup(Action):
             update_doctor(doctor)
         else:
             add_doctor(doctor)
-        update_doctor_in_spreadsheet(doctor)
 
         caption = (
             f"Thank you for your interest in {get_bot_display_name()}. We have received your details and will review it and get back to you within 48 hours.\n"

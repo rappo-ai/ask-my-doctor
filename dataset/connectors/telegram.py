@@ -534,7 +534,6 @@ class TelegramInput(InputChannel):
                 except Exception as e:
                     logger.error(f"Exception when trying to handle message.{e}")
                     logger.debug(e, exc_info=True)
-                    pass
 
                 return response.text("success")
 

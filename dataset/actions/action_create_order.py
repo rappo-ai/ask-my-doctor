@@ -9,7 +9,6 @@ from actions.utils.doctor import get_doctor, is_approved_and_activated_doctor
 from actions.utils.order import create_order, get_order, update_order
 from actions.utils.patient import get_patient_for_user_id, print_patient
 from actions.utils.payment_link import create_payment_link
-from actions.utils.sheets import update_order_in_spreadsheet
 from actions.utils.timeslot_lock import is_doctor_slot_locked
 
 
@@ -71,7 +70,6 @@ class ActionCreateOrder(Action):
         }
 
         update_order(order_id, payment_link=payment_link, metadata=order_metadata)
-        update_order_in_spreadsheet(get_order(order_id))
 
         disclaimer_text = (
             "‼️ Disclaimer ‼️\n"

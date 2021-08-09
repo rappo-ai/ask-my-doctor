@@ -29,7 +29,6 @@ from actions.utils.payment_status import (
     get_order_id_for_payment_status,
     print_payment_status,
 )
-from actions.utils.sheets import update_order_in_spreadsheet
 from actions.utils.timeslot_lock import create_lock_for_doctor_slot, get_lock_for_slot
 
 logger = logging.getLogger(__name__)
@@ -137,8 +136,6 @@ class ActionPaymentCallback(Action):
 
             if meeting:
                 update_order(order_id, meeting=meeting)
-
-            update_order_in_spreadsheet(get_order(order_id))
 
             text = (
                 f"Booking Confirmation\n"
