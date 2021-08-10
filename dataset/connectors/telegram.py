@@ -9,13 +9,14 @@ from sanic.request import Request
 from sanic.response import HTTPResponse
 from telebot import TeleBot
 from telebot.types import (
+    BotCommand,
     InlineKeyboardButton,
-    Update,
     InlineKeyboardMarkup,
     KeyboardButton,
+    Message,
     ReplyKeyboardMarkup,
     ReplyKeyboardRemove,
-    Message,
+    Update,
 )
 from typing import Dict, Text, Any, List, Optional, Callable, Awaitable
 from urllib.parse import urlunparse
@@ -545,6 +546,11 @@ class TelegramInput(InputChannel):
         channel.set_webhook(
             url=self.webhook_url, drop_pending_updates=self.drop_pending_updates
         )
+        commands = [
+            BotCommand("menu", "Go to main menu"),
+            BotCommand("help", "Contact support"),
+        ]
+        channel.set_my_commands(commands)
 
         return channel
 

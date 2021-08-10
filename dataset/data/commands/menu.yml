@@ -33,4 +33,5 @@ rules:
           - chat_type: private
     steps:
       - intent: menu
+      - action: action_deactivate_loop
       - action: action_main_menu
