@@ -11,7 +11,6 @@ from actions.utils.admin_config import (
     get_admin_group_id,
     get_meeting_duration_in_minutes,
 )
-from actions.utils.branding import get_bot_support_username
 from actions.utils.cart import print_cart
 from actions.utils.debug import is_debug_env
 from actions.utils.doctor import get_doctor
@@ -80,6 +79,10 @@ class ActionPaymentCallback(Action):
             order_id = order.get("_id")
 
         assert isinstance(order_id, ObjectId)
+
+        # ignore event if order is already marked paid
+        if get_json_key(order, "payment_status.razorpay_payment_link_status") == "paid":
+            return []
 
         payment_details = fetch_payment_details(payment_status)
 
@@ -190,9 +193,7 @@ class ActionPaymentCallback(Action):
                 },
             )
             dispatcher.utter_message(json_message=patient_json_message)
-            dispatcher.utter_message(
-                text=f"Please contact {get_bot_support_username()} for any help with this order.\n\nClick /menu to view the main menu."
-            )
+            dispatcher.utter_message(text="Click /menu to view the main menu.")
 
             if admin_group_id:
                 admin_json_message = deepcopy(json_message)
