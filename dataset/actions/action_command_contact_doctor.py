@@ -48,7 +48,7 @@ class ActionCommandListDoctors(Action):
                 }
             )
         else:
-            usage = "/contactdoctor <ORDER_ID>"
+            usage = "/contactdoctor <ORDER ID>"
             dispatcher.utter_message(
                 json_message={
                     "text": f"The command format is incorrect. Usage:\n\n{usage}\n\nYou must reply to an existing message to use this command."
