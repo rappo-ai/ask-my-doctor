@@ -49,6 +49,8 @@ responses:
     - text: Please enter the patient's phone number.
   utter_ask_patient__email:
     - text: Please enter the patient's email id.
+  utter_admin_patient_send_message_help:
+    - text: "Reply to the message you want to send with /contactdoctor <ORDER_ID>"
 
 rules:
   - rule: Create new confirm patient form
@@ -103,7 +105,13 @@ rules:
       - slot_was_set:
           - requested_slot: null
       - action: action_patient_send_message
-
+  - rule: Admin EXT_patient_send_message
+    condition:
+      - slot_was_set:
+          - chat_type: group
+    steps:
+      - intent: EXT_patient_send_message
+      - action: utter_admin_patient_send_message_help
 slots:
   patient__age:
     type: text
