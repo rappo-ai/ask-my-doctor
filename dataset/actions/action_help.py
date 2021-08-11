@@ -28,6 +28,8 @@ class ActionHelp(Action):
                 + "/approve <DOCTOR ID> - approve a doctor\n"
                 + "/reject <DOCTOR ID> <REASON> - reject a doctor\n"
                 + "/listdoctors <SPECIALITY>[OPTIONAL] <LISTING STATUS>[OPTIONAL] <ONBOARDING STATUS>[OPTIONAL] - list all doctors based on speciality, listing status or onboarding status (any one filter)\n"
+                + "/contactdoctor <ORDER ID> - contact the doctor for an order\n"
+                + "/contactpatient <ORDER ID> - contact the patient for an order\n"
                 + "\n"
                 + "Additional commands to update doctor profiles:\n"
                 + "\n"

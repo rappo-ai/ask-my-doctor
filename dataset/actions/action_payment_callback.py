@@ -33,6 +33,66 @@ from actions.utils.timeslot_lock import create_lock_for_doctor_slot, get_lock_fo
 logger = logging.getLogger(__name__)
 
 
+def create_booking_confirmation_message(
+    order_id, cart, patient, payment_status, keyboard
+):
+    text = (
+        f"Booking Confirmation\n"
+        + "\n"
+        + f"Order #{order_id}\n"
+        + "\n"
+        + "Appoinment Details\n"
+        + "\n"
+        + print_cart(cart)
+        + "\n"
+        + f"Patient details\n"
+        + "\n"
+        + print_patient(patient)
+        + "\n"
+        + f"Payment Details\n"
+        + "\n"
+        + print_payment_status(payment_status)
+        + "\n"
+        + f"Your appointment has been scheduled. Please join the meeting at the date and time of the appointment."
+    )
+
+    return {
+        "text": text,
+        "reply_markup": {
+            "keyboard": keyboard,
+            "type": "inline",
+        },
+    }
+
+
+def create_contact_doctor_button(order):
+    return {
+        "title": "Contact Doctor",
+        "payload": f"/EXT_patient_send_message{{\"o_id\":\"{str(order['_id'])}\"}}",
+    }
+
+
+def create_contact_patient_button(order):
+    return {
+        "title": "Contact Patient",
+        "payload": f"/EXT_doctor_send_message{{\"o_id\":\"{str(order['_id'])}\"}}",
+    }
+
+
+def create_contact_support_button():
+    return {
+        "title": "Contact Support",
+        "payload": "/help",
+    }
+
+
+def create_join_meeting_button(meeting):
+    return {
+        "title": "Join Meeting",
+        "url": f"{meeting.get('hangoutLink')}",
+    }
+
+
 class ActionPaymentCallback(Action):
     def name(self) -> Text:
         return "action_payment_callback"
@@ -140,78 +200,49 @@ class ActionPaymentCallback(Action):
             if meeting:
                 update_order(order_id, meeting=meeting)
 
-            text = (
-                f"Booking Confirmation\n"
-                + "\n"
-                + f"Order #{order_id}\n"
-                + "\n"
-                + "Appoinment Details\n"
-                + "\n"
-                + print_cart(cart)
-                + "\n"
-                + f"Patient details\n"
-                + "\n"
-                + print_patient(patient)
-                + "\n"
-                + f"Payment Details\n"
-                + "\n"
-                + print_payment_status(payment_status)
-                + "\n"
-                + f"Your appointment has been scheduled. Please join the meeting at the date and time of the appointment."
-            )
-
-            keyboard = [[]]
+            patient_keyboard = [
+                [
+                    create_contact_doctor_button(order),
+                    create_contact_support_button(),
+                ]
+            ]
+            doctor_keyboard = [
+                [
+                    create_contact_patient_button(order),
+                    create_contact_support_button(),
+                ]
+            ]
+            admin_keyboard = [
+                [
+                    create_contact_doctor_button(order),
+                    create_contact_patient_button(order),
+                ]
+            ]
 
             if meeting:
-                keyboard[0].append(
-                    {
-                        "title": "Join Meeting",
-                        "url": f"{meeting.get('hangoutLink')}",
-                    }
-                )
+                for k in [patient_keyboard, doctor_keyboard, admin_keyboard]:
+                    k[0].insert(0, create_join_meeting_button(meeting))
 
-            keyboard[0].append(
-                {
-                    "title": "Contact Support",
-                    "payload": "/help",
-                }
-            )
-
-            json_message = {
-                "text": text,
-                "reply_markup": {
-                    "keyboard": keyboard,
-                    "type": "inline",
-                },
-            }
-            patient_json_message = deepcopy(json_message)
-            patient_json_message["reply_markup"]["keyboard"][0].insert(
-                len(keyboard[0]) - 1,
-                {
-                    "title": "Contact Doctor",
-                    "payload": f"/EXT_patient_send_message{{\"o_id\":\"{str(order['_id'])}\"}}",
-                },
+            patient_json_message = create_booking_confirmation_message(
+                order_id, cart, patient, payment_status, patient_keyboard
             )
             dispatcher.utter_message(json_message=patient_json_message)
             dispatcher.utter_message(text="Click /menu to view the main menu.")
 
             if admin_group_id:
-                admin_json_message = deepcopy(json_message)
+                admin_json_message = create_booking_confirmation_message(
+                    order_id, cart, patient, payment_status, admin_keyboard
+                )
                 admin_json_message["chat_id"] = admin_group_id
                 dispatcher.utter_message(json_message=admin_json_message)
             else:
                 logger.warn("Admin group id not set. Use /admin or /groupid.")
 
             if doctor_chat_id:
-                doctor_json_message = deepcopy(json_message)
-                doctor_json_message["chat_id"] = doctor_chat_id
-                doctor_json_message["reply_markup"]["keyboard"][0].insert(
-                    len(keyboard[0]) - 1,
-                    {
-                        "title": "Contact Patient",
-                        "payload": f"/EXT_doctor_send_message{{\"o_id\":\"{str(order['_id'])}\"}}",
-                    },
+                doctor_json_message = create_booking_confirmation_message(
+                    order_id, cart, patient, payment_status, doctor_keyboard
                 )
+                doctor_json_message["chat_id"] = doctor_chat_id
                 dispatcher.utter_message(json_message=doctor_json_message)
             else:
                 logger.warn("Doctor chat id not set.")

@@ -3,6 +3,8 @@ version: "2.0"
 actions:
   - action_command_addspeciality
   - action_command_approve
+  - action_command_contact_doctor
+  - action_command_contact_patient
   - action_command_deletespeciality
   - action_command_groupid
   - action_command_listdoctors
@@ -13,6 +15,8 @@ intents:
   - addspeciality
   - admin
   - approve
+  - contact_doctor
+  - contact_patient
   - deletespeciality
   - groupid
   - listdoctors
@@ -62,6 +66,18 @@ nlu:
       match_condition: "start"
     examples: |
       - /listdoctors
+  - intent: contact_doctor
+    metadata:
+      keyword_intent: true
+      match_condition: "start"
+    examples: |
+      - /contactdoctor
+  - intent: contact_patient
+    metadata:
+      keyword_intent: true
+      match_condition: "start"
+    examples: |
+      - /contactpatient
 
 rules:
   - rule: set admin group id
@@ -92,3 +108,11 @@ rules:
     steps:
       - intent: listdoctors
       - action: action_command_listdoctors
+  - rule: contact doctor
+    steps:
+      - intent: contact_doctor
+      - action: action_command_contact_doctor
+  - rule: contact patient
+    steps:
+      - intent: contact_patient
+      - action: action_command_contact_patient

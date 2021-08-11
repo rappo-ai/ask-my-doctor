@@ -71,6 +71,8 @@ responses:
     - text: "What is your phone number?"
   utter_ask_doctor_signup__photo:
     - text: "Please send a photo to use as your profile picture. It should be at least 256 px by 256 px. If the photo is not square it will be cropped. The recommended size is 512 px by 512 px and photos will be resized to this size."
+  utter_admin_doctor_send_message_help:
+    - text: "Reply to the message you want to send with /contactpatient <ORDER_ID>"
 
 rules:
   - rule: Start new doctor signup form
@@ -121,7 +123,13 @@ rules:
       - slot_was_set:
           - requested_slot: null
       - action: action_doctor_send_message
-
+  - rule: Admin EXT_doctor_send_message
+    condition:
+      - slot_was_set:
+          - chat_type: group
+    steps:
+      - intent: EXT_doctor_send_message
+      - action: utter_admin_doctor_send_message_help
 slots:
   doctor_send_message__message_id:
     type: text
