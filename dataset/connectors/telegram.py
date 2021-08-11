@@ -482,7 +482,7 @@ class TelegramInput(InputChannel):
             razorpay_webhook_secret = os.getenv("RAZORPAY_WEBHOOK_SECRET")
             razorpay_key_id = os.getenv("RAZORPAY_KEY_ID")
             razorpay_secret_key = os.getenv("RAZORPAY_SECRET_KEY")
-            return process_razorpay_webhook(
+            return await process_razorpay_webhook(
                 request, razorpay_webhook_secret, razorpay_key_id, razorpay_secret_key
             )
 
@@ -491,7 +491,7 @@ class TelegramInput(InputChannel):
             razorpay_webhook_secret = os.getenv("DEMO_RAZORPAY_WEBHOOK_SECRET")
             razorpay_key_id = os.getenv("DEMO_RAZORPAY_KEY_ID")
             razorpay_secret_key = os.getenv("DEMO_RAZORPAY_SECRET_KEY")
-            return process_razorpay_webhook(
+            return await process_razorpay_webhook(
                 request, razorpay_webhook_secret, razorpay_key_id, razorpay_secret_key
             )
 
