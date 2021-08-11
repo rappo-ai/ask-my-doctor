@@ -24,9 +24,12 @@ def get_order_id_for_payment_status(payment_status: Dict):
     )
 
 
-def fetch_payment_details(payment_status: Dict):
+def fetch_payment_details(payment_status: Dict, is_demo_mode: bool = False):
     razorpay_key_id = os.getenv("RAZORPAY_KEY_ID")
     razorpay_secret_key = os.getenv("RAZORPAY_SECRET_KEY")
+    if is_demo_mode:
+        razorpay_key_id = os.getenv("DEMO_RAZORPAY_KEY_ID")
+        razorpay_secret_key = os.getenv("DEMO_RAZORPAY_SECRET_KEY")
 
     if not (razorpay_key_id and razorpay_secret_key):
         logger.warn(

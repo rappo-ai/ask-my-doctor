@@ -153,7 +153,7 @@ class ActionPaymentCallback(Action):
         if get_json_key(order, "payment_status.razorpay_payment_link_status") == "paid":
             return []
 
-        payment_details = fetch_payment_details(payment_status)
+        payment_details = fetch_payment_details(payment_status, is_demo_mode)
 
         payment_status["payment_details"] = payment_details
 
