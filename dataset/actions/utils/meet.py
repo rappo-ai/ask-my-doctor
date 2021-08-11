@@ -48,9 +48,20 @@ def get_google_auth_url(user_id):
     return authorization_url
 
 
-def create_meeting(credentials, guest_emails, title, start_date, end_date, requestId):
+def create_meeting(
+    credentials,
+    guest_emails,
+    title,
+    start_date,
+    end_date,
+    requestId,
+    is_demo_mode: bool = False,
+):    
     response = {}
     try:
+        if is_demo_mode:
+            return {"hangoutLink": MOCK_HANGOUT_LINK}
+    
         client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
         client_secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
 

@@ -325,6 +325,51 @@ class TelegramInput(InputChannel):
                 )
             )
 
+        async def process_razorpay_webhook(
+            request: Request,
+            razorpay_webhook_secret: Text,
+            razorpay_key_id: Text,
+            razorpay_secret_key: Text,
+        ) -> HTTPResponse:
+            if request.method != "POST":
+                return response.text("Invalid request.")
+            try:
+                if razorpay_webhook_secret:
+                    import razorpay
+
+                    client = razorpay.Client(
+                        auth=(razorpay_key_id, razorpay_secret_key)
+                    )
+                    utility = razorpay.Utility(client)
+                    request_body = request.body.decode("utf-8")
+                    webhook_signature = request.headers.get("X-Razorpay-Signature")
+                    utility.verify_webhook_signature(
+                        request_body, webhook_signature, razorpay_webhook_secret
+                    )
+                request_json = request.json
+                payment_status = {
+                    "razorpay_payment_id": get_json_key(
+                        request_json, "payload.payment.entity.id"
+                    ),
+                    "razorpay_payment_link_id": get_json_key(
+                        request_json, "payload.payment_link.entity.id"
+                    ),
+                    "razorpay_payment_link_reference_id": get_json_key(
+                        request_json, "payload.payment_link.entity.reference_id"
+                    ),
+                    "razorpay_payment_link_status": get_json_key(
+                        request_json, "payload.payment_link.entity.status"
+                    ),
+                    "razorpay_signature": "",
+                }
+                order_id = get_json_key(
+                    request_json, "payload.payment_link.entity.reference_id"
+                )
+                await process_payment_status(order_id, payment_status)
+            except Exception as e:
+                logger.error(e)
+            return response.text("success")
+
         @telegram_webhook.route("/", methods=["GET"])
         async def health(_: Request) -> HTTPResponse:
             return response.json({"status": "ok"})
@@ -434,44 +479,21 @@ class TelegramInput(InputChannel):
 
         @telegram_webhook.route("/razorpay_webhook", methods=["POST"])
         async def razorpay_webhook(request: Request) -> HTTPResponse:
-            if request.method != "POST":
-                return response.text("Invalid request.")
-            try:
-                webhook_secret = os.getenv("RAZORPAY_WEBHOOK_SECRET")
-                if webhook_secret:
-                    import razorpay
-                    razorpay_key_id = os.getenv("RAZORPAY_KEY_ID")
-                    razorpay_secret_key = os.getenv("RAZORPAY_SECRET_KEY")
-                    client = razorpay.Client(auth=(razorpay_key_id, razorpay_secret_key))
-                    utility = razorpay.Utility(client)
-                    request_body = request.body.decode("utf-8")
-                    webhook_signature = request.headers.get("X-Razorpay-Signature")
-                    utility.verify_webhook_signature(
-                        request_body, webhook_signature, webhook_secret
-                    )
-                request_json = request.json
-                payment_status = {
-                    "razorpay_payment_id": get_json_key(
-                        request_json, "payload.payment.entity.id"
-                    ),
-                    "razorpay_payment_link_id": get_json_key(
-                        request_json, "payload.payment_link.entity.id"
-                    ),
-                    "razorpay_payment_link_reference_id": get_json_key(
-                        request_json, "payload.payment_link.entity.reference_id"
-                    ),
-                    "razorpay_payment_link_status": get_json_key(
-                        request_json, "payload.payment_link.entity.status"
-                    ),
-                    "razorpay_signature": "",
-                }
-                order_id = get_json_key(
-                    request_json, "payload.payment_link.entity.reference_id"
-                )
-                await process_payment_status(order_id, payment_status)
-            except Exception as e:
-                logger.error(e)
-            return response.text("success")
+            razorpay_webhook_secret = os.getenv("RAZORPAY_WEBHOOK_SECRET")
+            razorpay_key_id = os.getenv("RAZORPAY_KEY_ID")
+            razorpay_secret_key = os.getenv("RAZORPAY_SECRET_KEY")
+            return process_razorpay_webhook(
+                request, razorpay_webhook_secret, razorpay_key_id, razorpay_secret_key
+            )
+
+        @telegram_webhook.route("/demo_razorpay_webhook", methods=["POST"])
+        async def demo_razorpay_webhook(request: Request) -> HTTPResponse:
+            razorpay_webhook_secret = os.getenv("DEMO_RAZORPAY_WEBHOOK_SECRET")
+            razorpay_key_id = os.getenv("DEMO_RAZORPAY_KEY_ID")
+            razorpay_secret_key = os.getenv("DEMO_RAZORPAY_SECRET_KEY")
+            return process_razorpay_webhook(
+                request, razorpay_webhook_secret, razorpay_key_id, razorpay_secret_key
+            )
 
         @telegram_webhook.route("/order_unlocked", methods=["POST"])
         async def order_unlocked(request: Request) -> Any:

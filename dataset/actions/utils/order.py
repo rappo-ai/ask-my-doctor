@@ -19,7 +19,12 @@ from actions.utils.timeslot_lock import delete_lock_for_id, get_lock_for_id
 logger = logging.getLogger(__name__)
 
 
-def create_order(user_id: Text, cart: Dict, timeslot_lock_id: ObjectId = None):
+def create_order(
+    user_id: Text,
+    cart: Dict,
+    timeslot_lock_id: ObjectId = None,
+    is_demo_mode: bool = False,
+):
     current_date = datetime.now(tz=SERVER_TZINFO)
     order = {
         "creation_ts": current_date.timestamp(),
@@ -28,9 +33,11 @@ def create_order(user_id: Text, cart: Dict, timeslot_lock_id: ObjectId = None):
         "last_update_date": current_date.isoformat(),
         "user_id": user_id,
         "cart": cart,
+        "is_demo_mode": is_demo_mode,
     }
     if timeslot_lock_id:
         order["timeslot_lock_id"] = timeslot_lock_id
+
     order_id = db.order.insert_one(order).inserted_id
     if timeslot_lock_id:
         unlock_order_job: Job = scheduler().add_job(
@@ -84,8 +91,10 @@ def get_order(id) -> Dict:
     return db.order.find_one({"_id": ObjectId(id)})
 
 
-def get_orders(doctor_id) -> Dict:
+def get_orders(doctor_id, include_demo_mode: bool = False) -> Dict:
     query = {}
+    if not include_demo_mode:
+        query["is_demo_mode"] = {"$ne": True}
     if doctor_id:
         query["metadata.doctor._id"] = ObjectId(doctor_id)
     return db.order.find(query).sort("_id", DESCENDING)

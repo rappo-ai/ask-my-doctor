@@ -4,7 +4,7 @@ from rasa_sdk.events import SlotSet, SessionStarted, ActionExecuted, EventType
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import get_admin_group_id
-from actions.utils.analytics import is_new_user, log_new_user, total_users
+from actions.utils.user import add_new_user, is_new_user, total_users
 from actions.utils.json import get_json_key
 from actions.utils.markdown import escape_markdown, get_user_link
 from actions.utils.telegram import get_chat_type, get_first_name, get_user_id
@@ -57,7 +57,7 @@ class ActionSessionStart(Action):
         metadata = tracker.get_slot("session_started_metadata") or {}
         telegram_user_id = get_user_id(metadata)
         if telegram_user_id and is_new_user(telegram_user_id):
-            log_new_user(telegram_user_id, get_json_key(metadata, "message.from", {}))
+            add_new_user(telegram_user_id, get_json_key(metadata, "message.from", {}))
             user_count = total_users()
             user_name = get_json_key(
                 metadata, "message.from.first_name", "Not Available"
