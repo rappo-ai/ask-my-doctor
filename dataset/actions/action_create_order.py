@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
@@ -10,6 +11,9 @@ from actions.utils.order import create_order, get_order, update_order
 from actions.utils.patient import get_patient_for_user_id, print_patient
 from actions.utils.payment_link import create_payment_link
 from actions.utils.timeslot_lock import is_doctor_slot_locked
+from actions.utils.user import get_user_for_user_id
+
+logger = logging.getLogger(__name__)
 
 
 class ActionCreateOrder(Action):
@@ -24,6 +28,11 @@ class ActionCreateOrder(Action):
     ) -> List[Dict[Text, Any]]:
 
         user_id = tracker.sender_id
+        telegram_user_id = tracker.get_slot("telegram_user_id") or ""
+        user = get_user_for_user_id(telegram_user_id)
+        if not user:
+            logger.warn("action_create_order: user not found")
+        is_demo_mode = (user or False) and (user.get("is_demo_mode") or False)
 
         cart: Dict = get_cart(user_id)
         cart_amount = get_cart_total(cart)
@@ -47,7 +56,7 @@ class ActionCreateOrder(Action):
             )
             return []
 
-        order_id: Text = create_order(user_id, cart=cart)
+        order_id: Text = create_order(user_id, cart=cart, is_demo_mode=is_demo_mode)
 
         payment_description = f"Consultation fee for {doctor.get('name', '')}"
 
@@ -61,6 +70,7 @@ class ActionCreateOrder(Action):
             description=payment_description,
             expire_by_seconds=get_payment_link_expiry_time_seconds(),
             order_id=order_id,
+            is_demo_mode=is_demo_mode,
         )
 
         order_metadata = {

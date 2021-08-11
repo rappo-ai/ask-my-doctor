@@ -9,7 +9,7 @@ from actions.utils.json import get_json_key
 from actions.utils.order import get_order
 
 
-class ActionCommandListDoctors(Action):
+class ActionCommandContactPatient(Action):
     def name(self) -> Text:
         return "action_command_contact_patient"
 

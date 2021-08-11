@@ -1,0 +1,24 @@
+version: "2.0"
+
+actions:
+  - action_demo
+
+intents:
+  - demo
+
+nlu:
+  - intent: demo
+    metadata:
+      keyword_intent: true
+      match_condition: "exact"
+    examples: |
+      - /demo
+
+rules:
+  - rule: Command /demo
+    condition:
+      - slot_was_set:
+          - chat_type: private
+    steps:
+      - intent: demo
+      - action: action_demo

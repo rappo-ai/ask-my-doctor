@@ -23,10 +23,15 @@ def create_payment_link(
     phone: Text,
     description: Text,
     order_id: Text,
-    expire_by_seconds:int = 0,
+    expire_by_seconds: int = 0,
+    is_demo_mode: bool = False,
 ):
+
     razorpay_key_id = os.getenv("RAZORPAY_KEY_ID")
     razorpay_secret_key = os.getenv("RAZORPAY_SECRET_KEY")
+    if is_demo_mode:
+        razorpay_key_id = os.getenv("DEMO_RAZORPAY_KEY_ID")
+        razorpay_secret_key = os.getenv("DEMO_RAZORPAY_SECRET_KEY")
 
     if not (razorpay_key_id and razorpay_secret_key):
         logger.warn(

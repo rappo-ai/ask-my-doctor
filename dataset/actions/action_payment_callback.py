@@ -29,15 +29,16 @@ from actions.utils.payment_status import (
     print_payment_status,
 )
 from actions.utils.timeslot_lock import create_lock_for_doctor_slot, get_lock_for_slot
+from actions.utils.user import get_user_for_user_id
 
 logger = logging.getLogger(__name__)
 
 
 def create_booking_confirmation_message(
-    order_id, cart, patient, payment_status, keyboard
+    order_id, cart, patient, payment_status, keyboard, is_demo_mode
 ):
     text = (
-        f"Booking Confirmation\n"
+        "Booking Confirmation\n"
         + "\n"
         + f"Order #{order_id}\n"
         + "\n"
@@ -53,8 +54,11 @@ def create_booking_confirmation_message(
         + "\n"
         + print_payment_status(payment_status)
         + "\n"
-        + f"Your appointment has been scheduled. Please join the meeting at the date and time of the appointment."
+        + f"Your appointment has been scheduled. Please join the meeting at the date and time of the appointment.\n"
     )
+
+    if is_demo_mode:
+        text = "DEMO BOOKING\n\n" + text + "\nDEMO BOOKING"
 
     return {
         "text": text,
@@ -104,6 +108,11 @@ class ActionPaymentCallback(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
+        telegram_user_id = tracker.get_slot("telegram_user_id") or ""
+        user = get_user_for_user_id(telegram_user_id)
+        if not user:
+            logger.warn("action_create_order: user not found")
+        is_demo_mode = (user or False) and (user.get("is_demo_mode") or False)
         admin_group_id = get_admin_group_id()
         entities = tracker.latest_message.get("entities", [])
 
@@ -170,7 +179,10 @@ class ActionPaymentCallback(Action):
                     }
                 )
                 return []
-            if not timeslot_lock or str(timeslot_lock.get("order_id")) != str(order_id):
+            if (not is_demo_mode) and (
+                (not timeslot_lock)
+                or str(timeslot_lock.get("order_id")) != str(order_id)
+            ):
                 timeslot_lock_id = create_lock_for_doctor_slot(
                     doctor_id=doctor_id,
                     slot_datetime=appointment_datetime,
@@ -195,6 +207,7 @@ class ActionPaymentCallback(Action):
                 start_date=start_date,
                 end_date=end_date,
                 requestId=str(order_id),
+                is_demo_mode=is_demo_mode,
             )
 
             if meeting:
@@ -224,23 +237,33 @@ class ActionPaymentCallback(Action):
                     k[0].insert(0, create_join_meeting_button(meeting))
 
             patient_json_message = create_booking_confirmation_message(
-                order_id, cart, patient, payment_status, patient_keyboard
+                order_id, cart, patient, payment_status, patient_keyboard, is_demo_mode
             )
             dispatcher.utter_message(json_message=patient_json_message)
             dispatcher.utter_message(text="Click /menu to view the main menu.")
 
             if admin_group_id:
                 admin_json_message = create_booking_confirmation_message(
-                    order_id, cart, patient, payment_status, admin_keyboard
+                    order_id,
+                    cart,
+                    patient,
+                    payment_status,
+                    admin_keyboard,
+                    is_demo_mode,
                 )
                 admin_json_message["chat_id"] = admin_group_id
                 dispatcher.utter_message(json_message=admin_json_message)
             else:
                 logger.warn("Admin group id not set. Use /admin or /groupid.")
 
-            if doctor_chat_id:
+            if (not is_demo_mode) and doctor_chat_id:
                 doctor_json_message = create_booking_confirmation_message(
-                    order_id, cart, patient, payment_status, doctor_keyboard
+                    order_id,
+                    cart,
+                    patient,
+                    payment_status,
+                    doctor_keyboard,
+                    is_demo_mode,
                 )
                 doctor_json_message["chat_id"] = doctor_chat_id
                 dispatcher.utter_message(json_message=doctor_json_message)
@@ -248,6 +271,11 @@ class ActionPaymentCallback(Action):
                 logger.warn("Doctor chat id not set.")
 
             if not meeting:
+                target_chats = (
+                    [tracker.sender_id, admin_group_id]
+                    if is_demo_mode
+                    else [tracker.sender_id, admin_group_id, doctor_chat_id]
+                )
                 [
                     dispatcher.utter_message(
                         json_message={
@@ -255,7 +283,7 @@ class ActionPaymentCallback(Action):
                             "text": f"Something went wrong when generating the meeting link for order #{order_id}. Please use /help to contact support.",
                         }
                     )
-                    for chat_id in [tracker.sender_id, admin_group_id, doctor_chat_id]
+                    for chat_id in target_chats
                 ]
         else:
             json_message = {"text": "Payment error"}

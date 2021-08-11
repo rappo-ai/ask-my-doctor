@@ -41,6 +41,7 @@ class ActionCommandListOrders(Action):
             )
             orders = get_orders(
                 doctor_id=doctor_id,
+                include_demo_mode=False,
             )
             num_orders = orders.count()
             dispatcher.utter_message(
