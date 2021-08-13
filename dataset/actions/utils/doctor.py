@@ -361,8 +361,14 @@ def format_doctor_for_csv(doctor: Dict) -> Text:
         f"{get_json_key(doctor, 'name')}",
         f"{get_json_key(doctor, 'phone_number')}",
         f"{get_json_key(doctor, 'gmail_id')}",
-        f"{str(get_json_key(doctor, 'speciality') or '').replace(',', ' ')}",
-        f"{str(get_json_key(doctor, 'description') or '').replace(',', ' ')}",
+        str(get_json_key(doctor, "speciality") or "")
+        .replace(",", " ")
+        .replace("\n", " ")
+        .replace("\t", " "),
+        str(get_json_key(doctor, "description") or "")
+        .replace(",", " ")
+        .replace("\n", " ")
+        .replace("\t", " "),
         f"{get_json_key(doctor, 'fee')}",
         f"{print_weekly_slots(get_json_key(doctor, 'weekly_slots'), ' ')}",
         f"{'Connected' if get_json_key(doctor, 'credentials') else 'Not connected'}",
