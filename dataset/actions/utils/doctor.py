@@ -13,6 +13,7 @@ from actions.utils.date import (
     get_available_dates_for_weekly_slots,
     print_weekly_slots,
 )
+from actions.utils.json import get_json_key
 from actions.utils.markdown import escape_markdown, get_user_link
 from actions.utils.timeslot_lock import is_doctor_slot_locked
 
@@ -322,3 +323,51 @@ def get_doctor_command_help(is_admin: bool = False):
             + f"To update your bank account details or Gmail id, or for any other queries, please contact the admin {get_bot_support_username()}.\n"
         )
     return command_help
+
+
+def format_doctor_header_for_csv() -> Text:
+    header_cols = [
+        "Doctor ID",
+        "Creation Timestamp",
+        "Creation Date",
+        "Last Update Timestamp",
+        "Last Update Date",
+        "Onboarding Status",
+        "Listing Status",
+        "Name",
+        "Phone Number",
+        "Gmail ID",
+        "Speciality",
+        "Description",
+        "Consultation Fee",
+        "Time Slots",
+        "Google ID",
+        "Bank Account Number",
+        "Bank Account Name",
+        "Bank Account IFSC",
+    ]
+    return ",".join(header_cols)
+
+
+def format_doctor_for_csv(doctor: Dict) -> Text:
+    doctor_cols = [
+        f"{get_json_key(doctor, '_id')}",
+        f"{get_json_key(doctor, 'creation_ts')}",
+        f"{get_json_key(doctor, 'creation_date')}",
+        f"{get_json_key(doctor, 'last_update_ts')}",
+        f"{get_json_key(doctor, 'last_update_date')}",
+        f"{get_json_key(doctor, 'onboarding_status')}",
+        f"{get_json_key(doctor, 'listing_status')}",
+        f"{get_json_key(doctor, 'name')}",
+        f"{get_json_key(doctor, 'phone_number')}",
+        f"{get_json_key(doctor, 'gmail_id')}",
+        f"{get_json_key(doctor, 'speciality')}",
+        f"{get_json_key(doctor, 'description')}",
+        f"{get_json_key(doctor, 'fee')}",
+        f"{print_weekly_slots(get_json_key(doctor, 'weekly_slots'), ' ')}",
+        f"{'Connected' if get_json_key(doctor, 'credentials') else 'Not connected'}",
+        f"{get_json_key(doctor, 'bank_account_number')}",
+        f"{get_json_key(doctor, 'bank_account_name')}",
+        f"{get_json_key(doctor, 'bank_account_ifsc')}",
+    ]
+    return ",".join(doctor_cols)

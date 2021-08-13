@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from pytz import timezone
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Text
 
 from actions.utils.admin_config import (
     get_booking_advance_time_minutes,
@@ -87,11 +87,11 @@ def _generate_time_slots_for_ranges(time_slot_ranges: List, date_dt: datetime):
     return time_slots
 
 
-def print_weekly_slots(weekly_slots: Dict):
+def print_weekly_slots(weekly_slots: Dict, separator: Text = ", "):
     time_slots_str = ""
     for key, value in weekly_slots.items():
         if value:
-            time_slots_str += f"{str(key).capitalize()}, {', '.join([v['start']+'-'+v['end'] for v in value])}; "
+            time_slots_str += f"{str(key).capitalize()}{separator}{separator.join([v['start']+'-'+v['end'] for v in value])}; "
     return time_slots_str
 
 
