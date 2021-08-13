@@ -1,3 +1,4 @@
+from datetime import datetime
 import re
 from typing import Any, AnyStr, Dict, List, Match, Text
 
@@ -5,12 +6,15 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import is_admin_group, get_specialities
+from actions.utils.date import SERVER_TZINFO
 from actions.utils.doctor import (
     LISTING_STATUS_ENABLED,
     LISTING_STATUS_DISABLED,
     ONBOARDING_STATUS_APPROVED,
     ONBOARDING_STATUS_REJECTED,
     ONBOARDING_STATUS_SIGNUP,
+    format_doctor_for_csv,
+    format_doctor_header_for_csv,
     get_doctors,
     get_doctor_card,
 )
@@ -82,6 +86,28 @@ class ActionCommandListDoctors(Action):
             )
             for d in doctors:
                 dispatcher.utter_message(json_message=get_doctor_card(d, True))
+
+            num_doctors = doctors.count()
+            if num_doctors:
+                current_date = datetime.now(tz=SERVER_TZINFO)
+                current_date_str = current_date.strftime("%d.%m.%y_%H.%M_%p")
+                file_name_base = (
+                    f"{str(message_text).replace(' ', '_')}_{current_date_str}"
+                )
+                file_name_csv = f"{file_name_base}.csv"
+                doctors_csv_list = [format_doctor_header_for_csv()]
+                doctors.rewind()
+                for d in doctors:
+                    doctors_csv_list.append(format_doctor_for_csv(d))
+                doctors_csv = "\n".join(doctors_csv_list)
+                dispatcher.utter_message(
+                    json_message={
+                        "document": doctors_csv,
+                        "document_file_type": "text/csv",
+                        "document_file_name": file_name_csv,
+                        "caption": f'Result of "{message_text}" on {current_date_str}.',
+                    }
+                )
         else:
             usage = "/listdoctors <SPECIALITY>[OPTIONAL] <LISTING STATUS>[OPTIONAL] <ONBOARDING STATUS>[OPTIONAL]"
             specialities = "\n".join(get_specialities())

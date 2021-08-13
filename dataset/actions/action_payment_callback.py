@@ -1,5 +1,4 @@
 from bson import ObjectId
-from copy import deepcopy
 from datetime import datetime, timedelta
 import logging
 from typing import Any, Text, Dict, List
@@ -234,7 +233,7 @@ class ActionPaymentCallback(Action):
 
             if meeting:
                 for k in [patient_keyboard, doctor_keyboard, admin_keyboard]:
-                    k[0].insert(0, create_join_meeting_button(meeting))
+                    k.insert(0, [create_join_meeting_button(meeting)])
 
             patient_json_message = create_booking_confirmation_message(
                 order_id, cart, patient, payment_status, patient_keyboard, is_demo_mode
