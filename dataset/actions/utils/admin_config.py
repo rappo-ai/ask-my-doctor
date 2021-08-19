@@ -1,14 +1,16 @@
 from typing import List, Text
 from bson.objectid import ObjectId
 
-from actions.db.store import db
+from actions.db.rappo import rappo_db
 from actions.utils.debug import is_debug_env
 
 ADMIN_CONFID_OBJECT_ID = "000000000000000000000001"
 
 
 def lazy_init():
-    admin_config = db.admin_config.find_one({"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)})
+    admin_config = rappo_db.admin_config.find_one(
+        {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}
+    )
     specialities = (
         [
             "General Surgeon",
@@ -19,7 +21,7 @@ def lazy_init():
         else []
     )
     if not admin_config:
-        db.admin_config.insert_one(
+        rappo_db.admin_config.insert_one(
             {
                 "_id": ObjectId(ADMIN_CONFID_OBJECT_ID),
                 "super_admins": [],
@@ -43,9 +45,9 @@ def is_super_admin(chat_id: Text):
 
 def get_payment_route_config():
     lazy_init()
-    return db.admin_config.find_one({"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}).get(
-        "payment_route_config"
-    )
+    return rappo_db.admin_config.find_one(
+        {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}
+    ).get("payment_route_config")
 
 
 def is_admin_group(chat_id: Text):
@@ -54,21 +56,21 @@ def is_admin_group(chat_id: Text):
 
 def get_super_admins():
     lazy_init()
-    return db.admin_config.find_one({"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}).get(
-        "super_admins"
-    )
+    return rappo_db.admin_config.find_one(
+        {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}
+    ).get("super_admins")
 
 
 def get_admin_group_id():
     lazy_init()
-    return db.admin_config.find_one({"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}).get(
-        "admin_group_id"
-    )
+    return rappo_db.admin_config.find_one(
+        {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}
+    ).get("admin_group_id")
 
 
 def set_admin_group_id(group_id):
     lazy_init()
-    db.admin_config.update_one(
+    rappo_db.admin_config.update_one(
         {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)},
         {"$set": {"admin_group_id": group_id}},
     )
@@ -76,14 +78,14 @@ def set_admin_group_id(group_id):
 
 def get_advance_appointment_days():
     lazy_init()
-    return db.admin_config.find_one({"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}).get(
-        "advance_appointment_days"
-    )
+    return rappo_db.admin_config.find_one(
+        {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}
+    ).get("advance_appointment_days")
 
 
 def set_advance_appointment_days(days: int):
     lazy_init()
-    db.admin_config.update_one(
+    rappo_db.admin_config.update_one(
         {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)},
         {"$set": {"advance_appointment_days": days}},
     )
@@ -91,14 +93,14 @@ def set_advance_appointment_days(days: int):
 
 def get_booking_advance_time_minutes():
     lazy_init()
-    return db.admin_config.find_one({"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}).get(
-        "booking_advance_time_minutes"
-    )
+    return rappo_db.admin_config.find_one(
+        {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}
+    ).get("booking_advance_time_minutes")
 
 
 def set_booking_advance_time_minutes(minutes: int):
     lazy_init()
-    db.admin_config.update_one(
+    rappo_db.admin_config.update_one(
         {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)},
         {"$set": {"booking_advance_time_minutes": minutes}},
     )
@@ -106,28 +108,28 @@ def set_booking_advance_time_minutes(minutes: int):
 
 def get_payment_link_expiry_time_seconds():
     lazy_init()
-    return db.admin_config.find_one({"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}).get(
-        "payment_link_expiry_time_seconds"
-    )
+    return rappo_db.admin_config.find_one(
+        {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}
+    ).get("payment_link_expiry_time_seconds")
 
 
 def get_max_follow_up_seconds():
     lazy_init()
-    return db.admin_config.find_one({"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}).get(
-        "max_follow_up_seconds"
-    )
+    return rappo_db.admin_config.find_one(
+        {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}
+    ).get("max_follow_up_seconds")
 
 
 def get_doctor_commission_rate():
     lazy_init()
-    return db.admin_config.find_one({"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}).get(
-        "doctor_commission_rate"
-    )
+    return rappo_db.admin_config.find_one(
+        {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}
+    ).get("doctor_commission_rate")
 
 
 def set_doctor_commission_rate(rate):
     lazy_init()
-    db.admin_config.update_one(
+    rappo_db.admin_config.update_one(
         {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)},
         {"$set": {"doctor_commission_rate": rate}},
     )
@@ -135,14 +137,14 @@ def set_doctor_commission_rate(rate):
 
 def get_meeting_duration_in_minutes():
     lazy_init()
-    return db.admin_config.find_one({"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}).get(
-        "meeting_duration_minutes"
-    )
+    return rappo_db.admin_config.find_one(
+        {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}
+    ).get("meeting_duration_minutes")
 
 
 def set_meeting_duration_in_minutes(minutes: int):
     lazy_init()
-    db.admin_config.update_one(
+    rappo_db.admin_config.update_one(
         {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)},
         {"$set": {"meeting_duration_minutes": minutes}},
     )
@@ -150,14 +152,14 @@ def set_meeting_duration_in_minutes(minutes: int):
 
 def get_specialities():
     lazy_init()
-    return db.admin_config.find_one({"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}).get(
-        "specialities"
-    )
+    return rappo_db.admin_config.find_one(
+        {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)}
+    ).get("specialities")
 
 
 def set_specialities(specialities: List):
     lazy_init()
-    db.admin_config.update_one(
+    rappo_db.admin_config.update_one(
         {"_id": ObjectId(ADMIN_CONFID_OBJECT_ID)},
         {"$set": {"specialities": specialities}},
     )

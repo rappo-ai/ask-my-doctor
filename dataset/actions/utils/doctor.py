@@ -3,7 +3,7 @@ from datetime import datetime
 from pymongo import ASCENDING, DESCENDING
 from typing import Dict, Text
 
-from actions.db.store import db
+from actions.db.rappo import rappo_db
 from actions.utils.admin_config import get_advance_appointment_days
 from actions.utils.branding import get_bot_support_username
 from actions.utils.debug import is_debug_env
@@ -24,15 +24,17 @@ LISTING_STATUS_ENABLED = "enabled"
 LISTING_STATUS_DISABLED = "disabled"
 MAX_DOCTOR_RANK = 9999999
 
-db.doctor.create_index([("rank_last_updated_ts", DESCENDING), ("rank", ASCENDING)])
+rappo_db.doctor.create_index(
+    [("rank_last_updated_ts", DESCENDING), ("rank", ASCENDING)]
+)
 
 
 def lazy_init():
-    if is_debug_env() and not db.doctor.find_one(
+    if is_debug_env() and not rappo_db.doctor.find_one(
         {"listing_status": LISTING_STATUS_ENABLED}
     ):
         current_date = datetime.now(tz=SERVER_TZINFO)
-        db.doctor.insert_many(
+        rappo_db.doctor.insert_many(
             [
                 {
                     "_id": ObjectId(),
@@ -121,7 +123,7 @@ def lazy_init():
 
 def is_approved_doctor(chat_id: Text):
     return bool(
-        db.doctor.find_one(
+        rappo_db.doctor.find_one(
             {"user_id": chat_id, "onboarding_status": ONBOARDING_STATUS_APPROVED}
         )
     )
@@ -129,7 +131,7 @@ def is_approved_doctor(chat_id: Text):
 
 def is_approved_and_activated_doctor(doctor_id) -> bool:
     return bool(
-        db.doctor.find_one(
+        rappo_db.doctor.find_one(
             {
                 "_id": ObjectId(doctor_id),
                 "onboarding_status": ONBOARDING_STATUS_APPROVED,
@@ -148,7 +150,7 @@ def add_doctor(doctor: Dict):
     doctor["last_update_date"] = current_date.isoformat()
     doctor["rank"] = MAX_DOCTOR_RANK
     doctor["rank_last_updated_ts"] = current_date.timestamp()
-    return db.doctor.insert_one(doctor).inserted_id
+    return rappo_db.doctor.insert_one(doctor).inserted_id
 
 
 def get_available_time_slots(doctor_id, date: Text):
@@ -160,17 +162,17 @@ def get_available_time_slots(doctor_id, date: Text):
 
 def get_doctor(id):
     lazy_init()
-    return db.doctor.find_one({"_id": ObjectId(id)})
+    return rappo_db.doctor.find_one({"_id": ObjectId(id)})
 
 
 def get_doctor_for_user_id(user_id: Text):
     lazy_init()
-    return db.doctor.find_one({"user_id": user_id})
+    return rappo_db.doctor.find_one({"user_id": user_id})
 
 
 def get_doctor_weekly_slots(id):
     lazy_init()
-    doctor: Dict = db.doctor.find_one({"_id": ObjectId(id)})
+    doctor: Dict = rappo_db.doctor.find_one({"_id": ObjectId(id)})
     return doctor.get("weekly_slots")
 
 
@@ -187,7 +189,7 @@ def get_doctors(
         query.update({"onboarding_status": onboarding_status})
     if listing_status:
         query.update({"listing_status": listing_status})
-    return db.doctor.find(query).sort(
+    return rappo_db.doctor.find(query).sort(
         [("rank_last_updated_ts", DESCENDING), ("rank", ASCENDING)]
     )
 
@@ -298,7 +300,7 @@ def update_doctor(doctor: Dict):
     current_date = datetime.now(tz=SERVER_TZINFO)
     doctor["last_update_ts"] = current_date.timestamp()
     doctor["last_update_date"] = current_date.isoformat()
-    db.doctor.update_one({"_id": doctor.get("_id")}, {"$set": doctor})
+    rappo_db.doctor.update_one({"_id": doctor.get("_id")}, {"$set": doctor})
 
 
 def get_doctor_command_help(is_admin: bool = False):

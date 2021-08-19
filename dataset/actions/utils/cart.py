@@ -2,13 +2,13 @@ from datetime import datetime
 from functools import reduce
 from typing import Any, Dict, List, Text
 
-from actions.db.store import db
+from actions.db.rappo import rappo_db
 from actions.utils.date import APPOINTMENT_DATE_FORMAT, APPOINTMENT_TIME_FORMAT
 from actions.utils.doctor import get_doctor
 
 
 def add_cart(user_id, items: List) -> int:
-    return db.cart.insert_one(
+    return rappo_db.cart.insert_one(
         {
             "user_id": user_id,
             "items": items,
@@ -17,11 +17,11 @@ def add_cart(user_id, items: List) -> int:
 
 
 def clear_cart(user_id):
-    db.cart.update_one({"user_id": user_id}, {"$set": {"items": []}})
+    rappo_db.cart.update_one({"user_id": user_id}, {"$set": {"items": []}})
 
 
 def get_cart(user_id) -> Dict[Text, Any]:
-    return db.cart.find_one({"user_id": user_id})
+    return rappo_db.cart.find_one({"user_id": user_id})
 
 
 def get_cart_total(user_cart):
@@ -51,4 +51,4 @@ def print_cart(cart: Dict):
 
 
 def update_cart(user_id, items: List) -> int:
-    db.cart.update_one({"user_id": user_id}, {"$set": {"items": items}})
+    rappo_db.cart.update_one({"user_id": user_id}, {"$set": {"items": items}})

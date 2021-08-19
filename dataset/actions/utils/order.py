@@ -8,7 +8,7 @@ import requests
 from requests.structures import CaseInsensitiveDict
 from typing import Dict, Optional, Text
 
-from actions.db.store import db
+from actions.db.rappo import rappo_db
 from actions.utils.admin_config import get_payment_link_expiry_time_seconds
 from actions.utils.date import SERVER_TZINFO
 from actions.utils.host import get_host_url
@@ -38,7 +38,7 @@ def create_order(
     if timeslot_lock_id:
         order["timeslot_lock_id"] = timeslot_lock_id
 
-    order_id = db.order.insert_one(order).inserted_id
+    order_id = rappo_db.order.insert_one(order).inserted_id
     if timeslot_lock_id:
         unlock_order_job: Job = scheduler().add_job(
             unlock_order,
@@ -52,7 +52,7 @@ def create_order(
             replace_existing=True,
             name="Unlock Order",
         )
-        db.order.update_one(
+        rappo_db.order.update_one(
             {"_id": order_id}, {"$set": {"unlock_order_job_id": unlock_order_job.id}}
         )
     return order_id
@@ -60,7 +60,7 @@ def create_order(
 
 def unlock_order(order_id):
     try:
-        order: Dict = db.order.find_one({"_id": ObjectId(order_id)})
+        order: Dict = rappo_db.order.find_one({"_id": ObjectId(order_id)})
         payment_status = order.get("payment_status", {})
         if get_json_key(payment_status, "razorpay_payment_link_status") != "paid":
             timeslot_lock_id = order.get("timeslot_lock_id")
@@ -88,7 +88,7 @@ def unlock_order(order_id):
 
 
 def get_order(id) -> Dict:
-    return db.order.find_one({"_id": ObjectId(id)})
+    return rappo_db.order.find_one({"_id": ObjectId(id)})
 
 
 def get_orders(doctor_id, include_demo_mode: bool = False) -> Dict:
@@ -97,12 +97,12 @@ def get_orders(doctor_id, include_demo_mode: bool = False) -> Dict:
         query["is_demo_mode"] = {"$ne": True}
     if doctor_id:
         query["metadata.doctor._id"] = ObjectId(doctor_id)
-    return db.order.find(query).sort("_id", DESCENDING)
+    return rappo_db.order.find(query).sort("_id", DESCENDING)
 
 
 def get_latest_open_order_for_user_id(user_id):
     cursor = (
-        db.order.find(
+        rappo_db.order.find(
             {
                 "$and": [
                     {"user_id": user_id},
@@ -151,7 +151,7 @@ def update_order(
     if timeslot_lock_id:
         order["timeslot_lock_id"] = timeslot_lock_id
 
-    db.order.update_one({"_id": ObjectId(id)}, {"$set": order})
+    rappo_db.order.update_one({"_id": ObjectId(id)}, {"$set": order})
 
 
 def format_order_header_for_csv() -> Text:

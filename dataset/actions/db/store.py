@@ -11,8 +11,8 @@ class MongoDataStore:
 
     def __init__(
         self,
+        db: Text,
         host: Optional[Text] = "mongodb://mongo:27017",
-        db: Optional[Text] = "rappo",
         username: Optional[Text] = None,
         password: Optional[Text] = None,
         auth_source: Optional[Text] = "admin",
@@ -27,13 +27,3 @@ class MongoDataStore:
         )
 
         self.db = Database(self.client, db)
-
-
-_db_store = MongoDataStore()
-
-db = _db_store.db
-
-
-def reset_actions_db():
-    for c in db.list_collection_names():
-        db.drop_collection(c)
