@@ -57,6 +57,7 @@ actions:
   - action_command_contact_doctor
   - action_command_contact_patient
   - action_command_deletespeciality
+  - action_command_funnel
   - action_command_groupid
   - action_command_listdoctors
   - action_command_reject

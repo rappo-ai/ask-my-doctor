@@ -4,7 +4,7 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.admin_config import get_admin_group_id, is_super_admin
-from actions.db.store import reset_actions_db
+from actions.db.rappo import reset_rappo_db
 
 
 class ActionCommandResetDB(Action):
@@ -22,7 +22,7 @@ class ActionCommandResetDB(Action):
             return []
 
         old_group_id = get_admin_group_id() or "not set"
-        reset_actions_db()
+        reset_rappo_db()
         dispatcher.utter_message(
             json_message={
                 "text": f"The actions DB has been reset. Previous group id was {old_group_id}."

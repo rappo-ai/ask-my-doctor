@@ -26,6 +26,7 @@ class ActionHelp(Action):
                 + "/addspeciality <SPECIALITY> - add a speciality\n"
                 + "/deletespeciality <SPECIALITY> - delete a speciality\n"
                 + "/approve <DOCTOR ID> - approve a doctor\n"
+                + "/funnel - action funnel statistics for all patients\n"
                 + "/reject <DOCTOR ID> <REASON> - reject a doctor\n"
                 + "/listdoctors <SPECIALITY>[OPTIONAL] <LISTING STATUS>[OPTIONAL] <ONBOARDING STATUS>[OPTIONAL] - list all doctors based on speciality, listing status or onboarding status (any one filter)\n"
                 + "/contactdoctor <ORDER ID>[OPTIONAL] <DOCTOR ID>[OPTIONAL] - broadcast a message to all doctors; or contact a single doctor by ORDER ID or DOCTOR ID\n"
