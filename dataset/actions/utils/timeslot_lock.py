@@ -42,7 +42,7 @@ def create_lock_for_doctor_slot(
 
 def is_doctor_slot_locked(doctor_id, slot_datetime: Text) -> bool:
     lock_id = compute_hased_id(doctor_id, slot_datetime)
-    return bool(db.timeslot_lock.find_one({"_id": ObjectId(lock_id)}))
+    return bool(rappo_db.timeslot_lock.find_one({"_id": ObjectId(lock_id)}))
 
 
 def get_lock_for_slot(doctor_id, slot_datetime: Text) -> bool:
