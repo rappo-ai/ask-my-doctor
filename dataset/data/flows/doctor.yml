@@ -130,6 +130,13 @@ rules:
     steps:
       - intent: EXT_doctor_send_message
       - action: utter_admin_doctor_send_message_help
+  - rule: Admin EXT_doctor_send_message
+    condition:
+      - slot_was_set:
+          - chat_type: supergroup
+    steps:
+      - intent: EXT_doctor_send_message
+      - action: utter_admin_doctor_send_message_help
 slots:
   doctor_send_message__message_id:
     type: text
