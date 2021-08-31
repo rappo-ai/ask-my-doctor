@@ -112,6 +112,13 @@ rules:
     steps:
       - intent: EXT_patient_send_message
       - action: utter_admin_patient_send_message_help
+  - rule: Admin EXT_patient_send_message
+    condition:
+      - slot_was_set:
+          - chat_type: supergroup
+    steps:
+      - intent: EXT_patient_send_message
+      - action: utter_admin_patient_send_message_help
 slots:
   patient__age:
     type: text
