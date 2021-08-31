@@ -1,20 +1,18 @@
 version: "2.0"
 
+actions:
+  - action_start
+
 intents:
   - start
-  - menu
 
 nlu:
   - intent: start
     metadata:
       keyword_intent: true
-      match_condition: "exact"
+      match_condition: "start"
     examples: |
       - /start
-
-responses:
-  utter_greet:
-    - text: Hi {first_name}! I am here to assist you in connecting with doctors and scheduling appointments with them.
 
 rules:
   - rule: Command /start
@@ -23,8 +21,8 @@ rules:
           - chat_type: private
     steps:
       - intent: start
-      - action: utter_greet
-      - action: action_main_menu
+      - action: action_deactivate_loop
+      - action: action_start
   - rule: NLU Fallback
     condition:
       - slot_was_set:

@@ -5,6 +5,7 @@ actions:
   - action_demo
   - action_help
   - action_main_menu
+  - action_start
 
   - action_ask_search__speciality
   - action_on_search_set
@@ -85,6 +86,7 @@ forms:
       - EXT_doctor_send_message
       - help
       - menu
+      - start
     required_slots:
       search__speciality:
         - type: from_text
@@ -96,6 +98,7 @@ forms:
       - EXT_doctor_send_message
       - help
       - menu
+      - start
     required_slots:
       appointment__date:
         - type: from_text
@@ -109,6 +112,7 @@ forms:
       - EXT_doctor_send_message
       - help
       - menu
+      - start
     required_slots:
       patient__name:
         - type: from_text
@@ -125,6 +129,7 @@ forms:
       - EXT_doctor_send_message
       - help
       - menu
+      - start
     required_slots: {}
   doctor_signup_form:
     ignored_intents:
@@ -134,6 +139,7 @@ forms:
       - EXT_doctor_send_message
       - help
       - menu
+      - start
     required_slots:
       doctor_signup__name:
         - type: from_text
@@ -162,6 +168,7 @@ forms:
       - EXT_patient_send_message
       - help
       - menu
+      - start
     required_slots: {}
   yes_no_confirm_form:
     ignored_intents:
@@ -171,6 +178,7 @@ forms:
       - EXT_doctor_send_message
       - help
       - menu
+      - start
     required_slots:
       yes_no_confirm__user_input:
         - type: from_text

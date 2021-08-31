@@ -45,7 +45,9 @@ class ActionOnSearchSet(Action):
             )
             return []
         else:
-            dispatcher.utter_message(json_message={"text": "Please choose a doctor:"})
+            dispatcher.utter_message(
+                json_message={"text": f"Please choose a {speciality}:"}
+            )
         for d in doctors:
             reply_markup = {
                 "keyboard": [

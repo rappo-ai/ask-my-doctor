@@ -19,6 +19,15 @@ forms:
 
 intents:
   - EXTERNAL_create_search
+  - searchset
+
+nlu:
+  - intent: searchset
+    metadata:
+      keyword_intent: true
+      match_condition: "exact"
+    examples: |
+      - /searchset
 
 rules:
   - rule: Start new search request form
@@ -40,6 +49,10 @@ rules:
       - active_loop: null
       - slot_was_set:
           - requested_slot: null
+      - action: action_on_search_set
+  - rule: Trigger action_on_search_set
+    steps:
+      - intent: searchset
       - action: action_on_search_set
 
 slots:
