@@ -269,7 +269,7 @@ class ActionPaymentCallback(Action):
             else:
                 logger.warn("Doctor chat id not set.")
 
-            if not meeting:
+            if False and not meeting:
                 target_chats = (
                     [tracker.sender_id, admin_group_id]
                     if is_demo_mode
