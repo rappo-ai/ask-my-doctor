@@ -5,6 +5,7 @@ import logging
 import os
 
 from actions.utils.date import SERVER_TZINFO
+from actions.utils.markdown import escape_markdown
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +51,7 @@ def fetch_payment_details(payment_status: Dict, is_demo_mode: bool = False):
     return client.payment.fetch(payment_id)
 
 
-def print_payment_status(payment_status: Dict):
+def print_payment_status(payment_status: Dict, enable_markdown: bool = False):
     payment_details = payment_status.get("payment_details", {})
     amount_rupees = payment_details.get("amount", 0) / 100
     date = datetime.fromtimestamp(
@@ -60,9 +61,12 @@ def print_payment_status(payment_status: Dict):
     status = payment_status.get("razorpay_payment_link_status")
 
     return (
-        f"Amount: {amount_rupees}\n"
-        + f"Payment ID: {payment_status.get('razorpay_payment_id', '')}\n"
-        + f"Date: {date}\n"
-        + f"Mode: {mode}\n"
-        + f"Status of Payment: {status}\n"
+        escape_markdown(f"Amount: {amount_rupees}\n", enabled=enable_markdown)
+        + escape_markdown(
+            f"Payment ID: {payment_status.get('razorpay_payment_id', '')}\n",
+            enabled=enable_markdown,
+        )
+        + escape_markdown(f"Date: {date}\n", enabled=enable_markdown)
+        + escape_markdown(f"Mode: {mode}\n", enabled=enable_markdown)
+        + escape_markdown(f"Status of Payment: {status}\n", enabled=enable_markdown)
     )
