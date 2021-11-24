@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Text
 from actions.db.rappo import rappo_db
 from actions.utils.date import APPOINTMENT_DATE_FORMAT, APPOINTMENT_TIME_FORMAT
 from actions.utils.doctor import get_doctor
+from actions.utils.markdown import escape_markdown, get_user_link
 
 
 def add_cart(user_id, items: List) -> int:
@@ -35,18 +36,32 @@ def get_cart_total(user_cart):
     return 0
 
 
-def print_cart(cart: Dict):
+def print_cart(cart: Dict, show_user_links: bool = False):
     cart_item = next(iter(cart.get("items", [])), {})
     doctor_id = cart_item.get("doctor_id")
     doctor: Dict = get_doctor(doctor_id)
     appointment_datetime: datetime = datetime.fromisoformat(
         cart_item.get("appointment_datetime")
     )
+    doctor_name = doctor.get("name", "")
+    doctor_text = (
+        f"Doctor: {get_user_link(doctor.get('telegram_user_id', ''), escape_markdown(doctor_name, enabled=show_user_links))}\n"
+        if show_user_links
+        else escape_markdown(f"Doctor: {doctor_name}\n", enabled=show_user_links)
+    )
     return (
-        f"Doctor: {doctor.get('name', '')}\n"
-        + f"Speciality: {doctor.get('speciality', '')}\n"
-        + f"Date: {appointment_datetime.strftime(APPOINTMENT_DATE_FORMAT)}\n"
-        + f"Time: {appointment_datetime.strftime(APPOINTMENT_TIME_FORMAT)}\n"
+        doctor_text
+        + escape_markdown(
+            f"Speciality: {doctor.get('speciality', '')}\n", enabled=show_user_links
+        )
+        + escape_markdown(
+            f"Date: {appointment_datetime.strftime(APPOINTMENT_DATE_FORMAT)}\n",
+            enabled=show_user_links,
+        )
+        + escape_markdown(
+            f"Time: {appointment_datetime.strftime(APPOINTMENT_TIME_FORMAT)}\n",
+            enabled=show_user_links,
+        )
     )
 
 

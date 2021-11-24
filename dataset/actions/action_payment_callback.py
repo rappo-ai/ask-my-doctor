@@ -15,6 +15,7 @@ from actions.utils.debug import is_debug_env
 from actions.utils.doctor import get_doctor
 from actions.utils.entity import get_entity
 from actions.utils.json import get_json_key
+from actions.utils.markdown import escape_markdown
 from actions.utils.meet import create_meeting
 from actions.utils.order import (
     get_latest_open_order_for_user_id,
@@ -34,30 +35,43 @@ logger = logging.getLogger(__name__)
 
 
 def create_booking_confirmation_message(
-    order_id, cart, patient, payment_status, keyboard, is_demo_mode
+    order_id,
+    cart,
+    patient,
+    payment_status,
+    keyboard,
+    is_demo_mode,
+    show_user_links=False,
 ):
     text = (
-        "Booking Confirmation\n"
+        escape_markdown("Booking Confirmation\n", enabled=show_user_links)
         + "\n"
-        + f"Order #{order_id}\n"
+        + escape_markdown(f"Order #{order_id}\n", enabled=show_user_links)
         + "\n"
-        + "Appoinment Details\n"
+        + escape_markdown("Appoinment Details\n", enabled=show_user_links)
         + "\n"
-        + print_cart(cart)
+        + print_cart(cart, show_user_links)
         + "\n"
-        + f"Patient details\n"
+        + escape_markdown(f"Patient details\n", enabled=show_user_links)
         + "\n"
-        + print_patient(patient)
+        + print_patient(patient, show_user_links)
         + "\n"
-        + f"Payment Details\n"
+        + escape_markdown(f"Payment Details\n", enabled=show_user_links)
         + "\n"
-        + print_payment_status(payment_status)
+        + print_payment_status(payment_status, show_user_links)
         + "\n"
-        + f"Your appointment has been scheduled. Please join the meeting at the date and time of the appointment.\n"
+        + escape_markdown(
+            f"Your appointment has been scheduled. Concerned doctor will connect with you soon.\n",
+            enabled=show_user_links,
+        )
     )
 
     if is_demo_mode:
-        text = "DEMO BOOKING\n\n" + text + "\nDEMO BOOKING"
+        text = (
+            escape_markdown("DEMO BOOKING\n\n", enabled=show_user_links)
+            + text
+            + escape_markdown("\nDEMO BOOKING", enabled=show_user_links)
+        )
 
     return {
         "text": text,
@@ -65,6 +79,7 @@ def create_booking_confirmation_message(
             "keyboard": keyboard,
             "type": "inline",
         },
+        "parse_mode": "MarkdownV2" if show_user_links else None,
     }
 
 
@@ -249,6 +264,7 @@ class ActionPaymentCallback(Action):
                     payment_status,
                     admin_keyboard,
                     is_demo_mode,
+                    show_user_links=True,
                 )
                 admin_json_message["chat_id"] = admin_group_id
                 dispatcher.utter_message(json_message=admin_json_message)

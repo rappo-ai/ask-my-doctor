@@ -47,6 +47,9 @@ class ActionCommandContactPatient(Action):
                     "message_id": reply_message_id,
                 }
             )
+            dispatcher.utter_message(
+                json_message={"text": f"Your message was sent to the patient."}
+            )
         else:
             usage = "/contactpatient <ORDER ID>"
             dispatcher.utter_message(
